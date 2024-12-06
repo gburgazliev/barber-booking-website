@@ -8,6 +8,9 @@ app.use(cors());
 app.use(express.json());
 const port = process.env.PORT || 5000;
 app.listen(port);
+app.get("/", (req, res) => {
+    res.status(200).json({ message: "Backend is running!" });
+  });
 
 const UserRouter = require('./routes/users')
 
