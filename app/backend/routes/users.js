@@ -75,4 +75,13 @@ router.get("/login", verifyCookie, (req, res) => {
   res.status(200).json({ message: "Authorized succesfully", user });
 });
 
+router.get("/logout", (req, res) => {
+  res.clearCookie("jwt", {
+    httpOnly: true,
+    secure: true,
+    sameSite: "strict",
+  });
+  res.status(200).json({ message: "Cookie cleared successfully!" });
+});
+
 module.exports = router;
