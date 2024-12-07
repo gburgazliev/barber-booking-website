@@ -4,6 +4,12 @@ const User = require("../models/User");
 const bcrypt = require("bcryptjs");
 const verifyCookie = require("../middleware/verifyCookie");
 const signJWT = require("../helpers/signJWT");
+const COOKIE_OPTIONS = {
+  httpOnly: true,
+  signed: true,
+  secure: true,
+  sameSite: "strict",
+};
 
 const hashPassword = async (password) => {
   const saltRounds = 10;
@@ -29,10 +35,7 @@ router.post("/register", async (req, res, next) => {
     });
     const token = signJWT({ firstname, lastname, email, role });
     res.cookie("jwt", token, {
-      httpOnly: true,
-      signed: true,
-      secure: true,
-      sameSite: "strict",
+      ...COOKIE_OPTIONS,
       maxAge: 3600000,
     });
     res.status(201).json({ message: "User registered successfully!" });
@@ -57,10 +60,7 @@ router.post("/login", async (req, res, next) => {
 
     const token = signJWT(user);
     res.cookie("jwt", token, {
-      httpOnly: true,
-      secure: true,
-      signed: true,
-      sameSite: "strict",
+      ...COOKIE_OPTIONS,
       maxAge: 3600000,
     });
 
@@ -77,9 +77,7 @@ router.get("/login", verifyCookie, (req, res) => {
 
 router.get("/logout", (req, res) => {
   res.clearCookie("jwt", {
-    httpOnly: true,
-    secure: true,
-    sameSite: "strict",
+    ...COOKIE_OPTIONS,
   });
   res.status(200).json({ message: "Cookie cleared successfully!" });
 });
