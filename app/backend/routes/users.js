@@ -24,13 +24,13 @@ router.get("/", async (req, res) => {
 
 router.post("/register", async (req, res, next) => {
   try {
-    const { email, firstname, lastname, role, password } = req.body;
+    const { email, firstname, lastname, password } = req.body;
     const passwordHash = await hashPassword(password);
     await User.create({
       firstname,
       lastname,
       email,
-      role,
+      role: 'user',
       password: passwordHash,
     });
     const token = signJWT({ firstname, lastname, email ,passwordHash ,role });
