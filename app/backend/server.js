@@ -4,7 +4,7 @@ const mongoose = require("./mongoDB/mongoDB-config");
 const cookieParser = require("cookie-parser");
 const CORS_OPTIONS = {
   origin: ["http://localhost:5173", process.env.FRONTEND_URL], // Allow requests from this origin
-  methods: ["GET", "POST", "PUT", "DELETE"], // Allowed HTTP methods
+  methods: ["GET", "POST", "PUT", "DELETE", 'OPTIONS'], // Allowed HTTP methods
   credentials: true, // Allow cookies
 };
 const app = express();
