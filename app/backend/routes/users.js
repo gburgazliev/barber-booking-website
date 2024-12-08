@@ -30,10 +30,10 @@ router.post("/register", async (req, res, next) => {
       firstname,
       lastname,
       email,
-      role: 'user',
+      role:'user',
       password: passwordHash,
     });
-    const token = signJWT({ firstname, lastname, email ,passwordHash ,role });
+    const token = signJWT({ firstname, lastname, email ,passwordHash });
     res.cookie("jwt", token, {
       ...COOKIE_OPTIONS,
       maxAge: 3600000,
