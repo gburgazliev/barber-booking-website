@@ -25,9 +25,9 @@ router.get("/", async (req, res) => {
 router.post("/register", async (req, res, next) => {
   try {
     const { email, firstname, lastname, password } = req.body;
-    const userCheck = User.find({ email: email });
-      
-    if (userCheck !== null &&  userCheck !== undefined) {
+    const userCheck = await User.findOne({ email: email });
+
+    if (userCheck !== null) {
       throw new Error("User with this email already exists!");
     }
     const passwordHash = await hashPassword(password);
