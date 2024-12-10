@@ -25,22 +25,29 @@ router.get("/", async (req, res) => {
 router.post("/register", async (req, res, next) => {
   try {
     const { email, firstname, lastname, password } = req.body;
+    const userCheck = User.find({ email: email });
+
+    if (userCheck) {
+      throw new Error("User with this email already exists!");
+    }
     const passwordHash = await hashPassword(password);
     await User.create({
       firstname,
       lastname,
       email,
-      role:'user',
+      role: "user",
       password: passwordHash,
     });
-    const token = signJWT({ firstname, lastname, email ,passwordHash });
+    const token = signJWT({ firstname, lastname, email, passwordHash });
     res.cookie("jwt", token, {
       ...COOKIE_OPTIONS,
       maxAge: 3600000,
     });
     res.status(201).json({ message: "User registered successfully!" });
   } catch (error) {
-    res.status(403).json({ message: "Error registering user" });
+    res
+      .status(403)
+      .json({ message: `Error registering user: ${error.message}` });
   }
 });
 
