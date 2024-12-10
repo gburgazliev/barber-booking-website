@@ -23,4 +23,11 @@ app.get("/", (req, res) => {
 
 const UserRouter = require("./routes/users");
 
+app.options('*', cors(CORS_OPTIONS));
+
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).json({ message: "Something went wrong!", error: err.message });
+});
+
 app.use("/api/users", UserRouter);
