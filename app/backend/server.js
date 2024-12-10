@@ -7,7 +7,7 @@ const CORS_OPTIONS = {
     "http://localhost:5173",
     process.env.FRONTEND_URL,
   ], // Allow requests from this origin
-  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"], // Allowed HTTP methods
+   // Allowed HTTP methods
   credentials: true,
   allowedHeaders: ["Content-Type", "Authorization", "Cookie"],
   exposedHeaders: ["set-cookie"],
