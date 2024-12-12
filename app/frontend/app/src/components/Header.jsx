@@ -1,6 +1,8 @@
 import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import themeController from "../utils/themeController";
 const Header = () => {
+  const navigate = useNavigate();
   useEffect(() => {
     themeController();
   }, []);
@@ -120,10 +122,30 @@ const Header = () => {
                 </details>
               </li>
               <li>
-                <a>Sign up</a>
+                <a
+                  onClick={() =>
+                    navigate("/auth", {
+                      state: {
+                        auth: "register",
+                      },
+                    })
+                  }
+                >
+                  Sign up
+                </a>
               </li>
               <li>
-                <a>Sign in</a>
+                <a
+                  onClick={() =>
+                    navigate("/auth", {
+                      state: {
+                        auth: "login",
+                      },
+                    })
+                  }
+                >
+                  Sign in
+                </a>
               </li>
             </ul>
           </div>
