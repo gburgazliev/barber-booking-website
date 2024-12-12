@@ -8,7 +8,7 @@ const COOKIE_OPTIONS = {
   httpOnly: true,
   signed: true,
   secure: true,
-  sameSite: "strict",
+  sameSite: "none",
 };
 
 const hashPassword = async (password) => {
