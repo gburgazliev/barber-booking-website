@@ -1,10 +1,14 @@
-import { useState } from "react";
-import {login} from '../service/authentication-service'
-import { useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { login } from "../service/authentication-service";
+import { useNavigate, useLocation } from "react-router-dom";
+import AuthContext from "../context/AuthContext";
+import { useContext } from "react";
 
 const Login = () => {
-  const [form, setForm] = useState({email: '', password: ''});
+  const [form, setForm] = useState({ email: "", password: "" });
   const [loading, setIsLoading] = useState(false);
+  const { setIsLoggedIn } = useContext(AuthContext);
+  const location = useLocation();
   const navigate = useNavigate();
 
   const updateForm = (key, value) => {
@@ -18,25 +22,25 @@ const Login = () => {
     setIsLoading(true);
     e.preventDefault();
     try {
-      const response = await login(
-       form.email,
-        form.password
-      );
-      if (response) { // if registration is succesful
+      const user = await login(form.email, form.password);
+
+      if (user) {
+        setIsLoggedIn({ status: true, user: { ...user } });
+
         setIsLoading(false);
-        navigate("/");
+        navigate(location?.from?.pathname || "/");
       }
 
       setIsLoading(false);
     } catch (error) {
-        setIsLoading(false);
+      setIsLoading(false);
       console.error("Registration failed:", error.message);
     }
   };
 
   return (
     <div>
-      <form  onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit}>
         <label className="input input-bordered flex items-center gap-2">
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -79,7 +83,7 @@ const Login = () => {
           />
         </label>
         <button className="self-end" type="submit">
-         {loading ? 'Loading...' : 'Login'}
+          {loading ? "Loading..." : "Login"}
         </button>
       </form>
     </div>
