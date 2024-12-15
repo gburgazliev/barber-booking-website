@@ -82,7 +82,7 @@ const Login = () => {
             onChange={(e) => updateForm("password", e.target.value)}
           />
         </label>
-        <button className="self-end" type="submit">
+        <button className="btn" type="submit">
           {loading ? "Loading..." : "Login"}
         </button>
       </form>
