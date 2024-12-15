@@ -1,6 +1,7 @@
 import { useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate,Link } from "react-router-dom";
 import themeController from "../utils/themeController";
+/// change a with LINK
 const Header = () => {
   const navigate = useNavigate();
   useEffect(() => {
@@ -123,12 +124,15 @@ const Header = () => {
               </li>
               <li>
                 <a
-                  onClick={() =>
-                    navigate("/auth", {
+                  onClick={(e) =>
+                   {
+                    e.preventDefault();
+                   navigate("/auth", {
                       state: {
                         auth: "register",
                       },
-                    })
+                    }) 
+                   } 
                   }
                 >
                   Sign up
@@ -136,12 +140,15 @@ const Header = () => {
               </li>
               <li>
                 <a
-                  onClick={() =>
-                    navigate("/auth", {
+                  onClick={(e) =>
+                    {
+                      e.preventDefault();
+                       navigate("/auth", {
                       state: {
                         auth: "login",
                       },
                     })
+                    }
                   }
                 >
                   Sign in
