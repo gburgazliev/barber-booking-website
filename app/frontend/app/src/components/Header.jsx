@@ -123,10 +123,10 @@ const Header = () => {
                 </details>
               </li>
               <li>
-              <Link to={{pathname: '/auth', state: {auth: 'register'}}}>Sign up</Link>;
+              <Link to={{pathname: '/auth', state: {auth: 'register'}}}>Sign up</Link>
               </li>
               <li>
-              <Link to={{pathname: '/auth', state: {auth: 'login'}}}>Sign in</Link>;
+              <Link to={{pathname: '/auth', state: {auth: 'login'}}}>Sign in</Link>
               </li>
             </ul>
           </div>
