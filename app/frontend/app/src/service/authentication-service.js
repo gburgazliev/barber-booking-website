@@ -2,7 +2,7 @@ import { SERVER_URL } from "../constants/serverUrl";
 
 export const login = async (email, password) => {
   try {
-    const response = await fetch(SERVER_URL("/api/users/login"), {
+    const response = await fetch(SERVER_URL("api/users/login"), {
       method: "POST",
       credentials: "include",
       headers: {
