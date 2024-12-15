@@ -14,7 +14,7 @@ function App() {
       <AuthContext.Provider value={{isLoggedIn: authValue,  setIsLoggedIn: setAuthValue }}>
         <Routes>
           <Route path="/auth" element={<AuthView/>}/>
-          <Route path="/" element={<Authentication><HomeView /> </Authentication>} />
+          <Route path="/" element={<HomeView /> } />
         </Routes>
       </AuthContext.Provider>
     </BrowserRouter>
