@@ -35,4 +35,4 @@ app.use((err, req, res, next) => {
     .json({ message: "Something went wrong!", error: err.message });
 });
 
-app.use("/api/users", UserRouter);
+app.use("api/users", UserRouter);
