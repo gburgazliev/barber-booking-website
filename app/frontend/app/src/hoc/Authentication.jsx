@@ -6,11 +6,12 @@ import AuthContext from "../context/AuthContext";
 
 const Authentication = ({ children }) => {
   const { isLoggedIn, setIsLoggedIn } = useContext(AuthContext);
-  const [loading, setIsLoading] = useState(true);
+  const [loading, setIsLoading] = useState(false);
 
   // automatically login the user if there is a valid cookie
-  useEffect(() => {
+  if (!isLoggedIn.status) {
     (async () => {
+      setIsLoading(true);
       try {
         const response = await fetch(SERVER_URL("api/users/login"), {
           method: "GET",
@@ -26,11 +27,10 @@ const Authentication = ({ children }) => {
         setIsLoading(false);
       } catch (error) {
         console.log("Auto-login failed:", error.message);
-        setIsLoggedIn({ status: false, user: {} });
         setIsLoading(false);
       }
     })();
-  }, []);
+  }
 
   if (loading) {
     return <div>Loading....</div>;
