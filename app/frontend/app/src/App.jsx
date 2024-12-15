@@ -7,7 +7,7 @@ import  Authentication  from "./hoc/Authentication";
 import AuthView from "./views/AuthView";
 
 function App() {
-  const [authValue, setAuthValue] = useState({status: 'false', user:{}});
+  const [authValue, setAuthValue] = useState({status: false, user:{}});
 
   return (
     <BrowserRouter>
