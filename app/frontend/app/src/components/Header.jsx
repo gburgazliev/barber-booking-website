@@ -123,36 +123,10 @@ const Header = () => {
                 </details>
               </li>
               <li>
-                <a
-                  onClick={(e) =>
-                   {
-                    e.preventDefault();
-                   navigate("/auth", {
-                      state: {
-                        auth: "register",
-                      },
-                    }) 
-                   } 
-                  }
-                >
-                  Sign up
-                </a>
+              <Link to={{pathname: '/auth', state: {auth: 'register'}}}>Sign up</Link>;
               </li>
               <li>
-                <a
-                  onClick={(e) =>
-                    {
-                      e.preventDefault();
-                       navigate("/auth", {
-                      state: {
-                        auth: "login",
-                      },
-                    })
-                    }
-                  }
-                >
-                  Sign in
-                </a>
+              <Link to={{pathname: '/auth', state: {auth: 'login'}}}>Sign in</Link>;
               </li>
             </ul>
           </div>
