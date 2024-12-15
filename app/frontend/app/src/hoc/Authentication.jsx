@@ -20,7 +20,8 @@ const Authentication = ({ children }) => {
 
         if (response.ok) {
           const body = await response.json();
-          setIsLoggedIn({ status: true, user: body.user });
+
+          setIsLoggedIn({ status: true, user: body.user._doc });
         }
         setIsLoading(false);
       } catch (error) {
