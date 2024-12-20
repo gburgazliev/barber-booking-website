@@ -1,13 +1,16 @@
 import { useState, useEffect } from "react";
 import { login } from "../service/authentication-service";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate, useLocation, Link } from "react-router-dom";
 import AuthContext from "../context/AuthContext";
 import { useContext } from "react";
+import ALERT_TYPES from "../constants/alertTypeConstants";
+import AlertContext from "../context/AlertContext";
 
 const Login = () => {
   const [form, setForm] = useState({ email: "", password: "" });
   const [loading, setIsLoading] = useState(false);
   const { setIsLoggedIn } = useContext(AuthContext);
+  const { addAlert } = useContext(AlertContext);
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -28,19 +31,21 @@ const Login = () => {
         setIsLoggedIn({ status: true, user: { ...user } });
 
         setIsLoading(false);
+        addAlert('Login successful!', ALERT_TYPES.SUCCESS);
         navigate(location?.from?.pathname || "/");
       }
 
       setIsLoading(false);
     } catch (error) {
       setIsLoading(false);
-      console.error("Registration failed:", error.message);
+      addAlert(error.message)
+      
     }
   };
 
   return (
-    <div>
-      <form onSubmit={handleSubmit}>
+    <div className="glass p-10 rounded">
+      <form onSubmit={handleSubmit} className="flex flex-col gap-4">
         <label className="input input-bordered flex items-center gap-2">
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -82,8 +87,22 @@ const Login = () => {
             onChange={(e) => updateForm("password", e.target.value)}
           />
         </label>
-        <button className="btn" type="submit">
-          {loading ? "Loading..." : "Login"}
+        <p>
+          Don't have an account?{" "}
+          <Link
+            className="text-sky-700 hover:underline decoration-purple"
+            to="/auth"
+            state={{ auth: "register" }}
+          >
+            Register here
+          </Link>{" "}
+        </p>
+        <button className="self-end" type="submit">
+          {loading ? (
+            <span className="loading loading-spinner loading-sm" />
+          ) : (
+            "Login"
+          )}
         </button>
       </form>
     </div>
