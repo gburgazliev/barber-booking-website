@@ -28,7 +28,7 @@ const AlertContainer = () => {
   return (
     <motion.div
       layout
-      className="flex flex-col gap-5 fixed top-10 right-10 z-50"
+      className="flex flex-col w-64 text-sm gap-5  fixed top-10 right-10 z-[999]"
     >
       <AnimatePresence>
         {alerts.map((alert) => {
@@ -43,7 +43,7 @@ const AlertContainer = () => {
                   initial="hidden"
                   animate="visible"
                   exit="exit"
-                  className="alert alert-error"
+                  className="alert alert-error "
                 >
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
