@@ -23,8 +23,9 @@ const Authentication = ({ children }) => {
 
           if (response.ok) {
             const body = await response.json();
+            
 
-            setIsLoggedIn({ status: true, user: body.user._doc });
+            setIsLoggedIn({ status: true, user: body.user });
           }
           setIsLoading(false);
         } catch (error) {
@@ -34,6 +35,10 @@ const Authentication = ({ children }) => {
       })();
     }
   }, []);
+
+  useEffect(() => {
+   console.log(isLoggedIn)
+  }, [isLoggedIn])
 
   if (loading) {
     return <div>Loading....</div>;
