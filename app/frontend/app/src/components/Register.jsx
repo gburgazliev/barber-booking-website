@@ -1,7 +1,10 @@
-import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useEffect, useState, useContext } from "react";
+import { useNavigate, Link } from "react-router-dom";
 import { register } from "../service/authentication-service";
+import AlertContext from "../context/AlertContext";
+import ALERT_TYPES from "../constants/alertTypeConstants";
 const Register = () => {
+  const { addAlert } = useContext(AlertContext);
   const navigate = useNavigate();
   const [loading, setIsLoading] = useState(false);
   const [form, setForm] = useState({
@@ -27,20 +30,27 @@ const Register = () => {
         form.email,
         form.password
       );
-      if (response) { // if registration is succesful
+      if (response) {
+        // if registration is succesful
         setIsLoading(false);
+        addAlert(
+          "Register successful! Redirecting to login.",
+          ALERT_TYPES.SUCCESS
+        );
         navigate("/auth", { state: { auth: "login" } });
       }
 
       setIsLoading(false);
     } catch (error) {
-        setIsLoading(false);
+      setIsLoading(false);
       console.error("Registration failed:", error.message);
+
+      addAlert(error.message);
     }
   };
 
   return (
-    <div className="bg-black p-10">
+    <div className="glass p-10 rounded">
       <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
         <label className="input input-bordered flex items-center gap-2">
           <svg
@@ -56,7 +66,6 @@ const Register = () => {
             type="text"
             className="grow "
             placeholder="Email"
-           
             value={form.email}
             onChange={(e) => updateForm("email", e.target.value)}
           />
@@ -119,8 +128,22 @@ const Register = () => {
             onChange={(e) => updateForm("password", e.target.value)}
           />
         </label>
+        <p>
+          Already have an account?{" "}
+          <Link
+            className="text-sky-700 hover:underline decoration-purple"
+            to="/auth"
+            state={{ auth: "login" }}
+          >
+            Sign in here
+          </Link>{" "}
+        </p>
         <button className="self-end" type="submit">
-         {loading ? 'Loading...' : 'Register'}
+          {loading ? (
+            <span className="loading loading-spinner loading-lg"></span>
+          ) : (
+            "Register"
+          )}
         </button>
       </form>
     </div>
