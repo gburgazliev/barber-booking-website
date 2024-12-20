@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { useNavigate,Link } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import themeController from "../utils/themeController";
 /// change a with LINK
 const Header = () => {
@@ -9,11 +9,11 @@ const Header = () => {
   }, []);
 
   return (
-    <div className="drawer">
+    <div className="drawer z-40">
       <input id="my-drawer-3" type="checkbox" className=" drawer-toggle" />
       <div className="drawer-content flex flex-col">
         {/* Navbar */}
-        <div className="navbar bg-base-300  sm:w-fit sm:rounded-full md:w-5/6 md:self-center sm:self-start">
+        <div className="navbar bg-base-300  w-fit rounded-full md:w-5/6 md:self-center sm:self-start">
           <div className="flex-none lg:hidden">
             <label
               htmlFor="my-drawer-3"
@@ -39,7 +39,7 @@ const Header = () => {
             <ul className="menu menu-horizontal">
               {/* Navbar menu content here */}
               <li>
-                <a href="/">Home</a>
+                <Link to="/">Home</Link>
               </li>
               <li>
                 <a>Location</a>
@@ -47,7 +47,7 @@ const Header = () => {
               <li></li>
             </ul>
           </div>
-          <div className="sm:hidden lg:flex navbar-end">
+          <div className="hidden lg:flex navbar-end">
             <ul className="menu menu-horizontal">
               {/* Navbar menu content here */}
               <li>
@@ -123,10 +123,14 @@ const Header = () => {
                 </details>
               </li>
               <li>
-              <Link to='/auth' state={{auth: 'register'}}>Sign up</Link>
+                <Link to="/auth" state={{ auth: "register" }}>
+                  Sign up
+                </Link>
               </li>
               <li>
-              <Link to='/auth' state={{auth: 'login'}}>Sign in</Link>
+                <Link to="/auth" state={{ auth: "login" }}>
+                  Sign in
+                </Link>
               </li>
             </ul>
           </div>
@@ -138,7 +142,7 @@ const Header = () => {
           aria-label="close sidebar"
           className="drawer-overlay"
         ></label>
-        <ul className="menu bg-base-200 min-h-full w-50 p-4">
+        <ul className="flex flex-col menu bg-base-200 min-h-full w-50 p-4">
           {/* Sidebar content here */}
 
           <span className="menu-title ">About</span>
@@ -226,6 +230,21 @@ const Header = () => {
                 </li>
               </ul>
             </details>
+          </li>
+
+          <li className="flex flex-row mt-auto">
+        
+            
+           
+              <Link to="/auth" state={{ auth: "login" }}>
+                Sign in
+              </Link>
+
+              <Link to="/auth" state={{ auth: "register" }}>
+                Sign up
+              </Link>
+
+            
           </li>
         </ul>
       </div>
