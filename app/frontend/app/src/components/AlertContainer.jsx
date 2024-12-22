@@ -28,7 +28,7 @@ const AlertContainer = () => {
   return (
     <motion.div
       layout
-      className="flex flex-col w-64 text-sm gap-5  fixed top-10 right-10 z-[999]"
+      className="flex flex-col w-90 text-sm md:text-lg gap-5 right-2  fixed top-10 md:right-10 z-[999]"
     >
       <AnimatePresence>
         {alerts.map((alert) => {
@@ -43,7 +43,8 @@ const AlertContainer = () => {
                   initial="hidden"
                   animate="visible"
                   exit="exit"
-                  className="alert alert-error "
+                  className="alert alert-error select-none hover:cursor-pointer"
+                  onClick={() => removeAlert(alert.id)}
                 >
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
@@ -66,9 +67,12 @@ const AlertContainer = () => {
             case ALERT_TYPES.SUCCESS: {
               return (
                 <motion.div
+                layout
+                  variants={alertVariants}
                   role="alert"
                   key={alert.id}
-                  className="alert alert-success"
+                  className="alert alert-success select-none hover:cursor-pointer"
+                  onClick={() => removeAlert(alert.id)}
                 >
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
