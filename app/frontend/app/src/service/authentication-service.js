@@ -15,7 +15,7 @@ export const login = async (email, password) => {
     });
     if (!response.ok) {
       throw new Error(
-        "Error signing in! Make sure you are passing valid email and password."
+        "Make sure you are passing valid email and password."
       );
     }
     const body = await response.json();
@@ -44,12 +44,25 @@ export const register = async (firstname, lastname, email, password) => {
     });
 
     if (!response.ok) {
-   const errorMessage = await response.json();
-  throw new Error(errorMessage.message)
+      const errorMessage = await response.json();
+      throw new Error(errorMessage.message);
     }
     return await response.json();
   } catch (error) {
-     console.error(error.message);
-     throw error;
+    console.error(error.message);
+    throw error;
+  }
+};
+
+export const validateFirstnameAndLastname = (firstname, lastname) => {
+  if (firstname.length < 3 || lastname.length < 3) {
+    throw new Error("First and last name should be atleast 3 characters long!");
+  }
+};
+
+export const validateEmail = (email) => {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(email)) {
+    throw new Error("Invalid email!");
   }
 };
