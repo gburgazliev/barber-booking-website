@@ -19,7 +19,7 @@ const AlertProvider = ({ children }) => {
  * @param {string} type 
  * @param {Number} timeout 5000 ms
  */
-  const addAlert = (message = "", type = ALERT_TYPES.ERROR, timeout = 5000) => {
+  const addAlert = (message , type = ALERT_TYPES.ERROR, timeout = 5000) => {
     const id = new Date().getMilliseconds().toString();
     dispatch({
       type: ALERT_ACTIONS.ADD_ALERT,

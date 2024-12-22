@@ -3,7 +3,7 @@ import AuthPage from "../components/AuthPage";
 
 const AuthView = () => {
   return (
-    <div className=" w-full flex flex-col justify-items-center items-center gap-[100px] md:gap-[250px] ">
+    <div className=" w-full flex flex-col  items-center gap-[100px] md:gap-[250px] ">
       <Header />
       <AuthPage />
     </div>
