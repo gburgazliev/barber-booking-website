@@ -111,7 +111,7 @@ router.post("/reset-password", async (req, res) => {
   user.resetTokenExpirationTime = resetTokenExpDate;
   await user.save();
 
-  const resetUrl = `http://localhost:5173/reset-password/${resetTokenHex}`;
+  const resetUrl = `${process.env.FRONTEND_URL}/reset-password/${resetTokenHex}`;
   await transporter.sendMail({
     from: "barbariavarna@gmail.com",
     to: email, // This can be any email address
@@ -123,7 +123,7 @@ router.post("/reset-password", async (req, res) => {
         <p>If you didn't request this, please ignore this email</p>
     `,
   });
-  console.log(email);
+
   res.status(200).json({ message: "Reset email sent!" });
 });
 
