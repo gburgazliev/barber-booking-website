@@ -5,6 +5,7 @@ import AuthContext from "../context/AuthContext";
 import { useContext } from "react";
 import ALERT_TYPES from "../constants/alertTypeConstants";
 import AlertContext from "../context/AlertContext";
+import updateForm from "../helpers/updateForm";
 
 const Login = () => {
   const [form, setForm] = useState({ email: "", password: "" });
@@ -13,13 +14,6 @@ const Login = () => {
   const { addAlert } = useContext(AlertContext);
   const location = useLocation();
   const navigate = useNavigate();
-
-  const updateForm = (key, value) => {
-    setForm((prevState) => ({
-      ...prevState,
-      [key]: value,
-    }));
-  };
 
   const handleSubmit = async (e) => {
     setIsLoading(true);
@@ -31,15 +25,14 @@ const Login = () => {
         setIsLoggedIn({ status: true, user: { ...user } });
 
         setIsLoading(false);
-        addAlert('Login successful!', ALERT_TYPES.SUCCESS);
+        addAlert("Login successful!", ALERT_TYPES.SUCCESS);
         navigate(location?.from?.pathname || "/");
       }
 
       setIsLoading(false);
     } catch (error) {
       setIsLoading(false);
-      addAlert(error.message)
-      
+      addAlert(`Error signing in: ${error.message}`);
     }
   };
 
@@ -61,7 +54,7 @@ const Login = () => {
             className="grow "
             placeholder="Email"
             value={form.email}
-            onChange={(e) => updateForm("email", e.target.value)}
+            onChange={(e) => updateForm("email", e.target.value, setForm)}
           />
         </label>
 
@@ -84,13 +77,23 @@ const Login = () => {
             className="grow"
             required
             value={form.password}
-            onChange={(e) => updateForm("password", e.target.value)}
+            onChange={(e) => updateForm("password", e.target.value, setForm)}
           />
         </label>
         <p>
-          Don't have an account?{" "}
+          Forgot your password ?{" "}
           <Link
-            className="text-sky-700 hover:underline decoration-purple"
+            className="text-purple-700 hover:underline decoration-purple"
+            to={"/reset-password"}
+          >
+            Reset here
+          </Link>
+        </p>
+
+        <p>
+          Don't have an account ?{" "}
+          <Link
+            className="text-purple-700 hover:underline decoration-purple"
             to="/auth"
             state={{ auth: "register" }}
           >

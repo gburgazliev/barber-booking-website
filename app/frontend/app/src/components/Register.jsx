@@ -1,8 +1,14 @@
 import { useEffect, useState, useContext } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { register } from "../service/authentication-service";
+import {
+  register,
+  validateFirstnameAndLastname,
+  validateEmail,
+} from "../service/authentication-service";
 import AlertContext from "../context/AlertContext";
 import ALERT_TYPES from "../constants/alertTypeConstants";
+import updateForm from "../helpers/updateForm";
+
 const Register = () => {
   const { addAlert } = useContext(AlertContext);
   const navigate = useNavigate();
@@ -14,16 +20,13 @@ const Register = () => {
     password: "",
   });
 
-  const updateForm = (key, value) => {
-    setForm((prevState) => ({
-      ...prevState,
-      [key]: value,
-    }));
-  };
   const handleSubmit = async (e) => {
     setIsLoading(true);
     e.preventDefault();
     try {
+      validateEmail(form.email);
+      validateFirstnameAndLastname(form.firstname, form.lastname);
+
       const response = await register(
         form.firstname,
         form.lastname,
@@ -45,7 +48,7 @@ const Register = () => {
       setIsLoading(false);
       console.error("Registration failed:", error.message);
 
-      addAlert(error.message);
+      addAlert(`Error registering user: ${error.message}`);
     }
   };
 
@@ -64,10 +67,11 @@ const Register = () => {
           </svg>
           <input
             type="text"
-            className="grow "
+            className="grow"
             placeholder="Email"
+            required
             value={form.email}
-            onChange={(e) => updateForm("email", e.target.value)}
+            onChange={(e) => updateForm("email", e.target.value, setForm)}
           />
         </label>
         <label className="input input-bordered flex items-center gap-2">
@@ -85,7 +89,7 @@ const Register = () => {
             placeholder="Firstname"
             required
             value={form.firstname}
-            onChange={(e) => updateForm("firstname", e.target.value)}
+            onChange={(e) => updateForm("firstname", e.target.value, setForm)}
           />
         </label>
         <label className="input input-bordered flex items-center gap-2">
@@ -103,7 +107,7 @@ const Register = () => {
             placeholder="Lastname"
             required
             value={form.lastname}
-            onChange={(e) => updateForm("lastname", e.target.value)}
+            onChange={(e) => updateForm("lastname", e.target.value, setForm)}
           />
         </label>
         <label className="input input-bordered flex items-center gap-2">
@@ -125,13 +129,13 @@ const Register = () => {
             className="grow"
             required
             value={form.password}
-            onChange={(e) => updateForm("password", e.target.value)}
+            onChange={(e) => updateForm("password", e.target.value, setForm)}
           />
         </label>
         <p>
           Already have an account?{" "}
           <Link
-            className="text-sky-700 hover:underline decoration-purple"
+            className="text-purple-700 hover:underline decoration-purple"
             to="/auth"
             state={{ auth: "login" }}
           >
