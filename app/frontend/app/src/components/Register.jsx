@@ -144,7 +144,7 @@ const Register = () => {
         </p>
         <button className="self-end" type="submit">
           {loading ? (
-            <span className="loading loading-spinner loading-lg"></span>
+            <span className="loading loading-spinner loading-sm"></span>
           ) : (
             "Register"
           )}
