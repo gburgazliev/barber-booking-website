@@ -1,12 +1,42 @@
-import { useEffect } from "react";
+import { useEffect, useContext } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import themeController from "../utils/themeController";
+import AuthContext from "../context/AuthContext";
+import { logout } from "../service/authentication-service";
+
 /// change a with LINK
 const Header = () => {
   const navigate = useNavigate();
+  const { isLoggedIn, setIsLoggedIn } = useContext(AuthContext);
   useEffect(() => {
     themeController();
   }, []);
+
+  const handleLogout = async () => {
+    await logout();
+    setIsLoggedIn({ status: false, user: {} });
+
+    navigate("/");
+  };
+
+  const isLoggedInConditionalRender = !isLoggedIn.status ? (
+    <>
+      <li>
+        <Link to="/auth" state={{ auth: "register" }}>
+          Sign up
+        </Link>
+      </li>
+      <li>
+        <Link to="/auth" state={{ auth: "login" }}>
+          Sign in
+        </Link>
+      </li>
+    </>
+  ) : (
+    <li>
+      <button onClick={handleLogout}>Logout</button>
+    </li>
+  );
 
   return (
     <div className="drawer">
@@ -122,16 +152,7 @@ const Header = () => {
                   </ul>
                 </details>
               </li>
-              <li>
-                <Link to="/auth" state={{ auth: "register" }}>
-                  Sign up
-                </Link>
-              </li>
-              <li>
-                <Link to="/auth" state={{ auth: "login" }}>
-                  Sign in
-                </Link>
-              </li>
+              {isLoggedInConditionalRender}
             </ul>
           </div>
         </div>
@@ -233,18 +254,13 @@ const Header = () => {
           </li>
 
           <li className="flex flex-row mt-auto">
-        
-            
-           
-              <Link to="/auth" state={{ auth: "login" }}>
-                Sign in
-              </Link>
+            <Link to="/auth" state={{ auth: "login" }}>
+              Sign in
+            </Link>
 
-              <Link to="/auth" state={{ auth: "register" }}>
-                Sign up
-              </Link>
-
-            
+            <Link to="/auth" state={{ auth: "register" }}>
+              Sign up
+            </Link>
           </li>
         </ul>
       </div>
