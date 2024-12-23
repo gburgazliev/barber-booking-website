@@ -26,6 +26,17 @@ export const login = async (email, password) => {
   }
 };
 
+export const logout = async () => {
+  try {
+    await fetch(SERVER_URL("api/users/logout"), {
+      method: "GET",
+      credentials: "include",
+    }); 
+  } catch (error) {
+    console.error(error.message);
+  }
+}
+
 export const register = async (firstname, lastname, email, password) => {
   try {
     const response = await fetch(SERVER_URL("api/users/register"), {
