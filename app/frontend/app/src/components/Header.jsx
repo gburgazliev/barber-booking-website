@@ -252,7 +252,10 @@ const Header = () => {
               </ul>
             </details>
           </li>
-          {isLoggedInConditionalRender}
+          <div className="flex flex-row mt-auto ">
+            {isLoggedInConditionalRender}
+          </div>
+          
         </ul>
       </div>
     </div>
