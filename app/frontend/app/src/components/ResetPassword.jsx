@@ -30,7 +30,7 @@ const ResetPassword = () => {
 
   return (
     <form action="" className="flex flex-col gap-2" onSubmit={handleSubmit}>
-      {" "}
+     
       <label className="input input-bordered flex items-center gap-2">
         <svg
           xmlns="http://www.w3.org/2000/svg"

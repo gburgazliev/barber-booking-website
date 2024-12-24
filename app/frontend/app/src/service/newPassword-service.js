@@ -14,7 +14,6 @@ export const newPasswordRequest = async (resetToken, newPassword) => {
     if (!response.ok) {
       throw new Error(body.message);
     }
-    console.log(response.status)
 
     return body;
   } catch (error) {

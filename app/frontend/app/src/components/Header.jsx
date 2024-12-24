@@ -252,16 +252,7 @@ const Header = () => {
               </ul>
             </details>
           </li>
-
-          <li className="flex flex-row mt-auto">
-            <Link to="/auth" state={{ auth: "login" }}>
-              Sign in
-            </Link>
-
-            <Link to="/auth" state={{ auth: "register" }}>
-              Sign up
-            </Link>
-          </li>
+          {isLoggedInConditionalRender}
         </ul>
       </div>
     </div>
