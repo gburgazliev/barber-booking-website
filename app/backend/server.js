@@ -10,7 +10,7 @@ const CORS_OPTIONS = {
    // Allowed HTTP methods
   credentials: true,
   allowedHeaders: ["Content-Type", "Authorization", "Cookie"],
-  exposedHeaders: ["set-cookie"],
+  exposedHeaders: ["Set-Cookie"],
   preflightContinue: false,
   optionsSuccessStatus: 204,
 };
