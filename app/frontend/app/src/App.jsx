@@ -1,18 +1,30 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import "./App.css";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import HomeView from "./views/HomeView";
 import AuthContext from "./context/AuthContext";
 import Authentication from "./hoc/Authentication";
 import AuthView from "./views/AuthView";
 import AlertProvider from "./hoc/AlertProvider";
 import AlertContainer from "./components/AlertContainer";
-import ResetPasswordView from './views/ResetPasswordView';
+import ResetPasswordView from "./views/ResetPasswordView";
 import NewPasswordView from "./views/NewPasswordView";
-
+import { autoLogin } from "./service/authentication-service";
 
 function App() {
   const [authValue, setAuthValue] = useState({ status: false, user: {} });
+
+  useEffect(() => {
+    const handleAutoLogin = async () => {
+      await autoLogin();
+
+      const user = localStorage.getItem("user");
+      if (user) {
+        setAuthValue({ status: true, user: user });
+      }
+    };
+    handleAutoLogin();
+  }, []);
 
   return (
     <AlertProvider>
@@ -25,7 +37,10 @@ function App() {
             <Route path="/auth" element={<AuthView />} />
             <Route path="/" element={<HomeView />} />
             <Route path="/reset-password" element={<ResetPasswordView />} />
-            <Route path="/reset-password/:resetToken" element={<NewPasswordView />} />
+            <Route
+              path="/reset-password/:resetToken"
+              element={<NewPasswordView />}
+            />
           </Routes>
         </AuthContext.Provider>
       </BrowserRouter>
