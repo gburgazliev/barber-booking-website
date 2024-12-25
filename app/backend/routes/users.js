@@ -48,11 +48,11 @@ router.post("/register", async (req, res, next) => {
       role: "user",
       password: passwordHash,
     });
-    const token = signJWT({ firstname, lastname, email, passwordHash });
-    res.cookie("jwt", token, {
-      ...COOKIE_OPTIONS,
-      maxAge: 3600000,
-    });
+    // const token = signJWT({ firstname, lastname, email, passwordHash });
+    // res.cookie("jwt", token, {
+    //   ...COOKIE_OPTIONS,
+    //   maxAge: 3600000,
+    // });
     res.status(201).json({ message: "User registered successfully!" });
   } catch (error) {
     res.status(403).json({ message: `${error.message}` });
@@ -86,7 +86,8 @@ router.post("/login", async (req, res, next) => {
 });
 
 router.get("/login", verifyCookie, (req, res) => {
-  const user = req.user;
+  const user = { ...req.user._doc, iat: req.user.iat, exp: req.user.exp };
+
   res.status(200).json({ message: "Authorized succesfully", user });
 });
 
@@ -130,19 +131,21 @@ router.post("/reset-password", async (req, res) => {
 router.post("/new-password", async (req, res) => {
   const { resetToken, newPassword } = req.body;
   const user = await User.findOne({ resetToken: resetToken });
-  
-   if(!user) {
-    return res.status(401).json({message: 'Invalid reset link !'})
-   }
+
+  if (!user) {
+    return res.status(401).json({ message: "Invalid reset link !" });
+  }
 
   if (user.resetTokenExpirationTime < Date.now()) {
     return res.status(410).json({ message: "Reset time expired !" });
   }
-  
+
   const isSamePassword = await bcrypt.compare(newPassword, user.password);
-  
+
   if (isSamePassword) {
-    return res.status(400).json({message: 'New password should not be the same your current password.'})
+    return res.status(400).json({
+      message: "New password should not be the same your current password.",
+    });
   }
 
   const newPasswordHash = await hashPassword(newPassword);
@@ -150,8 +153,7 @@ router.post("/new-password", async (req, res) => {
   user.resetToken = null;
   user.resetTokenExpirationTime = null;
   await user.save();
-  res.status(200).json({message: 'Password reset successfully'});
-
+  res.status(200).json({ message: "Password reset successfully" });
 });
 
 module.exports = router;
