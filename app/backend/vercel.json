@@ -15,7 +15,8 @@
         "Access-Control-Allow-Origin": "https://barber-booking-website-frontend.vercel.app",
         "Access-Control-Allow-Credentials": "true",
         "Access-Control-Allow-Methods": "GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS",
-        "Access-Control-Allow-Headers": "Origin, X-Requested-With, Content-Type, Accept, Authorization, Cookie"
+        "Access-Control-Allow-Headers": "Origin, X-Requested-With, Content-Type, Accept, Authorization, Cookie",
+         "Access-Control-Expose-Headers": "Set-Cookie"
       }
     }
   ]
