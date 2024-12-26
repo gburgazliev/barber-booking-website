@@ -10,7 +10,7 @@ const nodemailer = require("nodemailer");
 const COOKIE_OPTIONS = {
   httpOnly: true,
   signed: true,
-  secure: true,  // Only true in production
+  secure: false,  // Only true in production
   sameSite:'none', // "none" for production, "lax" for development
 
 };
