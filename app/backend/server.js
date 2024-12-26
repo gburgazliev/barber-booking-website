@@ -16,6 +16,7 @@ const CORS_OPTIONS = {
 };
 const app = express();
 app.use(cookieParser(process.env.COOKIE_SECRET));
+app.options("*", cors(CORS_OPTIONS));
 app.use(cors(CORS_OPTIONS));
 app.use(express.json());
 const port = process.env.PORT || 5000;
