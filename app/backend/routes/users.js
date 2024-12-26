@@ -6,11 +6,13 @@ const bcrypt = require("bcryptjs");
 const verifyCookie = require("../middleware/verifyCookie");
 const signJWT = require("../helpers/signJWT");
 const nodemailer = require("nodemailer");
+const path = require("path");
 const COOKIE_OPTIONS = {
   httpOnly: true,
   signed: true,
-  secure: true,
-  sameSite: "none",
+  secure: process.env.NODE_ENV === 'production',  // Only true in production
+  sameSite:process.env.NODE_ENV === 'production' ? "none" : "lax", // "none" for production, "lax" for development
+  
 };
 
 const transporter = nodemailer.createTransport({
@@ -86,6 +88,7 @@ router.post("/login", async (req, res, next) => {
 });
 
 router.get("/login", verifyCookie, (req, res) => {
+ 
   const user = { ...req.user._doc, iat: req.user.iat, exp: req.user.exp };
 
   res.status(200).json({ message: "Authorized succesfully", user });
