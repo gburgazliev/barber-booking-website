@@ -10,8 +10,8 @@ const path = require("path");
 const COOKIE_OPTIONS = {
   httpOnly: true,
   signed: true,
-  secure: process.env.NODE_ENV === 'production',  // Only true in production
-  sameSite:process.env.NODE_ENV === 'production' ? "none" : "lax", // "none" for production, "lax" for development
+  secure: false,  // Only true in production
+  sameSite:'none', // "none" for production, "lax" for development
   
 };
 
