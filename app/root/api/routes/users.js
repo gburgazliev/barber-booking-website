@@ -11,7 +11,7 @@ const COOKIE_OPTIONS = {
   httpOnly: true,
   signed: true,
   secure: true,  // Only true in production
-  sameSite:'lax', // "none" for production, "lax" for development
+  sameSite:'none', // "none" for production, "lax" for development
   path: '/'
 
 };
@@ -97,6 +97,7 @@ router.get("/login", verifyCookie, (req, res) => {
 });
 
 router.get("/logout", (req, res) => {
+ 
   res.clearCookie("jwt", COOKIE_OPTIONS);
   res.status(200).json({ message: "Cookie cleared successfully!" });
 });
