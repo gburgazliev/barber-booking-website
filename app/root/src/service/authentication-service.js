@@ -49,6 +49,7 @@ export const logout = async () => {
       method: "GET",
       credentials: "include",
     });
+    localStorage.removeItem('user')
   } catch (error) {
     console.error(error.message);
   }
