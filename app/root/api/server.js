@@ -10,7 +10,7 @@ const CORS_OPTIONS = {
   ], // Allow requests from this origin
   // Allowed HTTP methods
   credentials: true,
-  allowedHeaders: ["Content-Type", "Authorization", "Cookie"],
+  allowedHeaders: ["Content-Type", "Authorization", "Cookie", 'Cache-Control', 'Pragma'],
   exposedHeaders: ["Set-Cookie"],
   preflightContinue: false,
   optionsSuccessStatus: 204,
