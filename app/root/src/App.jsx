@@ -22,7 +22,7 @@ function App() {
       try {
           await autoLogin();
 
-      const user = localStorage.getItem("user");
+      const user = JSON.parse(localStorage.getItem("user"));
       if (user) {
         setAuthValue({ status: true, user: user });
         console.log('logged in as', user.email)
