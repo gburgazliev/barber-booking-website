@@ -31,7 +31,7 @@ export const autoLogin = async () => {
       credentials: "include",
       mode: "cors",
     });
-    if (response.ok && response.status === 200) {
+    if (response.status === 200) {
       const body = await response.json();
       const user = body.user;
       
