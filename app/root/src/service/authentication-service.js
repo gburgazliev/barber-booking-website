@@ -53,6 +53,11 @@ export const logout = async () => {
     await fetch(SERVER_URL("api/users/logout"), {
       method: "GET",
       credentials: "include",
+      mode: 'cors',
+      headers: {
+        'Cache-Control': 'no-cache',
+        'Pragma': 'no-cache'
+      }
     });
     localStorage.removeItem('user')
    
