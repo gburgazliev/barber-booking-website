@@ -7,6 +7,8 @@ export const login = async (email, password) => {
       credentials: "include",
       headers: {
         "Content-Type": "application/json",
+        'Cache-Control': 'no-cache',
+        'Pragma': 'no-cache'
       },
       body: JSON.stringify({
         email,
@@ -54,10 +56,10 @@ export const logout = async () => {
       method: "GET",
       credentials: "include",
       mode: 'cors',
-      // headers: {
-      //   'Cache-Control': 'no-cache',
-      //   'Pragma': 'no-cache'
-      // }
+      headers: {
+        'Cache-Control': 'no-cache',
+        'Pragma': 'no-cache'
+      }
     });
     localStorage.removeItem('user')
    
