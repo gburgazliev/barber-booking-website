@@ -23,6 +23,8 @@ function App() {
       const user = localStorage.getItem("user");
       if (user) {
         setAuthValue({ status: true, user: user });
+      } else {
+        setAuthValue({ status: false, user: {} });
       }
       } catch (error) {
         console.error("Auto-login error:", error);
