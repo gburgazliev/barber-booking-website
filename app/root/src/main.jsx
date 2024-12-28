@@ -6,8 +6,6 @@ import AlertProvider from "./hoc/AlertProvider.jsx";
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>
-    <AlertProvider>
-      <App />
-    </AlertProvider>
+  <App/>
   </StrictMode>
 );
