@@ -1,4 +1,4 @@
-import { useEffect, useContext } from "react";
+import { useEffect, useContext, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import themeController from "../utils/themeController";
 import AuthContext from "../context/AuthContext";
@@ -8,16 +8,13 @@ import { logout } from "../service/authentication-service";
 const Header = () => {
   const navigate = useNavigate();
   const { isLoggedIn, setIsLoggedIn } = useContext(AuthContext);
-  useEffect(() => {
-    themeController();
-  }, []);
 
-  const handleLogout = async () => {
+  async function handleLogout() {
     await logout();
     setIsLoggedIn({ status: false, user: {} });
 
     navigate("/");
-  };
+  }
 
   const isLoggedInConditionalRender = !isLoggedIn.status ? (
     <>
@@ -38,6 +35,11 @@ const Header = () => {
     </li>
   );
 
+  useEffect(() => {
+    themeController();
+  }, []);
+
+  
   return (
     <div className="drawer">
       <input id="my-drawer-3" type="checkbox" className=" drawer-toggle" />
@@ -255,7 +257,6 @@ const Header = () => {
           <div className="flex flex-row mt-auto ">
             {isLoggedInConditionalRender}
           </div>
-          
         </ul>
       </div>
     </div>

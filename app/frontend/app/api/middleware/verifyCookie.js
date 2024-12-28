@@ -1,8 +1,11 @@
 const jwt = require("jsonwebtoken");
 
 const verifyCookie = (req, res, next) => {
+  console.log('All cookies:', req.cookies);
+  console.log('Signed cookies:', req.signedCookies);
+  console.log('JWT cookie:', req.signedCookies.jwt);
   const token = req.signedCookies.jwt;
-
+  
   if (!token)
     return res.status(401).json({ message: "Unauthorized: no token provided" });
   try {

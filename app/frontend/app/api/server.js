@@ -5,9 +5,10 @@ const cookieParser = require("cookie-parser");
 const CORS_OPTIONS = {
   origin: [
     "http://localhost:5173",
+    "http://192.168.100.2:5173",
     process.env.FRONTEND_URL,
   ], // Allow requests from this origin
-   // Allowed HTTP methods
+  // Allowed HTTP methods
   credentials: true,
   allowedHeaders: ["Content-Type", "Authorization", "Cookie"],
   exposedHeaders: ["Set-Cookie"],
@@ -26,8 +27,6 @@ app.get("/", (req, res) => {
 });
 
 const UserRouter = require("./routes/users");
-
-app.options("*", cors(CORS_OPTIONS));
 
 app.use((err, req, res, next) => {
   console.error(err.stack);
