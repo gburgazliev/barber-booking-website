@@ -54,10 +54,10 @@ export const logout = async () => {
       method: "GET",
       credentials: "include",
       mode: 'cors',
-      headers: {
-        'Cache-Control': 'no-cache',
-        'Pragma': 'no-cache'
-      }
+      // headers: {
+      //   'Cache-Control': 'no-cache',
+      //   'Pragma': 'no-cache'
+      // }
     });
     localStorage.removeItem('user')
    
