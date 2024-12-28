@@ -34,7 +34,8 @@ export const autoLogin = async () => {
     if (response.ok) {
       const body = await response.json();
       const user = body.user;
-      localStorage.setItem("user", user);
+      
+      localStorage.setItem("user", JSON.stringify(user));
     } else {
       localStorage.removeItem('user');
     }
