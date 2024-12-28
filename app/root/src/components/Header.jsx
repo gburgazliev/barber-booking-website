@@ -13,7 +13,7 @@ const Header = () => {
     await logout();
     setIsLoggedIn({ status: false, user: {} });
 
-    
+    navigate('/')
   }
 
   const isLoggedInConditionalRender = isLoading ? (
