@@ -1,6 +1,6 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import "./App.css";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import HomeView from "./views/HomeView";
 import AuthContext from "./context/AuthContext";
 import Authentication from "./hoc/Authentication";
@@ -10,10 +10,13 @@ import AlertContainer from "./components/AlertContainer";
 import ResetPasswordView from "./views/ResetPasswordView";
 import NewPasswordView from "./views/NewPasswordView";
 import { autoLogin } from "./service/authentication-service";
+import ALERT_TYPES from "./constants/alertTypeConstants";
+import AlertContext from "./context/AlertContext";
 
 function App() {
   const [authValue, setAuthValue] = useState({ status: false, user: {} });
   const [isLoading, setIsLoading] = useState(true);
+  const { addAlert } = useContext(AlertContext);
 
   useEffect(() => {
     const handleAutoLogin = async () => {
@@ -23,6 +26,7 @@ function App() {
       const user = localStorage.getItem("user");
       if (user) {
         setAuthValue({ status: true, user: user });
+        addAlert(`Logged in as ${user.firstname}`, ALERT_TYPES.SUCCESS)
       } else {
         setAuthValue({ status: false, user: {} });
       }
