@@ -7,7 +7,7 @@ import { logout } from "../service/authentication-service";
 /// change a with LINK
 const Header = () => {
   const navigate = useNavigate();
-  const { isLoggedIn, setIsLoggedIn } = useContext(AuthContext);
+  const { isLoggedIn, setIsLoggedIn,isLoading } = useContext(AuthContext);
 
   async function handleLogout() {
     await logout();
@@ -16,7 +16,9 @@ const Header = () => {
     navigate("/");
   }
 
-  const isLoggedInConditionalRender = !isLoggedIn.status ? (
+  const isLoggedInConditionalRender = isLoading ? (
+    <span className="loading loading-spinner loading-sm"></span>
+  ) : !isLoggedIn.status ? (
     <>
       <li>
         <Link to="/auth" state={{ auth: "register" }}>
