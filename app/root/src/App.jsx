@@ -26,7 +26,7 @@ function App() {
       const user = localStorage.getItem("user");
       if (user) {
         setAuthValue({ status: true, user: user });
-        addAlert(`Logged in as ${user.firstname}`, ALERT_TYPES.SUCCESS)
+        console.log('logged in as', user.email)
       } else {
         setAuthValue({ status: false, user: {} });
       }
