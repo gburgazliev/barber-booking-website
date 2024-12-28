@@ -50,6 +50,7 @@ export const logout = async () => {
       credentials: "include",
     });
     localStorage.removeItem('user')
+    window.location.reload();
   } catch (error) {
     console.error(error.message);
   }
