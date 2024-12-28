@@ -30,8 +30,12 @@ export const autoLogin = async () => {
       method: "GET",
       credentials: "include",
       mode: "cors",
+      headers: {
+        'Cache-Control': 'no-cache',
+        'Pragma': 'no-cache'
+      }
     });
-    if (response.status === 200) {
+    if (response.ok) {
       const body = await response.json();
       const user = body.user;
       
