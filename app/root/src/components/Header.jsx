@@ -9,7 +9,7 @@ const Header = () => {
   const navigate = useNavigate();
   const { isLoggedIn, setIsLoggedIn,isLoading } = useContext(AuthContext);
 
-  async function handleLogout() {
+  const handleLogout = async () => {
     await logout();
     setIsLoggedIn({ status: false, user: {} });
 
