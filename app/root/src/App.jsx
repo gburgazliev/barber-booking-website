@@ -13,15 +13,24 @@ import { autoLogin } from "./service/authentication-service";
 
 function App() {
   const [authValue, setAuthValue] = useState({ status: false, user: {} });
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const handleAutoLogin = async () => {
-      await autoLogin();
+      try {
+          await autoLogin();
 
       const user = localStorage.getItem("user");
       if (user) {
         setAuthValue({ status: true, user: user });
       }
+      } catch (error) {
+        console.error("Auto-login error:", error);
+        setAuthValue({ status: false, user: {} });
+      } finally {
+        setIsLoading(false);
+      }
+    
     };
     handleAutoLogin();
   }, []);
@@ -31,7 +40,7 @@ function App() {
       <AlertContainer />
       <BrowserRouter>
         <AuthContext.Provider
-          value={{ isLoggedIn: authValue, setIsLoggedIn: setAuthValue }}
+          value={{ isLoggedIn: authValue, setIsLoggedIn: setAuthValue, isLoading, setIsLoading }}
         >
           <Routes>
             <Route path="/auth" element={<AuthView />} />
