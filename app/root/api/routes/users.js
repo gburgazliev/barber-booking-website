@@ -11,7 +11,7 @@ const COOKIE_OPTIONS = {
   httpOnly: true,
   signed: true,
   secure: true,  // Only true in production
-  sameSite:'none', // "none" for production, "lax" for development
+  sameSite:'lax', // "none" for production, "lax" for development
 
 };
 
