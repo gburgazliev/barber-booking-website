@@ -85,7 +85,9 @@ router.post("/login", async (req, res, next) => {
       lastname: user.lastname,
     };
 
-    const token = signJWT(userForToken);
+    const token = signJWT(userForToken)
+
+    console.log(userForToken)
     delete user.password;
 
     res.cookie("jwt", token, {
@@ -117,7 +119,7 @@ router.post("/login", async (req, res, next) => {
 });
 
 router.get("/login", verifyCookie, (req, res) => {
-  const user = { ...req.user._doc, iat: req.user.iat, exp: req.user.exp };
+  const user = { ...req.user, iat: req.user.iat, exp: req.user.exp };
 
   res.status(200).json({ message: "Authorized succesfully", user });
 });
