@@ -31,7 +31,7 @@ const CORS_OPTIONS = {
 
 // app.use(limiter);
 
-async function startServer() {
+  const startServer = async () => {
   await connectToDB();
 
   const app = express();
