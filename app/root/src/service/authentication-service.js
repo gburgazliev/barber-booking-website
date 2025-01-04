@@ -44,6 +44,7 @@ export const autoLogin = async () => {
       localStorage.setItem("user", JSON.stringify(user));
     } else {
       localStorage.removeItem('user');
+      sessionStorage.clear();
     }
   } catch (error) {
     localStorage.removeItem('user');
@@ -62,7 +63,8 @@ export const logout = async () => {
         'Pragma': 'no-cache'
       }
     });
-    localStorage.removeItem('user')
+    localStorage.removeItem('user');
+    sessionStorage.clear();
    
   } catch (error) {
     console.error(error.message);
