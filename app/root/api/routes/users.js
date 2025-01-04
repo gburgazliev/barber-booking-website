@@ -95,19 +95,19 @@ router.post("/login", async (req, res, next) => {
 
     return res.status(200).json({ message: "Authorized succesfully", user });
   } catch (error) {
-    console.error('Login error:', error);
-    
+    console.error("Login error:", error);
+
     // Check for specific error types
-    if (error.name === 'ValidationError') {
-      return res.status(400).json({ 
+    if (error.name === "ValidationError") {
+      return res.status(400).json({
         message: "Invalid input data",
-        errors: Object.values(error.errors).map(err => err.message)
+        errors: Object.values(error.errors).map((err) => err.message),
       });
     }
-    
-    if (error.name === 'MongoError' || error.name === 'MongoServerError') {
-      return res.status(503).json({ 
-        message: "Database error, please try again later" 
+
+    if (error.name === "MongoError" || error.name === "MongoServerError") {
+      return res.status(503).json({
+        message: "Database error, please try again later",
       });
     }
 
