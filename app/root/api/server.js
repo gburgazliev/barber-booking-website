@@ -51,16 +51,3 @@ app.use((err, req, res, next) => {
 });
 
 // Improved server startup
-const startServer = async () => {
-  try {
-    await mongoose.connection.asPromise(); // Wait for MongoDB connection
-    app.listen(port, () => {
-      console.log(`Server running on port ${port}`);
-    });
-  } catch (error) {
-    console.error("Failed to start server:", error);
-    process.exit(1);
-  }
-};
-
-startServer();
