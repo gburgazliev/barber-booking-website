@@ -8,7 +8,7 @@ const Home = () => {
 
 useEffect(() => {
   addAlert(isLoggedIn.status)
-})
+}, [addAlert, isLoggedIn])
 
   return (
     <div>
