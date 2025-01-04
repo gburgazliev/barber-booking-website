@@ -33,7 +33,7 @@ export const autoLogin = async () => {
       credentials: "include",
       mode: "cors",
       headers: {
-        'Cache-Control': 'no-cache',
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
         'Pragma': 'no-cache'
       }
     });
@@ -46,6 +46,7 @@ export const autoLogin = async () => {
       localStorage.removeItem('user');
     }
   } catch (error) {
+    localStorage.removeItem('user');
     console.error(error);
   }
 };
@@ -57,7 +58,7 @@ export const logout = async () => {
       credentials: "include",
       mode: 'cors',
       headers: {
-        'Cache-Control': 'no-cache',
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
         'Pragma': 'no-cache'
       }
     });
