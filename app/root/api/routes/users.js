@@ -65,25 +65,54 @@ router.post("/login", async (req, res, next) => {
   try {
     const { email, password } = req.body;
 
-    const user = await User.findOne({ email: email });
+    const user = await User.findOne({ email: email })
+      .select("+password")
+      .lean()
+      .exec();
     if (!user) {
-      return res.status(404).json({ message: "Wrong or unexisting email" });
+      return res.status(401).json({ message: "Wrong or unexisting email" });
     }
 
     const isValid = await bcrypt.compare(password, user.password);
     if (!isValid) {
       return res.status(404).json({ message: "Incorrect password" });
     }
+    const userForToken = {
+      _id: user._id,
+      email: user.email,
+      role: user.role,
+      firstname: user.firstname,
+      lastname: user.lastname,
+    };
 
-    const token = signJWT(user);
+    const token = signJWT(userForToken);
+    delete user.password;
+
     res.cookie("jwt", token, {
       ...COOKIE_OPTIONS,
       maxAge: 3600000,
     });
 
-    res.status(200).json({ message: "Authorized succesfully", user });
+    return res.status(200).json({ message: "Authorized succesfully", user });
   } catch (error) {
-    res.status(404).json({ message: "Error authorizing user" });
+    console.error('Login error:', error);
+    
+    // Check for specific error types
+    if (error.name === 'ValidationError') {
+      return res.status(400).json({ 
+        message: "Invalid input data",
+        errors: Object.values(error.errors).map(err => err.message)
+      });
+    }
+    
+    if (error.name === 'MongoError' || error.name === 'MongoServerError') {
+      return res.status(503).json({ 
+        message: "Database error, please try again later" 
+      });
+    }
+
+    // Pass unexpected errors to the error handling middleware
+    return next(error);
   }
 });
 
