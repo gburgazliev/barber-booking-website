@@ -10,10 +10,9 @@ const nodemailer = require("nodemailer");
 const COOKIE_OPTIONS = {
   httpOnly: true,
   signed: true,
-  secure: true,  // Only true in production
-  sameSite:'none', // "none" for production, "lax" for development
-  path: '/'
-
+  secure: true, // Only true in production
+  sameSite: "none", // "none" for production, "lax" for development
+  path: "/",
 };
 
 const transporter = nodemailer.createTransport({
@@ -81,7 +80,6 @@ router.post("/login", async (req, res, next) => {
       ...COOKIE_OPTIONS,
       maxAge: 3600000,
     });
-    
 
     res.status(200).json({ message: "Authorized succesfully", user });
   } catch (error) {
@@ -90,33 +88,18 @@ router.post("/login", async (req, res, next) => {
 });
 
 router.get("/login", verifyCookie, (req, res) => {
- 
   const user = { ...req.user._doc, iat: req.user.iat, exp: req.user.exp };
 
   res.status(200).json({ message: "Authorized succesfully", user });
 });
 
 router.get("/logout", (req, res) => {
- 
-  // res.clearCookie("jwt", COOKIE_OPTIONS);
-
-  // const cookieOptions = {
-  //   ...COOKIE_OPTIONS,
-  //   maxAge: 0,
-  //   expires: new Date(0)
-  // };
-
-  // res.clearCookie("jwt", cookieOptions);
   res.cookie("jwt", "", {
     ...COOKIE_OPTIONS,
     maxAge: 0,
-    expires: new Date(0)
+    expires: new Date(0),
   });
-  // // Also try clearing with minimal options
-  // res.clearCookie("jwt", {
-  //   path: '/',
-  //   httpOnly: true
-  // });
+
   res.status(200).json({ message: "Cookie cleared successfully!" });
 });
 
