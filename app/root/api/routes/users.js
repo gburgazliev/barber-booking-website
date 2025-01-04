@@ -166,7 +166,7 @@ router.post("/new-password", async (req, res) => {
 
   if (isSamePassword) {
     return res.status(400).json({
-      message: "New password should not be the same your current password.",
+      message: "New password should not be the same as your current password.",
     });
   }
 
