@@ -127,14 +127,20 @@ router.get("/login", verifyCookie, (req, res) => {
   res.status(200).json({ message: "Authorized succesfully", user});
 });
 
-router.get("/logout", (req, res) => {
-  res.cookie("jwt", "", {
+router.get("/logout", (req, res, next) => {
+  try {
+    res.cookie("jwt", "", {
     ...COOKIE_OPTIONS,
     maxAge: 0,
     expires: new Date(0),
   });
 
   res.status(200).json({ message: "Cookie cleared successfully!" });
+  } catch (error) {
+    console.log(error);
+    next(error)
+  }
+  
 });
 
 router.post("/reset-password", async (req, res) => {
