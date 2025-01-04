@@ -6,10 +6,7 @@ const Home = () => {
   const { isLoggedIn } = useContext(AuthContext);
   const {addAlert} = useContext(AlertContext);
 
-useEffect(() => {
-  addAlert(isLoggedIn.status)
-}, [addAlert, isLoggedIn])
-
+ 
   return (
     <div>
       <h1>Home page</h1>
