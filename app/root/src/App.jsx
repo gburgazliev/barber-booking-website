@@ -49,7 +49,7 @@ function App() {
         >
           <Routes>
             <Route path="/auth" element={<AuthView />} />
-            <Route path="/" element={<HomeView />} />
+            <Route path="/" element={<Authentication><HomeView /> </Authentication>} />
             <Route path="/reset-password" element={<ResetPasswordView />} />
             <Route
               path="/reset-password/:resetToken"
