@@ -98,16 +98,20 @@ router.get("/login", verifyCookie, (req, res) => {
 
 router.get("/logout", (req, res) => {
  
-  res.clearCookie("jwt", COOKIE_OPTIONS);
+  // res.clearCookie("jwt", COOKIE_OPTIONS);
 
-  const cookieOptions = {
+  // const cookieOptions = {
+  //   ...COOKIE_OPTIONS,
+  //   maxAge: 0,
+  //   expires: new Date(0)
+  // };
+
+  // res.clearCookie("jwt", cookieOptions);
+  res.cookie("jwt", "", {
     ...COOKIE_OPTIONS,
     maxAge: 0,
     expires: new Date(0)
-  };
-
-  res.clearCookie("jwt", cookieOptions);
-  
+  });
   // // Also try clearing with minimal options
   // res.clearCookie("jwt", {
   //   path: '/',
