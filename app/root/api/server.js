@@ -31,8 +31,6 @@ const CORS_OPTIONS = {
 
 // app.use(limiter);
 
-
-
 async function startServer() {
   await connectToDB();
 
@@ -51,12 +49,13 @@ async function startServer() {
   const UserRouter = require("./routes/users");
 
   app.use("/api/users", UserRouter);
+  app.use((err, req, res, next) => {
+    console.error(err.stack);
+    res
+      .status(500)
+      .json({ message: "Something went wrong!", error: err.message });
+  });
 }
 startServer();
-app.use((err, req, res, next) => {
-  console.error(err.stack);
-  res
-    .status(500)
-    .json({ message: "Something went wrong!", error: err.message });
-});
+
 // Improved server startup
