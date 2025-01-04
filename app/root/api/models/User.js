@@ -1,4 +1,4 @@
-const mongoose = require('../mongoDB/mongoDB-config')
+const  { mongoose } = require('../mongoDB/mongoDB-config')
 
 const UserSchema = new mongoose.Schema({
     firstname: {type: String, required:true },

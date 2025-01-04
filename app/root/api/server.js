@@ -1,7 +1,7 @@
 const express = require("express");
 const cors = require("cors");
 const mongoose = require("./mongoDB/mongoDB-config");
-const connectToDB = require("./mongoDB/mongoDB-config");
+const  { connectDB } = require("./mongoDB/mongoDB-config");
 const cookieParser = require("cookie-parser");
 // const rateLimit = require('express-rate-limit');
 const CORS_OPTIONS = {
@@ -32,7 +32,7 @@ const CORS_OPTIONS = {
 // app.use(limiter);
 
   const startServer = async () => {
-  await connectToDB();
+  await connectDB();
 
   const app = express();
 
