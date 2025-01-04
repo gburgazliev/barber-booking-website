@@ -2,6 +2,7 @@ const express = require("express");
 const cors = require("cors");
 const mongoose = require("./mongoDB/mongoDB-config");
 const cookieParser = require("cookie-parser");
+const rateLimit = require('express-rate-limit');
 const CORS_OPTIONS = {
   origin: [
     "http://localhost:5173",
@@ -22,6 +23,12 @@ const CORS_OPTIONS = {
   optionsSuccessStatus: 204,
 };
 const app = express();
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100 // limit each IP to 100 requests per windowMs
+});
+
+app.use(limiter);
 app.use(cookieParser(process.env.COOKIE_SECRET));
 app.options("*", cors(CORS_OPTIONS));
 app.use(cors(CORS_OPTIONS));
