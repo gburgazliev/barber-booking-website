@@ -88,9 +88,9 @@ router.post("/login", async (req, res, next) => {
 });
 
 router.get("/login", verifyCookie, (req, res) => {
-  // const user = { ...req.user._doc, iat: req.user.iat, exp: req.user.exp };
+  const user = { ...req.user._doc, iat: req.user.iat, exp: req.user.exp };
 
-  res.status(200).json({ message: "Authorized succesfully" });
+  res.status(200).json({ message: "Authorized succesfully", user });
 });
 
 router.get("/logout", (req, res) => {
