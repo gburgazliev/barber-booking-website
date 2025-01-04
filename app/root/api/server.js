@@ -10,7 +10,13 @@ const CORS_OPTIONS = {
   ], // Allow requests from this origin
   // Allowed HTTP methods
   credentials: true,
-  allowedHeaders: ["Content-Type", "Authorization", "Cookie", 'Cache-Control', 'Pragma'],
+  allowedHeaders: [
+    "Content-Type",
+    "Authorization",
+    "Cookie",
+    "Cache-Control",
+    "Pragma",
+  ],
   exposedHeaders: ["Set-Cookie"],
   preflightContinue: false,
   optionsSuccessStatus: 204,
@@ -28,6 +34,8 @@ app.get("/", (req, res) => {
 
 const UserRouter = require("./routes/users");
 
+app.use("/api/users", UserRouter);
+
 app.use((err, req, res, next) => {
   console.error(err.stack);
   res
@@ -35,4 +43,17 @@ app.use((err, req, res, next) => {
     .json({ message: "Something went wrong!", error: err.message });
 });
 
-app.use("/api/users", UserRouter);
+// Improved server startup
+const startServer = async () => {
+  try {
+    await mongoose.connection.asPromise(); // Wait for MongoDB connection
+    app.listen(port, () => {
+      console.log(`Server running on port ${port}`);
+    });
+  } catch (error) {
+    console.error("Failed to start server:", error);
+    process.exit(1);
+  }
+};
+
+startServer();
