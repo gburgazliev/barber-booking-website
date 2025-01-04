@@ -7,7 +7,9 @@ const Home = () => {
   const {addAlert} = useContext(AlertContext);
 
 
-  
+  useEffect(() => {
+  addAlert(isLoggedIn.user)
+  }, [isLoggedIn])
 
   return (
     <div>
