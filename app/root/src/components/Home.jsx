@@ -1,8 +1,14 @@
 import { useContext , useEffect} from "react";
 import AuthContext from "../context/AuthContext";
 import { autoLogin } from "../service/authentication-service";
+import AlertContext from "../context/AlertContext";
 const Home = () => {
   const { isLoggedIn } = useContext(AuthContext);
+  const {addAlert} = useContext(AlertContext);
+
+  useEffect(() => {
+  addAlert(isLoggedIn.user.email)
+  }, [isLoggedIn, addAlert])
 
   
 
