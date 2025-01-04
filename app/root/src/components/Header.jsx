@@ -17,7 +17,7 @@ const Header = () => {
       setIsLoggedIn({ status: false, user: {} });
     }
 
-    navigate("/");
+    // navigate("/");
   };
 
   const isLoggedInConditionalRender = isLoading ? (
