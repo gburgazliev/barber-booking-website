@@ -7,14 +7,18 @@ import { logout } from "../service/authentication-service";
 /// change a with LINK
 const Header = () => {
   const navigate = useNavigate();
-  const { isLoggedIn, setIsLoggedIn,isLoading } = useContext(AuthContext);
+  const { isLoggedIn, setIsLoggedIn, isLoading } = useContext(AuthContext);
 
   const handleLogout = async () => {
-    await logout();
-    setIsLoggedIn({ status: false, user: {} });
+    try {
+      await logout();
+      setIsLoggedIn({ status: false, user: {} });
+    } catch (error) {
+      setIsLoggedIn({ status: false, user: {} });
+    }
 
-    navigate('/')
-  }
+    navigate("/");
+  };
 
   const isLoggedInConditionalRender = isLoading ? (
     <span className="loading loading-spinner loading-sm"></span>
@@ -41,7 +45,6 @@ const Header = () => {
     themeController();
   }, []);
 
-  
   return (
     <div className="drawer">
       <input id="my-drawer-3" type="checkbox" className=" drawer-toggle" />
