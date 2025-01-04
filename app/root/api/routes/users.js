@@ -169,7 +169,7 @@ router.post("/reset-password", async (req, res) => {
 
 router.post("/new-password", async (req, res) => {
   const { resetToken, newPassword } = req.body;
-  const user = await User.findOne({ resetToken: resetToken });
+  const user = await User.findOne({ resetToken: resetToken }).select('+password');
 
   if (!user) {
     return res.status(401).json({ message: "Invalid reset link !" });
