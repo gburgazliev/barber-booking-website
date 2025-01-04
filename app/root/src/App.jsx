@@ -27,6 +27,7 @@ function App() {
         setAuthValue({ status: true, user: user });
         console.log('logged in as', user.email)
       } else {
+         localStorage.removeItem('user')
         setAuthValue({ status: false, user: {} });
       }
       } catch (error) {
