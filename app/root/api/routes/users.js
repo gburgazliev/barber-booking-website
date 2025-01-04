@@ -118,13 +118,19 @@ router.post("/login", async (req, res, next) => {
   }
 });
 
-router.get("/login", verifyCookie, (req, res) => {
-  const user = req.user._doc ? { ...req.user._doc } : { ...req.user };
+router.get("/login", verifyCookie, (req, res, next) => {
+  try {
+      const user = req.user._doc ? { ...req.user._doc } : { ...req.user };
   delete user.resetToken;
   delete user.resetTokenExpirationTime;
   delete user.password;
   delete user.__v;
   res.status(200).json({ message: "Authorized succesfully", user});
+  } catch (error) {
+    console.log(error);
+  next(error)
+  }
+
 });
 
 router.get("/logout", (req, res, next) => {
