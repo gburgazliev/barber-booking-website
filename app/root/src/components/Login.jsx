@@ -24,15 +24,13 @@ const Login = () => {
       if (user) {
         setIsLoggedIn({ status: true, user: { ...user } });
 
-        setIsLoading(false);
         addAlert("Login successful!", ALERT_TYPES.SUCCESS);
         navigate(location?.from?.pathname || "/");
       }
-
-      setIsLoading(false);
     } catch (error) {
-      setIsLoading(false);
       addAlert(`Error signing in: ${error.message}`);
+    } finally {
+      setIsLoading(false);
     }
   };
 

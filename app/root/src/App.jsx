@@ -9,34 +9,31 @@ import AlertProvider from "./hoc/AlertProvider";
 import AlertContainer from "./components/AlertContainer";
 import ResetPasswordView from "./views/ResetPasswordView";
 import NewPasswordView from "./views/NewPasswordView";
+import clearUserData from "./helpers/clearUserData";
 import { autoLogin } from "./service/authentication-service";
-
 
 function App() {
   const [authValue, setAuthValue] = useState({ status: false, user: {} });
   const [isLoading, setIsLoading] = useState(true);
- 
 
   useEffect(() => {
     const handleAutoLogin = async () => {
       try {
-          await autoLogin();
+        await autoLogin();
 
-      const user = JSON.parse(localStorage.getItem("user"));
-      if (user) {
-        setAuthValue({ status: true, user: user });
-        console.log('logged in as', user.email)
-      } else {
-         localStorage.removeItem('user')
-        setAuthValue({ status: false, user: {} });
-      }
+        const user = JSON.parse(localStorage.getItem("user"));
+        if (user) {
+          setAuthValue({ status: true, user: user });
+          console.log("logged in as", user.email);
+        } else {
+          setAuthValue({ status: false, user: {} });
+        }
       } catch (error) {
         console.error("Auto-login error:", error);
         setAuthValue({ status: false, user: {} });
       } finally {
         setIsLoading(false);
       }
-    
     };
     handleAutoLogin();
   }, []);
@@ -46,7 +43,12 @@ function App() {
       <AlertContainer />
       <BrowserRouter>
         <AuthContext.Provider
-          value={{ isLoggedIn: authValue, setIsLoggedIn: setAuthValue, isLoading, setIsLoading }}
+          value={{
+            isLoggedIn: authValue,
+            setIsLoggedIn: setAuthValue,
+            isLoading,
+            setIsLoading,
+          }}
         >
           <Routes>
             <Route path="/auth" element={<AuthView />} />

@@ -35,20 +35,19 @@ const Register = () => {
       );
       if (response) {
         // if registration is succesful
-        setIsLoading(false);
+
         addAlert(
           "Register successful! Redirecting to login.",
           ALERT_TYPES.SUCCESS
         );
         navigate("/auth", { state: { auth: "login" } });
       }
-
-      setIsLoading(false);
     } catch (error) {
-      setIsLoading(false);
       console.error("Registration failed:", error.message);
 
       addAlert(`Error registering user: ${error.message}`);
+    } finally {
+      setIsLoading(false);
     }
   };
 

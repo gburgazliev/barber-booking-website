@@ -12,12 +12,13 @@ const Header = () => {
   const handleLogout = async () => {
     try {
       await logout();
-      setIsLoggedIn({ status: false, user: {} });
     } catch (error) {
+      console.error("Error during logout:", error.message);
+    } finally {
+      // Ensure application state is updated regardless of errors
       setIsLoggedIn({ status: false, user: {} });
+      navigate("/");
     }
-
-    // navigate("/");
   };
 
   const isLoggedInConditionalRender = isLoading ? (

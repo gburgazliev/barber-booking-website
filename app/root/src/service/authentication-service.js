@@ -1,29 +1,25 @@
 import { SERVER_URL } from "../constants/serverUrl";
+import clearUserData from "../helpers/clearUserData";
 
 export const login = async (email, password) => {
-  try {
-    const response = await fetch(SERVER_URL("api/users/login"), {
-      method: "POST",
-      credentials: "include",
-      headers: {
-        "Content-Type": "application/json",
-        'Cache-Control': 'no-cache',
-        'Pragma': 'no-cache'
-      },
-      body: JSON.stringify({
-        email,
-        password,
-      }),
-    });
-    if (!response.ok) {
-      throw new Error("Make sure you are passing valid email and password.");
-    }
-    const body = await response.json();
-    return body.user;
-  } catch (error) {
-    console.error(error.message);
-    throw error;
+  const response = await fetch(SERVER_URL("api/users/login"), {
+    method: "POST",
+    credentials: "include",
+    headers: {
+      "Content-Type": "application/json",
+      "Cache-Control": "no-cache",
+      Pragma: "no-cache",
+    },
+    body: JSON.stringify({
+      email,
+      password,
+    }),
+  });
+  if (!response.ok) {
+    throw new Error("Make sure you are passing valid email and password.");
   }
+  const body = await response.json();
+  return body.user;
 };
 
 export const autoLogin = async () => {
@@ -33,21 +29,20 @@ export const autoLogin = async () => {
       credentials: "include",
       mode: "cors",
       headers: {
-        'Cache-Control': 'no-cache, no-store, must-revalidate',
-        'Pragma': 'no-cache'
-      }
+        "Cache-Control": "no-cache, no-store, must-revalidate",
+        Pragma: "no-cache",
+      },
     });
     if (response.ok) {
       const body = await response.json();
       const user = body.user;
-      
+
       localStorage.setItem("user", JSON.stringify(user));
     } else {
-      localStorage.removeItem('user');
-      sessionStorage.clear();
+      clearUserData();
     }
   } catch (error) {
-    localStorage.removeItem('user');
+    clearUserData();
     console.error(error);
   }
 };
@@ -57,15 +52,13 @@ export const logout = async () => {
     await fetch(SERVER_URL("api/users/logout"), {
       method: "GET",
       credentials: "include",
-      mode: 'cors',
+      mode: "cors",
       headers: {
-        'Cache-Control': 'no-cache, no-store, must-revalidate',
-        'Pragma': 'no-cache'
-      }
+        "Cache-Control": "no-cache, no-store, must-revalidate",
+        Pragma: "no-cache",
+      },
     });
-    localStorage.removeItem('user');
-    sessionStorage.clear();
-   
+    clearUserData();
   } catch (error) {
     console.error(error.message);
   }
