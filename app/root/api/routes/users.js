@@ -11,7 +11,7 @@ const COOKIE_OPTIONS = {
   httpOnly: true,
   signed: true,
   secure: true, // Only true in production
-  sameSite: "none", // "none" for production, "lax" for development
+  sameSite: "Strict", // "none" for production, "lax" for development
   path: "/",
 };
 
@@ -87,7 +87,6 @@ router.post("/login", async (req, res, next) => {
 
     const token = signJWT(userForToken)
 
-    console.log(userForToken)
     delete user.password;
 
     res.cookie("jwt", token, {
@@ -95,7 +94,7 @@ router.post("/login", async (req, res, next) => {
       maxAge: 3600000,
     });
 
-    return res.status(200).json({ message: "Authorized succesfully", user });
+    return res.status(200).json({ message: "Authorized succesfully", user, authenticated: true });
   } catch (error) {
     console.error("Login error:", error);
 
