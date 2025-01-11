@@ -18,7 +18,11 @@ export const login = async (email, password) => {
   if (!response.ok) {
     throw new Error("Make sure you are passing valid email and password.");
   }
+
   const body = await response.json();
+  if (!body.authenticated) {
+    throw new Error("Authentication failed");
+  }
   return body.user;
 };
 
