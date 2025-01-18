@@ -3,25 +3,9 @@ import { motion, AnimatePresence } from "framer-motion";
 import AlertContext from "../context/AlertContext";
 import Swal from "sweetalert2";
 import ALERT_TYPES from "../constants/alertTypeConstants";
-
+import("@sweetalert2/theme-dark/dark.css")
 const AlertContainer = () => {
   const { alerts, removeAlert } = useContext(AlertContext);
-  const theme = localStorage.getItem("theme");
-
-  useEffect(() => {
-    if (theme === "forest") {
-      import("@sweetalert2/theme-borderless/borderless.css");
-    } else {
-      import("@sweetalert2/theme-dark/dark.css");
-    }
-    // if (theme === "forest") {
-    //   document.body.classList.add("swal2-borderless");
-    //   document.body.classList.remove("swal2-dark");
-    // } else {
-    //   document.body.classList.add("swal2-dark");
-    //   document.body.classList.remove("swal2-borderless");
-    // }
-  }, [theme]);
 
   useEffect(() => {
     if (alerts.length > 0) {
