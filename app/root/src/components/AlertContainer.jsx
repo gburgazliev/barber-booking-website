@@ -1,7 +1,7 @@
 import { useContext, useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import AlertContext from "../context/AlertContext";
-import Swal from "sweetalert2";
+import Swal from "Sweetalert2";
 import ALERT_TYPES from "../constants/alertTypeConstants";
 const AlertContainer = () => {
   const { alerts, removeAlert } = useContext(AlertContext);
