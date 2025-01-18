@@ -26,6 +26,7 @@ const themeController = () => {
       localStorage.setItem("theme", themeName);
       htmlElement.setAttribute("data-theme", themeName);
       updateAriaLabels(themeName);
+      window.location.reload()
     });
   });
 };
