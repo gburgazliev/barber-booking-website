@@ -180,9 +180,7 @@ const Header = () => {
           <span className="menu-title ">About</span>
 
           <li className="">
-            <a href="/" className="">
-              Home
-            </a>
+            <Link to="/">Home</Link>
           </li>
           <li className="">
             <a href="/" className="">
