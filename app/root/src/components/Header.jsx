@@ -3,15 +3,18 @@ import { useNavigate, Link } from "react-router-dom";
 import themeController from "../utils/themeController";
 import AuthContext from "../context/AuthContext";
 import { logout } from "../service/authentication-service";
-
+import ALERT_TYPES from "../constants/alertTypeConstants";
+import AlertContext from "../context/AlertContext";
 /// change a with LINK
 const Header = () => {
   const navigate = useNavigate();
   const { isLoggedIn, setIsLoggedIn, isLoading } = useContext(AuthContext);
+  const {addAlert} = useContext(AlertContext);
 
   const handleLogout = async () => {
     try {
       await logout();
+      addAlert('User is logged out', ALERT_TYPES.INFO)
     } catch (error) {
       console.error("Error during logout:", error.message);
     } finally {
