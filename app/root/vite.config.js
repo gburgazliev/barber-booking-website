@@ -8,12 +8,5 @@ export default defineConfig({
     host: '0.0.0.0', // Bind to all network interfaces
     port: 5173,      // Default port (can be changed if needed)
   },
-  optimizeDeps: {
-    include: ['sweetalert2'],  // Force Vite to pre-bundle SweetAlert2
-  },
-  build: {
-    rollupOptions: {
-      external: [],  // Prevent Rollup from externalizing sweetalert2
-    },
-  },
+ 
 })
