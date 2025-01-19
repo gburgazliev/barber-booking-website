@@ -12,7 +12,7 @@ const Location = () => {
   };
 
   return (
-    <div className="flex flex-col md:flex-row md:w-4/5 max-w-full gap-5 p-5 border-2 bg-black items-center justify-center">
+    <div className="flex flex-col lg:flex-row md:w-4/5 max-w-full gap-5 p-5 border-2 bg-black items-center justify-center">
       <div className='border-2 w-full'>
         <LoadScript googleMapsApiKey="AIzaSyDZY1JO5MSS-bdztzPTDybpYhIBo4OtCeI">
         <GoogleMap
