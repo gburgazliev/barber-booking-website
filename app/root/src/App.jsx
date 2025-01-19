@@ -11,6 +11,8 @@ import ResetPasswordView from "./views/ResetPasswordView";
 import NewPasswordView from "./views/NewPasswordView";
 import clearUserData from "./helpers/clearUserData";
 import { autoLogin } from "./service/authentication-service";
+import LocationView from "./views/LocationView";
+
 
 function App() {
   const [authValue, setAuthValue] = useState({ status: false, user: {} });
@@ -52,6 +54,7 @@ function App() {
         >
           <Routes>
             <Route path="/auth" element={<AuthView />} />
+            <Route path="/location" element={<LocationView />} />
             <Route path="/" element={<HomeView />} />
             <Route path="/reset-password" element={<ResetPasswordView />} />
             <Route
