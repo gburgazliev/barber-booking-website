@@ -83,7 +83,7 @@ const Header = () => {
                 <Link to="/">Home</Link>
               </li>
               <li>
-                <a>Location</a>
+              <Link to="/location">Location</Link>
               </li>
               <li></li>
             </ul>
@@ -183,9 +183,7 @@ const Header = () => {
             <Link to="/">Home</Link>
           </li>
           <li className="">
-            <a href="/" className="">
-              Location
-            </a>
+          <Link to="/location">Location</Link>
           </li>
           <span className="menu-title">Users</span>
           <li>
