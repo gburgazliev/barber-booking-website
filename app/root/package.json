@@ -13,6 +13,7 @@
     "client": "npm run dev"
   },
   "dependencies": {
+    "@react-google-maps/api": "^2.20.5",
     "@sweetalert2/theme-borderless": "^5.0.26",
     "@sweetalert2/theme-dark": "^5.0.26",
     "autoprefixer": "^10.4.20",
