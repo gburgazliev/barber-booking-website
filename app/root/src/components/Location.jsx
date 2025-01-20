@@ -14,7 +14,7 @@ const Location = () => {
   return (
     <div className="flex flex-col lg:flex-row md:w-4/5 max-w-full gap-5 p-5 border-2 bg-black items-center justify-center">
       <div className=" w-full lg:w-1/2">
-        <LoadScript googleMapsApiKey="AIzaSyDZY1JO5MSS-bdztzPTDybpYhIBo4OtCeI"  loadingElement={<span className="loading loading-spinner loading-md"></span>}>
+        <LoadScript googleMapsApiKey={import.meta.env.VITE_GOOGLE_MAPS_API_KEY}  loadingElement={<span className="loading loading-spinner loading-md"></span>}>
           <GoogleMap
             mapContainerStyle={mapContainerStyle}
             center={center}
