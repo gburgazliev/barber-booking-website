@@ -53,7 +53,7 @@ const Calendar = () => {
     }
 
     setTimeSlots(slots);
-    console.log(slots);
+   
   };
   useEffect(() => {
     const fetchAppointments = async () => {
