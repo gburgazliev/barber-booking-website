@@ -1,9 +1,10 @@
 const express = require("express");
 const cors = require("cors");
-const mongoose = require("./mongoDB/mongoDB-config");
-const  { connectDB } = require("./mongoDB/mongoDB-config");
+const { connectDB } = require("./mongoDB/mongoDB-config");
 const cookieParser = require("cookie-parser");
-// const rateLimit = require('express-rate-limit');
+const rateLimit = require("express-rate-limit");
+const helmet = require("helmet");
+
 const CORS_OPTIONS = {
   origin: [
     "http://localhost:5173",
@@ -23,19 +24,17 @@ const CORS_OPTIONS = {
   preflightContinue: false,
   optionsSuccessStatus: 204,
 };
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // limit each IP to 100 requests per window
+});
 
-// const limiter = rateLimit({
-//   windowMs: 15 * 60 * 1000, // 15 minutes
-//   max: 100 // limit each IP to 100 requests per windowMs
-// });
-
-// app.use(limiter);
-
-  const startServer = async () => {
+const startServer = async () => {
   await connectDB();
 
   const app = express();
-
+  app.use(limiter);
+  app.use(helmet());
   app.use(cookieParser(process.env.COOKIE_SECRET));
   app.options("*", cors(CORS_OPTIONS));
   app.use(cors(CORS_OPTIONS));
@@ -47,15 +46,18 @@ const CORS_OPTIONS = {
   });
 
   const UserRouter = require("./routes/users");
+  const ScheduleRouter = require("./routes/workingHours");
 
   app.use("/api/users", UserRouter);
+  app.use("/api/schedule", ScheduleRouter);
+
   app.use((err, req, res, next) => {
     console.error(err.stack);
     res
       .status(500)
       .json({ message: "Something went wrong!", error: err.message });
   });
-}
+};
 startServer();
 
 // Improved server startup
