@@ -2,13 +2,13 @@ import React, { useState, useEffect, useContext } from "react";
 import AuthContext from "../context/AuthContext";
 import AlertContext from "../context/AlertContext";
 import Appointment from "./Appointment";
-import AlERT_TYPES from '../constants/alertTypeConstants'
+import AlERT_TYPES from "../constants/alertTypeConstants";
 import { SERVER_URL } from "../constants/serverUrl";
 const Calendar = () => {
   const [selectedDate, setSelectedDate] = useState(new Date());
   const currentDate = new Date();
   const [timeSlots, setTimeSlots] = useState([]);
-  const {addAlert} = useContext(AlertContext);
+  const { addAlert } = useContext(AlertContext);
 
   const maxDate = new Date();
   maxDate.setDate(currentDate.getDate() + 14);
@@ -21,26 +21,28 @@ const Calendar = () => {
   const handleSaveSchedule = async () => {
     try {
       const startTime = document.getElementById("start").value;
-    const endTime = document.getElementById("end").value;
-    const response = await fetch(SERVER_URL("api/schedule/set-working-hours"), {
-      method: "POST",
-      credentials: "include",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        date: formattedDateString,
-        startTime,
-        endTime,
-      }),
-    });
-    const data = await response.json();
-    addAlert('Schedule updated !', AlERT_TYPES.SUCCESS, )
-    generateTimeSlots(data.startTime, data.endTime);
+      const endTime = document.getElementById("end").value;
+      const response = await fetch(
+        SERVER_URL("api/schedule/set-working-hours"),
+        {
+          method: "POST",
+          credentials: "include",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            date: formattedDateString,
+            startTime,
+            endTime,
+          }),
+        }
+      );
+      const data = await response.json();
+      addAlert("Schedule updated !", AlERT_TYPES.SUCCESS);
+      generateTimeSlots(data.startTime, data.endTime);
     } catch (error) {
-      addAlert(`Error updating schedule: ${error.message}`)
+      addAlert(`Error updating schedule: ${error.message}`);
     }
-    
   };
 
   const generateTimeSlots = (startTime, endTime) => {
@@ -50,28 +52,30 @@ const Calendar = () => {
     while (start < end) {
       slots.push(start.toTimeString().substring(0, 5));
       start.setMinutes(start.getMinutes() + 30);
+      
     }
 
     setTimeSlots(slots);
-   
   };
   useEffect(() => {
     const fetchAppointments = async () => {
       try {
+        
         const response = await fetch(
           SERVER_URL(`api/schedule/get-working-hours/:${formattedDateString}`)
         );
         if (!response.ok) {
-          setTimeSlots([]);
-          return;
-        }
-        const data = await response.json();
+          generateTimeSlots("09:00", "19:30");
+        } else {
+          const data = await response.json();
 
-        generateTimeSlots(data.startTime, data.endTime);
+          generateTimeSlots(data.startTime, data.endTime);
+        }
       } catch (error) {
         console.error("Failed fetching appointments:", error.message);
       }
     };
+
     fetchAppointments();
   }, [selectedDate, formattedDateString]);
 
@@ -131,7 +135,7 @@ const Calendar = () => {
         </div>
         <div className="grid grid-cols-4 gap-5">
           {timeSlots.map((timeSlot, index) => (
-            <Appointment key={index} timeSlot={timeSlot} />
+            <Appointment key={index} timeSlot={timeSlot} date={formattedDateString} />
           ))}
         </div>
       </div>
