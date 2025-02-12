@@ -85,7 +85,7 @@ router.post("/login", async (req, res, next) => {
       lastname: user.lastname,
     };
 
-    const token = signJWT(userForToken)
+    const token = signJWT(userForToken);
 
     delete user.password;
 
@@ -94,7 +94,9 @@ router.post("/login", async (req, res, next) => {
       maxAge: 3600000,
     });
 
-    return res.status(200).json({ message: "Authorized succesfully", user, authenticated: true });
+    return res
+      .status(200)
+      .json({ message: "Authorized succesfully", user, authenticated: true });
   } catch (error) {
     console.error("Login error:", error);
 
@@ -119,33 +121,31 @@ router.post("/login", async (req, res, next) => {
 
 router.get("/login", verifyCookie, (req, res, next) => {
   try {
-      const user = req.user._doc ? { ...req.user._doc } : { ...req.user };
-  delete user.resetToken;
-  delete user.resetTokenExpirationTime;
-  delete user.password;
-  delete user.__v;
-  res.status(200).json({ message: "Authorized succesfully", user});
+    const user = req.user._doc ? { ...req.user._doc } : { ...req.user };
+    delete user.resetToken;
+    delete user.resetTokenExpirationTime;
+    delete user.password;
+    delete user.__v;
+    res.status(200).json({ message: "Authorized succesfully", user });
   } catch (error) {
     console.log(error);
-  next(error)
+    next(error);
   }
-
 });
 
 router.get("/logout", (req, res, next) => {
   try {
     res.cookie("jwt", "", {
-    ...COOKIE_OPTIONS,
-    maxAge: 0,
-    expires: new Date(0),
-  });
+      ...COOKIE_OPTIONS,
+      maxAge: 0,
+      expires: new Date(0),
+    });
 
-  res.status(200).json({ message: "Cookie cleared successfully!" });
+    res.status(200).json({ message: "Cookie cleared successfully!" });
   } catch (error) {
     console.log(error);
-    next(error)
+    next(error);
   }
-  
 });
 
 router.post("/reset-password", async (req, res) => {
@@ -180,7 +180,9 @@ router.post("/reset-password", async (req, res) => {
 
 router.post("/new-password", async (req, res) => {
   const { resetToken, newPassword } = req.body;
-  const user = await User.findOne({ resetToken: resetToken }).select('+password');
+  const user = await User.findOne({ resetToken: resetToken }).select(
+    "+password"
+  );
 
   if (!user) {
     return res.status(401).json({ message: "Invalid reset link !" });
