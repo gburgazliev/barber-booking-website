@@ -26,9 +26,18 @@ router.get("/get-working-hours/:date", async (req, res, next) => {
 router.post("/set-working-hours", async (req, res, next) => {
   try {
     const { date, startTime, endTime } = req.body;
+    const appointmentDate = new Date(`${date}T00:00:00Z`);
+
+    // Ensure `date` is valid
+    if (isNaN(appointmentDate.getTime())) {
+      return res.status(400).json({ message: "Invalid date format" });
+    }
+
+    // Set expiration date to 1 day after `date`
+    const expiresAt = new Date(appointmentDate.setDate(appointmentDate.getDate() + 1));
     const updatedObject = await WorkingHours.findOneAndUpdate(
       { date },
-      { startTime, endTime },
+      { startTime, endTime , expiresAt},
       { upsert: true, new: true }
     );
 
