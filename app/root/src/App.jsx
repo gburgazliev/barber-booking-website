@@ -12,6 +12,7 @@ import NewPasswordView from "./views/NewPasswordView";
 import clearUserData from "./helpers/clearUserData";
 import { autoLogin } from "./service/authentication-service";
 import LocationView from "./views/LocationView";
+import AppointmentConfirmation from "./components/AppointmentConfirmation";
 
 
 function App() {
@@ -54,6 +55,7 @@ function App() {
         >
           <Routes>
             <Route path="/auth" element={<AuthView />} />
+            <Route path="/confirm-appointment/:confirmationToken" element={<AppointmentConfirmation />} />
             <Route path="/location" element={<LocationView />} />
             <Route path="/" element={<HomeView />} />
             <Route path="/reset-password" element={<ResetPasswordView />} />
