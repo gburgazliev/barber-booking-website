@@ -13,16 +13,49 @@ const transporter = nodemailer.createTransport({
   },
 });
 
+router.get("/:date", async (req, res, next) => {
+  let { date } = req.params;
+  date = date.slice(1);
+  try {
+    const appointments = await Appointment.find({ date, status:'Confirmed' }).populate("userId");
+
+    res.status(200).json(appointments);
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.get("/", async (req, res) => {
+  try {
+    const appointments = await Appointment.find({ status: "Confirmed" });
+    res.status(200).json(appointments);
+  } catch (error) {
+    res.status(500).json({ message: "Error fetching appointments !" });
+  }
+});
+
 router.post("/book", verifyCookie, async (req, res, next) => {
   try {
     const { date, timeSlot, type } = req.body;
     const userId = req.user._id;
     const { email, firstname } = req.user;
+
+    const hasUserBooked = await Appointment.findOne({
+      userId: userId,
+      date,
+      status: "Confirmed",
+    });
+    console.log(hasUserBooked)
+    if (hasUserBooked) {
+      return res
+        .status(400)
+        .json({ message: "You have already booked a slot on this date !" });
+    }
     const isBooked = await Appointment.findOne({
       date,
       timeSlot,
       status: "Confirmed",
-    });
+    }); // consider appointment booked only if status is Confirmed
 
     if (isBooked) {
       return res
@@ -71,14 +104,32 @@ router.get("/confirmation/:confirmHex", async (req, res) => {
     let { confirmHex } = req.params;
 
     confirmHex = confirmHex.slice(1);
-    console.log(confirmHex);
+
     const appointment = await Appointment.findOne({
       confirmationHex: confirmHex,
     });
     if (!appointment) {
-      return res.status(410).json({ message: "Confirmation time expired !" });
+      return res.status(410).json({ message: "Confirmation link expired !" });
     }
+
+    const hasUserBooked = await Appointment.findOne({date: appointment.date, userId: appointment.userId, status: 'Confirmed'});
+  console.log(hasUserBooked)
+    if(hasUserBooked) {
+     return res.status(400).json({message: 'You have already booked a slot for this date !'})
+    }
+
+    
+    const isBooked = await Appointment.findOne({
+      date: appointment.date,
+      timeSlot: appointment.timeSlot,
+      status: "Confirmed",
+    });
+    if (isBooked) {
+      return res.status(400).json({ message: "Slot is already booked !" });
+    }
+
     appointment.status = "Confirmed";
+    appointment.confirmationHex = null;
     const appointmentDate = new Date(appointment.date + "T00:00:00Z"); // Ensure UTC
 
     // Set expiresAt to **1 day after the appointment date**
