@@ -17,6 +17,8 @@ router.get("/get-working-hours/:date", async (req, res, next) => {
     res.status(200).json({
       startTime: workingHours.startTime,
       endTime: workingHours.endTime,
+      breakStart: workingHours.breakStart,
+      breakEnd: workingHours.breakEnd
     });
   } catch (error) {
     next(error);
@@ -25,7 +27,7 @@ router.get("/get-working-hours/:date", async (req, res, next) => {
 
 router.post("/set-working-hours", async (req, res, next) => {
   try {
-    const { date, startTime, endTime } = req.body;
+    const { date, startTime, endTime, breakStart, breakEnd} = req.body;
     const appointmentDate = new Date(`${date}T00:00:00Z`);
 
     // Ensure `date` is valid
@@ -37,7 +39,7 @@ router.post("/set-working-hours", async (req, res, next) => {
     const expiresAt = new Date(appointmentDate.setDate(appointmentDate.getDate() + 1));
     const updatedObject = await WorkingHours.findOneAndUpdate(
       { date },
-      { startTime, endTime , expiresAt},
+      { startTime, endTime , expiresAt, breakEnd, breakStart},
       { upsert: true, new: true }
     );
 

@@ -4,6 +4,8 @@ const WorkingHoursSchema = new mongoose.Schema({
   date: { type: String, required: true }, // Format: YYYY-MM-DD
   startTime: { type: String, required: true }, // Example: "09:00"
   endTime: { type: String, required: true }, // Example: "18:00"
+  breakStart: {type: String, required: true},
+  breakEnd: {type: String, required: true},
   // No default value here
   expiresAt: {
     type: Date,

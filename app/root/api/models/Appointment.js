@@ -7,7 +7,7 @@ const AppointmentSchema = new mongoose.Schema({
   timeSlot: {type: String, required: true},
   status: {type: String, enum: ['Pending', 'Confirmed'], default: 'Pending'
   },
-  confirmationHex: {type: String, required: true},
+  confirmationHex: {type: String},
   expiresAt: { 
     type: Date, 
     default: () => new Date(Date.now() + 600000), 

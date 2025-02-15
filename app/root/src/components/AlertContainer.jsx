@@ -20,6 +20,7 @@ const AlertContainer = () => {
       if (queue.length > 0 && !isDisplaying) {
         setIsDisplaying(true);
         const alert = queue[0];
+       
         try {
           switch (alert.type) {
             case ALERT_TYPES.ERROR:
@@ -27,11 +28,12 @@ const AlertContainer = () => {
                 icon: "error",
                 title: "Error",
                 text: alert.text,
-                timer: 3000,
+                timer: alert.timer,
                 timerProgressBar: true,
-                showConfirmButton: false,
-                toast: true,
-                position: "top",
+                showConfirmButton: alert.showConfirmButton,
+                allowOutsideClick: alert.allowOutsideClick,
+                toast: alert.toast,
+                position: alert.position,
               });
               break;
             case ALERT_TYPES.SUCCESS:
@@ -39,11 +41,12 @@ const AlertContainer = () => {
                 icon: "success",
                 title: "Success",
                 text: alert.text,
-                timer: 3000,
+                timer: alert.timer,
                 timerProgressBar: true,
-                showConfirmButton: false,
-                toast: true,
-                position: "top",
+                showConfirmButton: alert.showConfirmButton,
+                allowOutsideClick: alert.allowOutsideClick,
+                toast: alert.toast,
+                position: alert.position,
               });
               break;
 
@@ -51,7 +54,11 @@ const AlertContainer = () => {
               await Swal.fire({
                 icon: "info",
                 text: alert.text,
-                position: "center",
+                timer: alert.timer,
+                timerProgressBar: true,
+                position: alert.position,
+                showConfirmButton: alert.showConfirmButton,
+                allowOutsideClick: alert.allowOutsideClick,
                 backdrop: "rgb(0, 0, 0, 0.3)",
               });
           }

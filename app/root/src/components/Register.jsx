@@ -38,14 +38,14 @@ const Register = () => {
 
         addAlert(
           "Register successful! Redirecting to login.",
-          ALERT_TYPES.SUCCESS
+          ALERT_TYPES.SUCCESS, undefined, true, undefined, false
         );
         navigate("/auth", { state: { auth: "login" } });
       }
     } catch (error) {
       console.error("Registration failed:", error.message);
 
-      addAlert(`Error registering user: ${error.message}`);
+      addAlert(`Error registering user: ${error.message}`, undefined, undefined, true, undefined, false);
     } finally {
       setIsLoading(false);
     }

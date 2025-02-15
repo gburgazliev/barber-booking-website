@@ -24,11 +24,11 @@ const Login = () => {
       if (user) {
         setIsLoggedIn({ status: true, user: { ...user } });
 
-        addAlert("Login successful!", ALERT_TYPES.SUCCESS);
+        addAlert("Login successful!", ALERT_TYPES.SUCCESS, undefined, true, undefined, false);
         navigate(location?.from?.pathname || "/");
       }
     } catch (error) {
-      addAlert(`Error signing in: ${error.message}`);
+      addAlert(`Error signing in: ${error.message}`, undefined, undefined, true, undefined, false);
     } finally {
       setIsLoading(false);
     }

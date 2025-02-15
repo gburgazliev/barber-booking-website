@@ -20,11 +20,11 @@ const NewPassword = () => {
       }
       const response = await newPasswordRequest(resetToken, form.newPassword);
       if (response) {
-        addAlert(response.message, ALERT_TYPES.SUCCESS);
+        addAlert(response.message, ALERT_TYPES.SUCCESS, undefined, true, undefined, false);
         navigate("/auth", { state: { auth: "login" } });
       }
     } catch (error) {
-      addAlert(error.message);
+      addAlert(error.message, undefined, undefined, true, undefined, false);
     }
   };
 

@@ -17,13 +17,16 @@ const AlertProvider = ({ children }) => {
  * 
  * @param {string} message 
  * @param {string} type 
- * @param {Number} timeout 5000 ms
+ * @param {string} position top
+ * @param {boolean} toast true
+ * @param {boolean} allowOutsideClick true 
+ * @param {boolean} showConfirmButton true 
  */
-  const addAlert = (message , type = ALERT_TYPES.ERROR) => {
+  const addAlert = (message , type = ALERT_TYPES.ERROR, position = 'top', toast = true, allowOutsideClick = true, showConfirmButton = true, timer = 3000) => {
     const id = new Date().getMilliseconds().toString();
     dispatch({
       type: ALERT_ACTIONS.ADD_ALERT,
-      payload: { message, type, id },
+      payload: { message, type, id , position, toast, allowOutsideClick, showConfirmButton, timer},
     });
 
     

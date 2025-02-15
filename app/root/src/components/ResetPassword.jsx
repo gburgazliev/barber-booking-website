@@ -18,13 +18,13 @@ const ResetPassword = () => {
         body: JSON.stringify({ email }),
       });
       if (response.ok) {
-        addAlert("Reset email sent", ALERT_TYPES.SUCCESS);
+        addAlert("Reset email sent", ALERT_TYPES.SUCCESS, undefined, true, undefined, false);
       } else {
         const parseResponse = await response.json();
-        addAlert(parseResponse.message);
+        addAlert(parseResponse.message, undefined, undefined, true, undefined, false);
       }
     } catch (error) {
-      addAlert(error.message);
+      addAlert(error.message, undefined, undefined, true, undefined, false);
     }
   };
 
