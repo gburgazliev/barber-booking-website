@@ -33,7 +33,7 @@ const startServer = async () => {
   await connectDB();
 
   const app = express();
-  app.use(limiter);
+  // app.use(limiter);
   app.use(helmet());
   app.use(cookieParser(process.env.COOKIE_SECRET));
   app.options("*", cors(CORS_OPTIONS));
@@ -47,10 +47,11 @@ const startServer = async () => {
 
   const UserRouter = require("./routes/users");
   const ScheduleRouter = require("./routes/workingHours");
+  const AppointmentRouter =  require("./routes/appointments");
 
   app.use("/api/users", UserRouter);
   app.use("/api/schedule", ScheduleRouter);
-
+  app.use("/api/appointments", AppointmentRouter);
   app.use((err, req, res, next) => {
     console.error(err.stack);
     res
