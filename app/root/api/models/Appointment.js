@@ -8,6 +8,7 @@ const AppointmentSchema = new mongoose.Schema({
   status: {type: String, enum: ['Pending', 'Confirmed'], default: 'Pending'
   },
   confirmationHex: {type: String},
+  bookedAt: {type:Date} ,
   expiresAt: { 
     type: Date, 
     default: () => new Date(Date.now() + 600000), 

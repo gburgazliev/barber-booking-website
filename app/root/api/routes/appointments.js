@@ -45,7 +45,7 @@ router.post("/book", verifyCookie, async (req, res, next) => {
       date,
       status: "Confirmed",
     });
-    console.log(hasUserBooked)
+    
     if (hasUserBooked) {
       return res
         .status(400)
@@ -113,7 +113,7 @@ router.get("/confirmation/:confirmHex", async (req, res) => {
     }
 
     const hasUserBooked = await Appointment.findOne({date: appointment.date, userId: appointment.userId, status: 'Confirmed'});
-  console.log(hasUserBooked)
+  
     if(hasUserBooked) {
      return res.status(400).json({message: 'You have already booked a slot for this date !'})
     }
@@ -130,6 +130,7 @@ router.get("/confirmation/:confirmHex", async (req, res) => {
 
     appointment.status = "Confirmed";
     appointment.confirmationHex = null;
+    appointment.bookedAt = new Date();
     const appointmentDate = new Date(appointment.date + "T00:00:00Z"); // Ensure UTC
 
     // Set expiresAt to **1 day after the appointment date**
