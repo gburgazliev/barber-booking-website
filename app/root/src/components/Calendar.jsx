@@ -65,12 +65,7 @@ const Calendar = () => {
     }
   };
 
-  const generateTimeSlots = (
-    startTime,
-    endTime,
-    startBreak = "13:00",
-    endBreak = "15:00"
-  ) => {
+  const generateTimeSlots = (startTime, endTime, startBreak, endBreak) => {
     const slots = [];
     const breakStart = new Date(`1970-01-01T${startBreak}:00`);
     const breakEnd = new Date(`1970-01-01T${endBreak}:00`);
@@ -136,27 +131,23 @@ const Calendar = () => {
     if (appointments.length > 0) {
       setTimeSlots((prev) =>
         prev.filter((timeSlot) => {
-          for (const appointment of appointments) {
-            if (
-              timeSlot === appointment.timeSlot &&
-              appointment.userId._id === isLoggedIn?.user._id
-            ) {
-              return true;
-            } else if (
+          const isBookedByOthers = appointments.some(
+            (appointment) =>
               timeSlot === appointment.timeSlot &&
               appointment.userId._id !== isLoggedIn?.user._id
-            ) {
-              return false;
-            }
-            
+          );
+
+          // If it's booked by someone else, filter it out
+          if (isBookedByOthers) {
+            return false;
           }
-         
+
+          // Otherwise keep the time slot (whether it's available or booked by current user)
           return true;
         })
       );
     }
   }, [appointments, isLoggedIn]);
-
 
   return (
     <div className="border">
@@ -233,6 +224,7 @@ const Calendar = () => {
               key={index}
               timeSlot={timeSlot}
               date={formattedDateString}
+              appointments={appointments}
             />
           ))}
         </div>
