@@ -111,14 +111,14 @@ const Appointment = memo(
           />
         )}
         {canCancel && (
-          <form className="w-full">
+          
             <button
               className="w-1/2 bg-red-800 "
               onClick={handleCancelAppointment}
             >
               Cancel
             </button>
-          </form>
+         
         )}
       </div>
     ) : (
