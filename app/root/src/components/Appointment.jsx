@@ -13,6 +13,7 @@ const Appointment = memo(
     const [selectedServiceText, setSelectedServiceText] = useState("");
     const [expiryTimestamp, setExpiryTimestamp] = useState(null);
     const [canCancel, setCanCancel] = useState(true);
+    const [canceled, setCanceled] = useState(false);
     const [currentUserAppointment, setCurrentUserAppointment] = useState({});
     const [isCurrentUserAppointment, setIsCurrentUserAppointment] =
       useState(false);
@@ -85,6 +86,10 @@ const Appointment = memo(
 
         if (response.ok) {
           const parseResponse = await response.json();
+          setCanceled(true);
+          setCanCancel(false);
+          setIsCurrentUserAppointment(false);
+          setCurrentUserAppointments({});
           addAlert(
             parseResponse.body,
             ALERT_TYPES.SUCCESS,
@@ -121,7 +126,9 @@ const Appointment = memo(
          
         )}
       </div>
-    ) : (
+    ) : canceled ? (
+       <div>Appointment canceled</div>
+    )  :(
       <div className="flex flex-col gap-2 p-2">
         <select
           className="select select-bordered w-full max-w-xs"
