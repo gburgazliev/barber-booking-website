@@ -13,11 +13,16 @@
     "client": "npm run dev"
   },
   "dependencies": {
+    "@emotion/react": "^11.14.0",
+    "@emotion/styled": "^11.14.0",
+    "@mui/material": "^6.4.7",
+    "@mui/x-date-pickers": "^7.27.1",
     "@react-google-maps/api": "^2.20.5",
     "@sweetalert2/theme-borderless": "^5.0.26",
     "@sweetalert2/theme-dark": "^5.0.26",
     "autoprefixer": "^10.4.20",
     "concurrently": "^9.1.0",
+    "dayjs": "^1.11.13",
     "framer-motion": "^11.15.0",
     "nodemon": "^3.1.7",
     "postcss": "^8.4.49",
