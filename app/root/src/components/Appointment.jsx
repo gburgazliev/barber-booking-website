@@ -8,7 +8,13 @@ import { cancelAppointment } from "../service/appointment-service";
 import CountdownTimer from "./CountdownTimer";
 
 const Appointment = memo(
-  ({ timeSlot, date, appointments, setCurrentUserAppointments }) => {
+  ({
+    timeSlot,
+    date,
+    appointments,
+    setCurrentUserAppointments,
+    refreshAppointments,
+  }) => {
     const [selectedService, setSelectedService] = useState("");
     const [selectedServiceText, setSelectedServiceText] = useState("");
     const [expiryTimestamp, setExpiryTimestamp] = useState(null);
@@ -75,8 +81,6 @@ const Appointment = memo(
           false,
           3000
         );
-      } finally {
-        handleModalClose();
       }
     };
 
@@ -90,6 +94,9 @@ const Appointment = memo(
           setCanCancel(false);
           setIsCurrentUserAppointment(false);
           setCurrentUserAppointments({});
+          if (refreshAppointments) {
+            refreshAppointments();
+          }
           addAlert(
             parseResponse.body,
             ALERT_TYPES.SUCCESS,
@@ -116,19 +123,17 @@ const Appointment = memo(
           />
         )}
         {canCancel && (
-          
-            <button
-              className="w-1/2 bg-red-800 "
-              onClick={handleCancelAppointment}
-            >
-              Cancel
-            </button>
-         
+          <button
+            className="w-1/2 bg-red-800 "
+            onClick={handleCancelAppointment}
+          >
+            Cancel
+          </button>
         )}
       </div>
     ) : canceled ? (
-       <div>Appointment canceled</div>
-    )  :(
+      <div>Appointment canceled</div>
+    ) : (
       <div className="flex flex-col gap-2 p-2">
         <select
           className="select select-bordered w-full max-w-xs"
