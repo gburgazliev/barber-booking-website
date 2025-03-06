@@ -113,8 +113,6 @@ const Calendar = () => {
     fetchSchedule();
   }, [formattedDateString]);
 
- 
-
   useEffect(() => {
     const fetchAppointments = async () => {
       try {
