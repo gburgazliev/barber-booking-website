@@ -87,49 +87,46 @@ const Calendar = () => {
 
     setTimeSlots(slots);
   };
-  useEffect(() => {
-    const fetchSchedule = async () => {
-      try {
-        const response = await fetch(
-          SERVER_URL(`api/schedule/get-working-hours/:${formattedDateString}`)
+
+   // Combined function to fetch schedule and appointments
+   const refreshData = async () => {
+    try {
+      // Fetch schedule
+      const scheduleResponse = await fetch(
+        SERVER_URL(`api/schedule/get-working-hours/:${formattedDateString}`)
+      );
+      if (scheduleResponse.ok) {
+        const scheduleData = await scheduleResponse.json();
+        generateTimeSlots(
+          scheduleData.startTime,
+          scheduleData.endTime,
+          scheduleData.breakStart,
+          scheduleData.breakEnd
         );
-        if (!response.ok) {
-          generateTimeSlots("09:00", "19:30");
-        } else {
-          const data = await response.json();
-
-          generateTimeSlots(
-            data.startTime,
-            data.endTime,
-            data.breakStart,
-            data.breakEnd
-          );
-        }
-      } catch (error) {
-        console.error("Failed fetching appointments:", error.message);
+      } else {
+        // Default schedule if none exists
+        generateTimeSlots("09:00", "19:30");
       }
-    };
 
-    fetchSchedule();
+      // Fetch appointments
+      const appointmentsResponse = await fetch(
+        SERVER_URL(`api/appointments/:${formattedDateString}`)
+      );
+      if (appointmentsResponse.ok) {
+        const appointmentsData = await appointmentsResponse.json();
+        setAppointments(appointmentsData);
+      }
+    } catch (error) {
+      console.error("Failed fetching data:", error.message);
+      addAlert(`Error refreshing data: ${error.message}`);
+    }
+  };
+
+  // Initial data fetch when date changes
+  useEffect(() => {
+    refreshData();
   }, [formattedDateString]);
 
-  useEffect(() => {
-    const fetchAppointments = async () => {
-      try {
-        const response = await fetch(
-          SERVER_URL(`api/appointments/:${formattedDateString}`)
-        );
-        if (response.ok) {
-          const data = await response.json();
-          setAppointments(data);
-        }
-      } catch (error) {
-        console.log(error);
-      }
-    };
-
-    fetchAppointments();
-  }, [formattedDateString]);
 
   useEffect(() => {
     if (appointments.length > 0) {
@@ -152,6 +149,8 @@ const Calendar = () => {
     }
   }, [appointments, isLoggedIn]);
 
+
+
   // Prevent month changes
   const handleMonthChange = () => {
     // Return current month to prevent navigation
@@ -169,7 +168,7 @@ const Calendar = () => {
         views={["day"]} // Only show day view, hide year and month pickers
       />
       Available appointments
-      <div className="grid grid-cols-4 gap-5">
+      <div className="grid grid-cols-4 gap-5 p-5 ml-2 mr-2 ">
         {timeSlots.map((timeSlot, index) => (
           <Appointment
             key={index}
@@ -177,10 +176,11 @@ const Calendar = () => {
             date={formattedDateString}
             appointments={appointments}
             setCurrentUserAppointments={setCurrentUserAppointments}
+            refreshAppointments={refreshData}
           />
         ))}
       </div>
-      <div className="flex flex-col">
+     {isLoggedIn.status && <div className="flex flex-col">
         Your appointments
         <div>
           {appointments
@@ -194,10 +194,11 @@ const Calendar = () => {
                 date={formattedDateString}
                 appointments={appointments}
                 setCurrentUserAppointments={setCurrentUserAppointments}
+                refreshAppointments={refreshData}
               />
             ))}
         </div>
-      </div>
+      </div> } 
     </div>
   );
 };
