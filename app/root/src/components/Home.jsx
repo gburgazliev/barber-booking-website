@@ -9,7 +9,7 @@ const Home = () => {
 
  
   return (
-    <div className="w-1/2">
+    <div className=''>
       <h1>Home page</h1>
       <Calendar/>
       <a href="">sadadsd</a>
