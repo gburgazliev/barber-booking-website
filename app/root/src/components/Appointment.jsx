@@ -110,7 +110,7 @@ const Appointment = memo(
             setCanCancel={setCanCancel}
           />
         )}
-        {!canCancel && (
+        {canCancel && (
           <form className="w-full">
             <button
               className="w-1/2 bg-red-800 "
