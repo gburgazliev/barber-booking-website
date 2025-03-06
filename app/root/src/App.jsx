@@ -13,6 +13,8 @@ import clearUserData from "./helpers/clearUserData";
 import { autoLogin } from "./service/authentication-service";
 import LocationView from "./views/LocationView";
 import AppointmentConfirmation from "./components/AppointmentConfirmation";
+import { LocalizationProvider } from "@mui/x-date-pickers";
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 
 
 function App() {
@@ -53,17 +55,22 @@ function App() {
             setIsLoading,
           }}
         >
-          <Routes>
-            <Route path="/auth" element={<AuthView />} />
-            <Route path="/confirm-appointment/:confirmationToken" element={<AppointmentConfirmation />} />
-            <Route path="/location" element={<LocationView />} />
-            <Route path="/" element={<HomeView />} />
-            <Route path="/reset-password" element={<ResetPasswordView />} />
-            <Route
-              path="/reset-password/:resetToken"
-              element={<NewPasswordView />}
-            />
-          </Routes>
+          <LocalizationProvider dateAdapter={AdapterDayjs}>
+            <Routes>
+              <Route path="/auth" element={<AuthView />} />
+              <Route
+                path="/confirm-appointment/:confirmationToken"
+                element={<AppointmentConfirmation />}
+              />
+              <Route path="/location" element={<LocationView />} />
+              <Route path="/" element={<HomeView />} />
+              <Route path="/reset-password" element={<ResetPasswordView />} />
+              <Route
+                path="/reset-password/:resetToken"
+                element={<NewPasswordView />}
+              />
+            </Routes>
+          </LocalizationProvider>
         </AuthContext.Provider>
       </BrowserRouter>
     </AlertProvider>
