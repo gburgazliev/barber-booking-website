@@ -2,7 +2,7 @@ import React from 'react';
 import { useTimer } from 'react-timer-hook';
 
 // Countdown Timer Component
-const CountdownTimer = ({ expiryTimestamp }) => {
+const CountdownTimer = ({ expiryTimestamp, setCanCancel }) => {
   const {
     seconds,
     minutes,
@@ -10,7 +10,7 @@ const CountdownTimer = ({ expiryTimestamp }) => {
     restart,
   } = useTimer({ 
     expiryTimestamp, 
-    onExpire: () => console.log('Timer expired')
+    onExpire: () => setCanCancel((prev) => !prev)
   });
 
   return (
