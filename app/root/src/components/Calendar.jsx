@@ -6,8 +6,8 @@ import AlERT_TYPES from "../constants/alertTypeConstants";
 import { SERVER_URL } from "../constants/serverUrl";
 import { DateCalendar } from "@mui/x-date-pickers/DateCalendar";
 import { StaticDateTimePicker } from "@mui/x-date-pickers/StaticDateTimePicker";
-import {Typography} from "@mui/material";
-
+import { Typography } from "@mui/material";
+import Divider from "@mui/material/Divider";
 import dayjs from "dayjs";
 
 const Calendar = () => {
@@ -15,6 +15,7 @@ const Calendar = () => {
   const [startTime, setStartTime] = useState(
     dayjs().hour(9).minute(0).second(0)
   );
+  const [selectedDateTime, setSelectedDateTime] = useState(dayjs());
   const [isStartHourChanged, setIsStartHourChanged] = useState(false);
   const [isStartMinutesChanged, setIsStartMinutesChanged] = useState(false);
   const [isEndTimeChanged, setIsEndTimeChanged] = useState(false);
@@ -62,6 +63,9 @@ const Calendar = () => {
       start = start.slice(0, start.length - 3);
       let end = new Date(endTime.$d).toTimeString().split(" ")[0];
       end = end.slice(0, end.length - 3);
+      if (appointments.length) {
+        throw new Error("Appointments already made for this schedule");
+      }
 
       const response = await fetch(
         SERVER_URL("api/schedule/set-working-hours"),
@@ -96,7 +100,15 @@ const Calendar = () => {
         data.breakEnd
       );
     } catch (error) {
-      addAlert(`Error updating schedule: ${error.message}`);
+      addAlert(
+        `Error updating schedule: ${error.message}`,
+        undefined,
+        undefined,
+        true,
+        false,
+        false,
+        3000
+      );
     }
   };
 
@@ -193,7 +205,7 @@ const Calendar = () => {
       ) : (
         <>
           <StaticDateTimePicker
-            value={dayjs()}
+            value={selectedDateTime}
             onChange={handleTimeChange}
             ampm={false}
             views={["year", "day", "hours", "minutes"]}
@@ -205,7 +217,7 @@ const Calendar = () => {
           </Typography>{" "}
         </>
       )}
-      <div>Available appointments </div>
+      <Divider textAlign="right"> Available appointments </Divider>
       <div className="grid grid-cols-4 gap-5 p-5 ml-2 mr-2 ">
         {timeSlots.map((timeSlot, index) => (
           <Appointment
@@ -220,7 +232,7 @@ const Calendar = () => {
       </div>
       {isLoggedIn.status && (
         <div className="flex flex-col">
-          Your appointments
+          <Divider textAlign="left">Your appointments </Divider>
           <div className="m-2 p-2">
             {appointments
               .filter(
