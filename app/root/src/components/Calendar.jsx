@@ -1,14 +1,24 @@
-import React, { useState, useEffect, useContext } from "react";
+import { useState, useEffect, useContext } from "react";
 import AuthContext from "../context/AuthContext";
 import AlertContext from "../context/AlertContext";
 import Appointment from "./Appointment";
 import AlERT_TYPES from "../constants/alertTypeConstants";
 import { SERVER_URL } from "../constants/serverUrl";
 import { DateCalendar } from "@mui/x-date-pickers/DateCalendar";
+import { StaticDateTimePicker } from "@mui/x-date-pickers/StaticDateTimePicker";
+import {Typography} from "@mui/material";
+
 import dayjs from "dayjs";
 
 const Calendar = () => {
   const [date, setDate] = useState(dayjs());
+  const [startTime, setStartTime] = useState(
+    dayjs().hour(9).minute(0).second(0)
+  );
+  const [isStartHourChanged, setIsStartHourChanged] = useState(false);
+  const [isStartMinutesChanged, setIsStartMinutesChanged] = useState(false);
+  const [isEndTimeChanged, setIsEndTimeChanged] = useState(false);
+  const [endTime, setEndTime] = useState(dayjs().hour(19).minute(0).second(0));
   const [currentUserAppointments, setCurrentUserAppointments] = useState({});
   const [timeSlots, setTimeSlots] = useState([]);
   const [appointments, setAppointments] = useState([]);
@@ -21,16 +31,37 @@ const Calendar = () => {
 
   const formattedDateString = date.toISOString().split("T")[0]; // YYYY-MM-DD
 
-  const getDayOfWeek = (date) => {
-    return new Date(date).toLocaleDateString("en-US", { weekday: "long" });
+  const handleTimeChange = (dateObject) => {
+    if (dateObject.$D !== date.$D) {
+      setDate(dateObject);
+      return; // so appointments and schedule are only fetched when the day is changed and not the time
+    }
+    const dateObj = new Date(dateObject.$d);
+    const hours = dateObj.getHours().toString();
+    if (!isStartHourChanged || !isStartMinutesChanged) {
+      const formatStartTime = dayjs().hour(hours).minute(dateObj.getMinutes());
+      setStartTime(formatStartTime);
+
+      if (isStartHourChanged && !isStartMinutesChanged) {
+        setIsStartMinutesChanged(true);
+      }
+      setIsStartHourChanged(true);
+    }
+
+    if (!isStartMinutesChanged || !isStartHourChanged) return;
+
+    if (!isEndTimeChanged) {
+      const formatStartTime = dayjs().hour(hours).minute(dateObj.getMinutes());
+      setEndTime(formatStartTime);
+    }
   };
 
   const handleSaveSchedule = async () => {
     try {
-      const startTime = document.getElementById("start").value;
-      const endTime = document.getElementById("end").value;
-      const breakStart = document.getElementById("breakStart").value;
-      const breakEnd = document.getElementById("breakEnd").value;
+      let start = new Date(startTime.$d).toTimeString().split(" ")[0];
+      start = start.slice(0, start.length - 3);
+      let end = new Date(endTime.$d).toTimeString().split(" ")[0];
+      end = end.slice(0, end.length - 3);
 
       const response = await fetch(
         SERVER_URL("api/schedule/set-working-hours"),
@@ -42,10 +73,10 @@ const Calendar = () => {
           },
           body: JSON.stringify({
             date: formattedDateString,
-            startTime,
-            endTime,
-            breakStart,
-            breakEnd,
+            startTime: start,
+            endTime: end,
+            // breakStart,
+            // breakEnd,
           }),
         }
       );
@@ -88,8 +119,8 @@ const Calendar = () => {
     setTimeSlots(slots);
   };
 
-   // Combined function to fetch schedule and appointments
-   const refreshData = async () => {
+  // Combined function to fetch schedule and appointments
+  const refreshData = async () => {
     try {
       // Fetch schedule
       const scheduleResponse = await fetch(
@@ -127,7 +158,6 @@ const Calendar = () => {
     refreshData();
   }, [formattedDateString]);
 
-
   useEffect(() => {
     if (appointments.length > 0) {
       setTimeSlots((prev) =>
@@ -149,25 +179,33 @@ const Calendar = () => {
     }
   }, [appointments, isLoggedIn]);
 
-
-
-  // Prevent month changes
-  const handleMonthChange = () => {
-    // Return current month to prevent navigation
-    return dayjs().startOf("month");
-  };
-
   return (
     <div className="border bg-white">
-      <DateCalendar
-        value={date}
-        onChange={(newDate) => setDate(newDate)}
-        minDate={minDate}
-        maxDate={maxDate}
-        // onMonthChange={handleMonthChange}
-        views={["day"]} // Only show day view, hide year and month pickers
-      />
-      Available appointments
+      {isLoggedIn.user.role !== "admin" ? (
+        <DateCalendar
+          value={date}
+          onChange={(newDate) => setDate(newDate)}
+          minDate={isLoggedIn.user.role === "admin" ? undefined : minDate}
+          maxDate={isLoggedIn.user.role === "admin" ? undefined : maxDate}
+          openTo="day"
+          views={["day"]}
+        />
+      ) : (
+        <>
+          <StaticDateTimePicker
+            value={dayjs()}
+            onChange={handleTimeChange}
+            ampm={false}
+            views={["year", "day", "hours", "minutes"]}
+            onAccept={handleSaveSchedule}
+          />
+          <Typography>
+            Selected Schedule: {startTime.format("h:mm A")} -{" "}
+            {endTime.format("h:mm A")}
+          </Typography>{" "}
+        </>
+      )}
+      <div>Available appointments </div>
       <div className="grid grid-cols-4 gap-5 p-5 ml-2 mr-2 ">
         {timeSlots.map((timeSlot, index) => (
           <Appointment
@@ -180,25 +218,27 @@ const Calendar = () => {
           />
         ))}
       </div>
-     {isLoggedIn.status && <div className="flex flex-col">
-        Your appointments
-        <div>
-          {appointments
-            .filter(
-              (appointment) => appointment._id === currentUserAppointments._id
-            )
-            .map((appointmentObj) => (
-              <Appointment
-                key={appointmentObj._id}
-                timeSlot={appointmentObj.timeSlot}
-                date={formattedDateString}
-                appointments={appointments}
-                setCurrentUserAppointments={setCurrentUserAppointments}
-                refreshAppointments={refreshData}
-              />
-            ))}
+      {isLoggedIn.status && (
+        <div className="flex flex-col">
+          Your appointments
+          <div className="m-2 p-2">
+            {appointments
+              .filter(
+                (appointment) => appointment._id === currentUserAppointments._id
+              )
+              .map((appointmentObj) => (
+                <Appointment
+                  key={appointmentObj._id}
+                  timeSlot={appointmentObj.timeSlot}
+                  date={formattedDateString}
+                  appointments={appointments}
+                  setCurrentUserAppointments={setCurrentUserAppointments}
+                  refreshAppointments={refreshData}
+                />
+              ))}
+          </div>
         </div>
-      </div> } 
+      )}
     </div>
   );
 };
