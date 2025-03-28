@@ -145,11 +145,11 @@ router.get("/confirmation/:confirmHex", async (req, res) => {
       return res.status(410).json({ message: "Confirmation link expired !" });
     }
 
-    const hasUserBooked = await Appointment.findOne({date: appointment.date, userId: appointment.userId, status: 'Confirmed'});
+    // const hasUserBooked = await Appointment.findOne({date: appointment.date, userId: appointment.userId, status: 'Confirmed'});
   
-    if(hasUserBooked) {
-     return res.status(400).json({message: 'You have already booked a slot for this date !'})
-    }
+    // if(hasUserBooked) {
+    //  return res.status(400).json({message: 'You have already booked a slot for this date !'})
+    // }
 
     
     const isBooked = await Appointment.findOne({
