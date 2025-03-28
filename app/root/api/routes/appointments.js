@@ -13,6 +13,20 @@ const transporter = nodemailer.createTransport({
   },
 });
 
+// Helper function to calculate the next time slot (40 minutes later)
+const calculateNextTimeSlot = (timeSlot) => {
+  const [hours, minutes] = timeSlot.split(':').map(Number);
+  let newMinutes = minutes + 40;
+  let newHours = hours;
+  
+  if (newMinutes >= 60) {
+    newMinutes -= 60;
+    newHours += 1;
+  }
+  
+  return `${String(newHours).padStart(2, '0')}:${String(newMinutes).padStart(2, '0')}`;
+};
+
 router.get("/:date", async (req, res, next) => {
   let { date } = req.params;
   date = date.slice(1);
@@ -46,11 +60,11 @@ router.post("/book", verifyCookie, async (req, res, next) => {
       status: "Confirmed",
     });
     
-    if (hasUserBooked) {
-      return res
-        .status(400)
-        .json({ message: "You have already booked a slot on this date !" });
-    }
+    // if (hasUserBooked) {
+    //   return res
+    //     .status(400)
+    //     .json({ message: "You have already booked a slot on this date !" });
+    // }
     const isBooked = await Appointment.findOne({
       date,
       timeSlot,
@@ -61,6 +75,25 @@ router.post("/book", verifyCookie, async (req, res, next) => {
       return res
         .status(409)
         .json({ message: "This time slot is already booked !" });
+    }
+
+    // For Hair and Beard service, check if the next slot is available
+    if (type === "Hair and Beard") {
+      // Calculate the next time slot (40 minutes later)
+      const nextTimeSlot = calculateNextTimeSlot(timeSlot);
+      
+      // Check if the next slot is already booked
+      const isNextSlotBooked = await Appointment.findOne({
+        date,
+        timeSlot: nextTimeSlot,
+        status: "Confirmed",
+      });
+      
+      if (isNextSlotBooked) {
+        return res
+          .status(409)
+          .json({ message: "The next time slot is not available for Hair and Beard service!" });
+      }
     }
 
     const confirmationToken = crypto.randomBytes(32).toString("hex");
@@ -126,6 +159,23 @@ router.get("/confirmation/:confirmHex", async (req, res) => {
     });
     if (isBooked) {
       return res.status(400).json({ message: "Slot is already booked !" });
+    }
+
+    if (appointment.type === "Hair and Beard") {
+      const nextTimeSlot = calculateNextTimeSlot(appointment.timeSlot);
+      
+      // Check if the next slot is already booked by someone
+      const isNextSlotBooked = await Appointment.findOne({
+        date: appointment.date,
+        timeSlot: nextTimeSlot,
+        status: "Confirmed"
+      });
+      
+      if (isNextSlotBooked) {
+        return res.status(400).json({ 
+          message: "The next time slot is no longer available for Hair and Beard service!" 
+        });
+      }
     }
 
     appointment.status = "Confirmed";
