@@ -6,7 +6,13 @@ const WorkingHoursSchema = new mongoose.Schema({
   endTime: { type: String, required: true }, // Example: "18:00"
   breakStart: {type: String, required: true},
   breakEnd: {type: String, required: true},
-  // No default value here
+    //fields for custom slot patterns
+  hasCustomSlotPattern: { type: Boolean, default: false },
+  canceledHairAndBeardSlots: [{
+    originalSlot: { type: String },
+    nextSlot: { type: String },
+    canceledAt: { type: Date, default: Date.now }
+  }],
   expiresAt: {
     type: Date,
     default: () => new Date(Date.now() + 600000),
