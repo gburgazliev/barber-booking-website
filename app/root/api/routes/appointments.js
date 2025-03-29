@@ -87,7 +87,7 @@ router.post("/book", verifyCookie, async (req, res, next) => {
         .json({ message: "This time slot is already booked!" });
     }
 
-    // For Hair and Beard service, check if the next slot is available
+    // For Hair and Beard service, ALWAYS check if the next slot is available
     if (type === "Hair and Beard") {
       if (duration !== 40) {
         return res
@@ -135,7 +135,7 @@ router.post("/book", verifyCookie, async (req, res, next) => {
       originalSlotTime: isShiftedSlot ? req.body.originalSlotTime : null
     });
 
-    // ONLY modify slot patterns if it's a Hair and Beard appointment
+    // ONLY for Hair and Beard: Create shifted and intermediate slots
     if (type === "Hair and Beard") {
       const nextSlot = calculateNextTimeSlot(timeSlot);
       
@@ -158,16 +158,19 @@ router.post("/book", verifyCookie, async (req, res, next) => {
       // Mark this pattern as custom
       workingHours.hasCustomSlotPattern = true;
       
-      // Get the third slot that will be affected (the one after next slot)
+      // Important: The third slot is the one AFTER the next slot
+      // If Hair and Beard is at 09:40, it blocks 09:40 and 10:20, so third slot is 11:00
       const thirdSlot = calculateNextTimeSlot(nextSlot);
       
       // Create a shifted slot (the third slot + 10 minutes)
+      // If third slot is 11:00, shifted would be 11:10
       const shiftedSlot = calculateShiftedSlot(thirdSlot);
       
-      // Create an intermediate slot (30 minutes after the first slot ends)
-      const intermediateSlot = calculateIntermediateSlot(timeSlot);
+      // Create an intermediate slot between the end of first slot and start of third slot
+      // If first slot ends at 10:20 and third is 11:00, intermediate is around 10:30
+      const intermediateSlot = calculateTimeWithOffset(nextSlot, 10); // 10 minutes after the second slot starts
       
-      // Check if these slots are within working hours and add them
+      // Check if these slots are within working hours
       if (isWithinWorkingHours(shiftedSlot, workingHours.startTime, workingHours.endTime, 
           workingHours.breakStart, workingHours.breakEnd)) {
         // Add shifted slot
