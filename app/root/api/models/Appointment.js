@@ -5,6 +5,7 @@ const AppointmentSchema = new mongoose.Schema({
   type: { type: String, enum:['Hair', 'Hair and Beard', 'Beard'], required: true },
   date: {type: String, required: true},
   timeSlot: {type: String, required: true},
+  duration: {type: Number, default: 40},
   status: {type: String, enum: ['Pending', 'Confirmed'], default: 'Pending'
   },
   confirmationHex: {type: String},
