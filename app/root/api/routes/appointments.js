@@ -208,25 +208,7 @@ router.get("/confirmation/:confirmHex", async (req, res) => {
   }
 });
 
-router.get("/custom-slots/:date", async (req, res, next) => {
-  try {
-    let { date } = req.params;
-    date = date.slice(1);
-    
-    const workingHours = await WorkingHours.findOne({ date });
-    
-    if (!workingHours || !workingHours.hasCustomSlotPattern) {
-      return res.status(404).json({ hasCustomPattern: false });
-    }
-    
-    res.status(200).json({
-      hasCustomPattern: true,
-      canceledHairAndBeardSlots: workingHours.canceledHairAndBeardSlots || []
-    });
-  } catch (error) {
-    next(error);
-  }
-});
+
 
 router.delete("/cancel/:id", async (req, res) => {
   try {
