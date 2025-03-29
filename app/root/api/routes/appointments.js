@@ -50,7 +50,7 @@ router.get("/", async (req, res) => {
 
 router.post("/book", verifyCookie, async (req, res, next) => {
   try {
-    const { date, timeSlot, type } = req.body;
+    const { date, timeSlot, type,  duration = 40 } = req.body;
     const userId = req.user._id;
     const { email, firstname } = req.user;
 
@@ -60,11 +60,11 @@ router.post("/book", verifyCookie, async (req, res, next) => {
       status: "Confirmed",
     });
     
-    // if (hasUserBooked) {
-    //   return res
-    //     .status(400)
-    //     .json({ message: "You have already booked a slot on this date !" });
-    // }
+    if (hasUserBooked) {
+      return res
+        .status(400)
+        .json({ message: "You have already booked a slot on this date !" });
+    }
     const isBooked = await Appointment.findOne({
       date,
       timeSlot,
@@ -79,6 +79,12 @@ router.post("/book", verifyCookie, async (req, res, next) => {
 
     // For Hair and Beard service, check if the next slot is available
     if (type === "Hair and Beard") {
+
+      if (duration !== 40) {
+        return res
+          .status(400)
+          .json({ message: "Hair and Beard service can only be booked in 40-minute slots!" });
+      }
       // Calculate the next time slot (40 minutes later)
       const nextTimeSlot = calculateNextTimeSlot(timeSlot);
       
@@ -95,6 +101,11 @@ router.post("/book", verifyCookie, async (req, res, next) => {
           .json({ message: "The next time slot is not available for Hair and Beard service!" });
       }
     }
+    if (duration === 30 && type !== "Beard" && type !== 'Hair') {
+      return res
+        .status(400)
+        .json({ message: "Only Beard or Hair service can be booked in 30-minute slots!" });
+    }
 
     const confirmationToken = crypto.randomBytes(32).toString("hex");
     await Appointment.create({
@@ -103,6 +114,7 @@ router.post("/book", verifyCookie, async (req, res, next) => {
       type,
       userId,
       confirmationHex: confirmationToken,
+      duration: duration // Store the slot duration
     });
 
     const confirmationLink = `${process.env.FRONTEND_URL}/confirm-appointment/:${confirmationToken}`;
@@ -145,11 +157,11 @@ router.get("/confirmation/:confirmHex", async (req, res) => {
       return res.status(410).json({ message: "Confirmation link expired !" });
     }
 
-    // const hasUserBooked = await Appointment.findOne({date: appointment.date, userId: appointment.userId, status: 'Confirmed'});
+    const hasUserBooked = await Appointment.findOne({date: appointment.date, userId: appointment.userId, status: 'Confirmed'});
   
-    // if(hasUserBooked) {
-    //  return res.status(400).json({message: 'You have already booked a slot for this date !'})
-    // }
+    if(hasUserBooked) {
+     return res.status(400).json({message: 'You have already booked a slot for this date !'})
+    }
 
     
     const isBooked = await Appointment.findOne({
@@ -190,7 +202,30 @@ router.get("/confirmation/:confirmHex", async (req, res) => {
 
     await appointment.save();
     res.status(200).json({ message: "Appointment confirmed successfully !" });
-  } catch (error) {}
+  } catch (error) {
+    console.error("Error confirming appointment:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+});
+
+router.get("/custom-slots/:date", async (req, res, next) => {
+  try {
+    let { date } = req.params;
+    date = date.slice(1);
+    
+    const workingHours = await WorkingHours.findOne({ date });
+    
+    if (!workingHours || !workingHours.hasCustomSlotPattern) {
+      return res.status(404).json({ hasCustomPattern: false });
+    }
+    
+    res.status(200).json({
+      hasCustomPattern: true,
+      canceledHairAndBeardSlots: workingHours.canceledHairAndBeardSlots || []
+    });
+  } catch (error) {
+    next(error);
+  }
 });
 
 router.delete("/cancel/:id", async (req, res) => {
@@ -198,8 +233,40 @@ router.delete("/cancel/:id", async (req, res) => {
     let { id } = req.params;
     id = id.slice(1);
     if (mongoose.Types.ObjectId.isValid(id)) {
+      const appointmentToCancel = await Appointment.findById(id);
+
+      if (!appointmentToCancel) {
+        return res.status(404).json({ message: "Appointment not found!" });
+      }
+
+         // Special handling for Hair and Beard appointments
+         if (appointmentToCancel.type === "Hair and Beard") {
+          const date = appointmentToCancel.date;
+          const originalSlot = appointmentToCancel.timeSlot;
+          const nextSlot = calculateNextTimeSlot(originalSlot); // Get the next 40-min slot
+          
+          // Update the working hours with custom slot pattern information
+          await WorkingHours.findOneAndUpdate(
+            { date: date },
+            { 
+              $set: { hasCustomSlotPattern: true },
+              $push: { 
+                canceledHairAndBeardSlots: {
+                  originalSlot: originalSlot,
+                  nextSlot: nextSlot,
+                  canceledAt: new Date()
+                }
+              }
+            },
+            { upsert: true }
+          );
+        }
+        // Delete the appointment
       await Appointment.deleteOne({ _id: id });
+
       res.status(200).json({ message: "Appointment canceled successfully !" });
+    } else {
+      return res.status(400).json({ message: "Invalid appointment ID" });
     }
   } catch (error) {
     res.status(500).json({ message: "Error canceling appointment !" });
