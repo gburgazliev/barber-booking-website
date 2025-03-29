@@ -222,37 +222,71 @@ router.delete("/cancel/:id", async (req, res) => {
         return res.status(404).json({ message: "Appointment not found!" });
       }
 
-         // Special handling for Hair and Beard appointments
-         if (appointmentToCancel.type === "Hair and Beard") {
-          const date = appointmentToCancel.date;
-          const originalSlot = appointmentToCancel.timeSlot;
-          const nextSlot = calculateNextTimeSlot(originalSlot); // Get the next 40-min slot
+      // Check if cancellation is within the allowed timeframe (10 minutes)
+      const bookingTime = new Date(appointmentToCancel.bookedAt);
+      const currentTime = new Date();
+      const timeDiff = Math.floor((currentTime - bookingTime) / 1000); // difference in seconds
+      
+      if (timeDiff > 600) { // 10 minutes = 600 seconds
+        return res.status(403).json({ message: "Cancellation period has expired!" });
+      }
+
+      // Special handling for Hair and Beard appointments
+      if (appointmentToCancel.type === "Hair and Beard") {
+        const date = appointmentToCancel.date;
+        const originalSlot = appointmentToCancel.timeSlot;
+        const nextSlot = calculateNextTimeSlot(originalSlot); // Get the next 40-min slot
+        
+        // First check if a working hours document already exists for this date
+        let workingHours = await WorkingHours.findOne({ date });
+        
+        if (workingHours) {
+          // Update existing document
+          workingHours.hasCustomSlotPattern = true;
           
-          // Update the working hours with custom slot pattern information
-          await WorkingHours.findOneAndUpdate(
-            { date: date },
-            { 
-              $set: { hasCustomSlotPattern: true },
-              $push: { 
-                canceledHairAndBeardSlots: {
-                  originalSlot: originalSlot,
-                  nextSlot: nextSlot,
-                  canceledAt: new Date()
-                }
-              }
-            },
-            { upsert: true }
-          );
+          // Ensure the document has all required fields
+          if (!workingHours.startTime) workingHours.startTime = "09:00";
+          if (!workingHours.endTime) workingHours.endTime = "19:00";
+          if (!workingHours.breakStart) workingHours.breakStart = "13:00";
+          if (!workingHours.breakEnd) workingHours.breakEnd = "14:00";
+          
+          // Add this canceled slot to the array
+          workingHours.canceledHairAndBeardSlots.push({
+            originalSlot,
+            nextSlot,
+            canceledAt: new Date()
+          });
+          
+          await workingHours.save();
+        } else {
+          // Create new document with all required fields
+          await WorkingHours.create({
+            date,
+            startTime: "09:00",
+            endTime: "19:00",
+            breakStart: "13:00",
+            breakEnd: "14:00", 
+            hasCustomSlotPattern: true,
+            canceledHairAndBeardSlots: [{
+              originalSlot,
+              nextSlot,
+              canceledAt: new Date()
+            }],
+            expiresAt: new Date(new Date(date).setDate(new Date(date).getDate() + 1))
+          });
         }
-        // Delete the appointment
+      }
+        
+      // Delete the appointment
       await Appointment.deleteOne({ _id: id });
 
-      res.status(200).json({ message: "Appointment canceled successfully !" });
+      res.status(200).json({ body: "Appointment canceled successfully!" });
     } else {
       return res.status(400).json({ message: "Invalid appointment ID" });
     }
   } catch (error) {
-    res.status(500).json({ message: "Error canceling appointment !" });
+    console.error("Error canceling appointment:", error);
+    res.status(500).json({ message: "Error canceling appointment!" });
   }
 });
 
