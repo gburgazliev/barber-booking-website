@@ -6,15 +6,20 @@ const AppointmentSchema = new mongoose.Schema({
   date: {type: String, required: true},
   timeSlot: {type: String, required: true},
   duration: {type: Number, default: 40},
-  status: {type: String, enum: ['Pending', 'Confirmed'], default: 'Pending'
-  },
+  status: {type: String, enum: ['Pending', 'Confirmed'], default: 'Pending'},
   confirmationHex: {type: String},
-  bookedAt: {type:Date} ,
+  bookedAt: {type: Date},
+  
+  // New fields for tracking slot types
+  isShiftedSlot: {type: Boolean, default: false},
+  isIntermediateSlot: {type: Boolean, default: false},
+  originalSlotTime: {type: String}, // Original time for shifted slots
+  
   expiresAt: { 
     type: Date, 
     default: () => new Date(Date.now() + 600000), 
     expires: 0 // TTL index enabled
-}
+  }
 });
 
 const Appointment = mongoose.model("Appointments", AppointmentSchema);
