@@ -3,6 +3,7 @@ const router = express.Router();
 const verifyCookie = require("../middleware/verifyCookie");
 const crypto = require("crypto");
 const Appointment = require("../models/Appointment");
+const WorkingHours = require("../models/WorkingHours")
 const nodemailer = require("nodemailer");
 const { default: mongoose } = require("mongoose");
 const transporter = nodemailer.createTransport({
