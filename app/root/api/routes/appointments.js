@@ -135,7 +135,7 @@ router.post("/book", verifyCookie, async (req, res, next) => {
       originalSlotTime: isShiftedSlot ? req.body.originalSlotTime : null
     });
 
-    // If it's a Hair and Beard appointment, create special slots
+    // ONLY modify slot patterns if it's a Hair and Beard appointment
     if (type === "Hair and Beard") {
       const nextSlot = calculateNextTimeSlot(timeSlot);
       
