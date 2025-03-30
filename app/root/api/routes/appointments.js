@@ -167,8 +167,8 @@ router.post("/book", verifyCookie, async (req, res, next) => {
       const shiftedSlot = calculateShiftedSlot(thirdSlot);
       
       // Create an intermediate slot between the end of first slot and start of third slot
-      // If first slot ends at 10:20 and third is 11:00, intermediate is around 10:30
-      const intermediateSlot = calculateTimeWithOffset(nextSlot, 10); // 10 minutes after the second slot starts
+      // If first slot ends at 10:20 and third is 11:00, intermediate is around 10:40
+      const intermediateSlot = calculateTimeWithOffset(nextSlot, 20); // 20 minutes after the second slot starts
       
       // Check if these slots are within working hours
       if (isWithinWorkingHours(shiftedSlot, workingHours.startTime, workingHours.endTime, 
