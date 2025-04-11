@@ -21,7 +21,8 @@ router.get("/get-working-hours/:date", async (req, res, next) => {
       breakStart: workingHours.breakStart,
       breakEnd: workingHours.breakEnd,
       shiftedSlots: workingHours.shiftedSlots || [],
-      intermediateSlots: workingHours.intermediateSlots || []
+      intermediateSlots: workingHours.intermediateSlots || [],
+      blockedSlots: workingHours.blockedSlots || []
     });
   } catch (error) {
     next(error);
