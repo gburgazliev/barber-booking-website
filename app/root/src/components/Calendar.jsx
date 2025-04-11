@@ -8,6 +8,14 @@ import { DateCalendar } from "@mui/x-date-pickers/DateCalendar";
 import { StaticDateTimePicker } from "@mui/x-date-pickers/StaticDateTimePicker";
 import { Typography } from "@mui/material";
 import Divider from "@mui/material/Divider";
+import {
+  fetchCustomSlotPatterns,
+  isRegularSlot,
+  isTimeAfter,
+  generateIntermediateSlot,
+  getMinutesSinceMidnight,
+  getMinutesBetween,
+} from "../service/calendar-service";
 import dayjs from "dayjs";
 
 const Calendar = () => {
@@ -23,6 +31,9 @@ const Calendar = () => {
   const [currentUserAppointments, setCurrentUserAppointments] = useState({});
   const [timeSlots, setTimeSlots] = useState([]);
   const [appointments, setAppointments] = useState([]);
+  const [shiftedSlots, setShiftedSlots] = useState([]);
+  const [intermediateSlots, setIntermediateSlots] = useState([]);
+  const [blockedSlots, setBlockedSlots] = useState([]);
   const { addAlert } = useContext(AlertContext);
   const { isLoggedIn } = useContext(AuthContext);
   const minDate = dayjs();
@@ -31,6 +42,59 @@ const Calendar = () => {
   const maxDate = dayjs().add(14, "day");
 
   const formattedDateString = date.toISOString().split("T")[0]; // YYYY-MM-DD
+
+  const getSlotType = (timeSlot) => {
+    // Check if it's a shifted slot
+    const isShifted = shiftedSlots.some(
+      (slot) => slot.shiftedTime === timeSlot
+    );
+
+    // Check if it's an intermediate slot
+    const isIntermediate = intermediateSlots.some(
+      (slot) => slot.slotTime === timeSlot
+    );
+
+    // Check if it's a regular 40-minute slot
+    const isRegular = isRegularSlot(timeSlot);
+
+    if (isShifted)
+      return { isShiftedSlot: true, isIntermediateSlot: false, duration: 30 };
+    if (isIntermediate)
+      return { isShiftedSlot: false, isIntermediateSlot: true, duration: 30 };
+    if (!isRegular)
+      return { isShiftedSlot: false, isIntermediateSlot: false, duration: 30 }; // 30-minute slot
+
+    return { isShiftedSlot: false, isIntermediateSlot: false, duration: 40 }; // Regular 40-minute slot
+  };
+
+  // Helper function to calculate the next time slot (40 minutes later)
+  const calculateNextTimeSlot = (timeSlot) => {
+    const [hours, minutes] = timeSlot.split(":").map(Number);
+    let newMinutes = minutes + 40;
+    let newMinutesTwo = minutes + 30;
+    let newHoursOne = hours;
+    let newHoursTwo = hours;
+
+    if (newMinutes >= 60) {
+      newMinutes -= 60;
+      newHoursOne += 1;
+    }
+    if (newMinutesTwo >= 60) {
+      newMinutesTwo -= 60;
+      newHoursTwo += 1;
+    }
+
+    return [
+      `${String(newHoursOne).padStart(2, "0")}:${String(newMinutes).padStart(
+        2,
+        "0"
+      )}`,
+      `${String(newHoursTwo).padStart(2, "0")}:${String(newMinutesTwo).padStart(
+        2,
+        "0"
+      )}`,
+    ];
+  };
 
   const handleTimeChange = (dateObject) => {
     if (dateObject.$D !== date.$D) {
@@ -119,18 +183,126 @@ const Calendar = () => {
     const start = new Date(`1970-01-01T${startTime}:00`);
     const end = new Date(`1970-01-01T${endTime}:00`);
 
-    while (start < end) {
+    while (start <= end) {
       if (start >= breakStart && start < breakEnd) {
-        start.setMinutes(start.getMinutes() + 30);
+        start.setMinutes(start.getMinutes() + 40);
         continue;
       }
       slots.push(start.toTimeString().substring(0, 5));
-      start.setMinutes(start.getMinutes() + 30);
+      start.setMinutes(start.getMinutes() + 40);
     }
 
     setTimeSlots(slots);
   };
 
+  // Process appointments and custom slot patterns to generate available time slots
+  const processAppointmentsAndSlots = async (baseSlots) => {
+    if (!appointments.length) {
+      return baseSlots;
+    }
+
+    // Create a copy of base slots
+    let availableSlots = [...baseSlots];
+
+    // Process Hair and Beard appointments first
+    const hairAndBeardAppointments = appointments.filter(
+      (appt) => appt.type === "Hair and Beard" && appt.status === "Confirmed"
+    );
+
+    // For each Hair and Beard appointment, remove both its slot and the next one
+    hairAndBeardAppointments.forEach((appt) => {
+      const currentSlot = appt.timeSlot;
+      const nextSlot = calculateNextTimeSlot(currentSlot);
+
+      // Remove both slots
+
+      availableSlots = availableSlots.filter(
+        (slot) => slot !== currentSlot && slot !== nextSlot
+      );
+    });
+
+    // Now handle other appointment types by removing their slots
+    const otherAppointments = appointments.filter(
+      (appt) => appt.type !== "Hair and Beard" && appt.status === "Confirmed"
+    );
+
+    otherAppointments.forEach((appt) => {
+      availableSlots = availableSlots.filter((slot) => slot !== appt.timeSlot);
+    });
+
+    // Get custom slot patterns if any exist
+    const customPatterns = await fetchCustomSlotPatterns(
+      SERVER_URL,
+      formattedDateString
+    );
+
+    if (customPatterns && customPatterns.hasCustomPattern) {
+      // Collect all slots to add (shifted/intermediate)
+      const slotsToAdd = [];
+
+      // Add shifted slots that aren't booked
+      customPatterns.shiftedSlots.forEach((slot) => {
+        if (!slot.isBooked) {
+          slotsToAdd.push(slot.shiftedTime);
+        }
+      });
+
+      // Add intermediate slots that aren't booked
+      customPatterns.intermediateSlots.forEach((slot) => {
+        if (!slot.isBooked) {
+          slotsToAdd.push(slot.slotTime);
+        }
+      });
+
+      // Add new slots
+      slotsToAdd.forEach((slot) => {
+        if (!availableSlots.includes(slot)) {
+          availableSlots.push(slot);
+        }
+      });
+    }
+    if (blockedSlots.length) {
+      blockedSlots.forEach((slotOBJ) => {
+        availableSlots.map((slot, index) => {
+          if (slotOBJ.timeSlot === slot) {
+            availableSlots.splice(index, 1);
+          }
+        });
+      });
+    }
+
+    // Sort slots chronologically
+    availableSlots.sort(
+      (a, b) => getMinutesSinceMidnight(a) - getMinutesSinceMidnight(b)
+    );
+
+    return availableSlots;
+  };
+
+  // Fix the generateTimeSlots function to ensure correct 40-minute intervals
+  // const generateTimeSlots = (startTime, endTime, breakStart, breakEnd) => {
+  //   const slots = [];
+  //   const breakStartDate = new Date(`1970-01-01T${breakStart}:00`);
+  //   const breakEndDate = new Date(`1970-01-01T${breakEnd}:00`);
+
+  //   // Create a new date object to avoid modifying the original
+  //   let current = new Date(`1970-01-01T${startTime}:00`);
+  //   const end = new Date(`1970-01-01T${endTime}:00`);
+
+  //   // Generate slots at exact 40-minute intervals
+  //   while (current <= end) {
+  //     // Skip slots during break time
+  //     if (current >= breakStartDate && current < breakEndDate) {
+  //       current.setMinutes(current.getMinutes() + 40);
+  //       continue;
+  //     }
+
+  //     slots.push(current.toTimeString().substring(0, 5));
+  //     current.setMinutes(current.getMinutes() + 40);
+  //   }
+
+  //   return slots;
+  // };
   // Combined function to fetch schedule and appointments
   const refreshData = async () => {
     try {
@@ -138,26 +310,106 @@ const Calendar = () => {
       const scheduleResponse = await fetch(
         SERVER_URL(`api/schedule/get-working-hours/:${formattedDateString}`)
       );
+
+      let baseSlots = [];
       if (scheduleResponse.ok) {
         const scheduleData = await scheduleResponse.json();
-        generateTimeSlots(
-          scheduleData.startTime,
-          scheduleData.endTime,
-          scheduleData.breakStart,
-          scheduleData.breakEnd
+        setBlockedSlots(scheduleData.blockedSlots);
+        setIntermediateSlots(scheduleData.intermediateSlots);
+        setShiftedSlots(scheduleData.shiftedSlots);
+        console.log(scheduleData);
+        const startTimeArr = scheduleData.startTime.split(":");
+        const endTimeArr = scheduleData.endTime.split(":");
+        setStartTime((prev) =>
+          prev.hour(Number(startTimeArr[0])).minute(Number(startTimeArr[1]))
         );
+        setEndTime((prev) =>
+          prev.hour(Number(endTimeArr[0])).minute(Number(endTimeArr[1]))
+        );
+
+        // Generate base slots
+        const slots = [];
+        const breakStart = new Date(`1970-01-01T${scheduleData.breakStart}:00`);
+        const breakEnd = new Date(`1970-01-01T${scheduleData.breakEnd}:00`);
+        const start = new Date(`1970-01-01T${scheduleData.startTime}:00`);
+        const end = new Date(`1970-01-01T${scheduleData.endTime}:00`);
+
+        // Ensure we generate slots at exactly 40-minute intervals
+        let slotTime = new Date(start);
+        while (slotTime <= end) {
+          if (slotTime >= breakStart && slotTime < breakEnd) {
+            slotTime.setMinutes(slotTime.getMinutes() + 40);
+            continue;
+          }
+          slots.push(slotTime.toTimeString().substring(0, 5));
+          slotTime.setMinutes(slotTime.getMinutes() + 40);
+        }
+
+        baseSlots = slots;
       } else {
         // Default schedule if none exists
-        generateTimeSlots("09:00", "19:30");
+        setStartTime((prev) => prev.hour(9).minute(0));
+        setEndTime((prev) => prev.hour(19).minute(0));
+
+        // Generate default base slots
+        const slots = [];
+        let start = new Date(`1970-01-01T09:00:00`);
+        const end = new Date(`1970-01-01T19:00:00`);
+        const breakStart = new Date(`1970-01-01T13:00:00`);
+        const breakEnd = new Date(`1970-01-01T14:00:00`);
+
+        // Ensure we generate slots at exactly 40-minute intervals
+        while (start <= end) {
+          if (start >= breakStart && start < breakEnd) {
+            start.setMinutes(start.getMinutes() + 40);
+            continue;
+          }
+          slots.push(start.toTimeString().substring(0, 5));
+          start.setMinutes(start.getMinutes() + 40);
+        }
+
+        baseSlots = slots;
       }
 
       // Fetch appointments
       const appointmentsResponse = await fetch(
         SERVER_URL(`api/appointments/:${formattedDateString}`)
       );
+
       if (appointmentsResponse.ok) {
         const appointmentsData = await appointmentsResponse.json();
-        setAppointments(appointmentsData);
+        console.log(appointmentsData);
+        setAppointments(appointmentsData.appointments);
+        // setBlockedSlots(appointmentsData.blockedSlots);
+
+        // Check if there are any Hair and Beard appointments
+        const hairAndBeardAppointments = appointmentsData.appointments.filter(
+          (appt) => appt.type === "Hair and Beard"
+        );
+
+        // Only modify slots if there are Hair and Beard appointments or custom slot patterns
+        if (
+          hairAndBeardAppointments.length > 0 ||
+          appointmentsData.shiftedSlots.length > 0 ||
+          appointmentsData.intermediateSlots.length > 0
+        ) {
+          // Process appointments and custom slots
+          const availableSlots = await processAppointmentsAndSlots(baseSlots);
+
+          setTimeSlots(availableSlots);
+        } else {
+          // If no Hair and Beard appointments, just filter out booked slots
+          const availableSlots = baseSlots.filter(
+            (slot) =>
+              !appointmentsData.appointments.some(
+                (appt) => appt.timeSlot === slot
+              )
+          );
+          setTimeSlots(availableSlots);
+        }
+      } else {
+        // If no appointments, just use the base slots
+        setTimeSlots(baseSlots);
       }
     } catch (error) {
       console.error("Failed fetching data:", error.message);
@@ -165,31 +417,95 @@ const Calendar = () => {
     }
   };
 
+
+
   // Initial data fetch when date changes
   useEffect(() => {
     refreshData();
   }, [formattedDateString]);
 
+  
+  // Filter out booked slots and slots after Hair and Beard appointments
   useEffect(() => {
-    if (appointments.length > 0) {
-      setTimeSlots((prev) =>
-        prev.filter((timeSlot) => {
-          const isBookedByOthers = appointments.some(
-            (appointment) => timeSlot === appointment.timeSlot
-          );
+    const updateAvailableSlots = async () => {
+      if (appointments.length > 0) {
+        const scheduleResponse = await fetch(
+          SERVER_URL(`api/schedule/get-working-hours/:${formattedDateString}`)
+        );
 
-          // If it's booked by someone else, filter it out
-          if (isBookedByOthers) {
-            return false;
-          } else {
-            return true;
+        let baseSlots = [];
+
+        if (scheduleResponse.ok) {
+          const scheduleData = await scheduleResponse.json();
+
+          // Generate base slots
+          const slots = [];
+          const breakStart = new Date(
+            `1970-01-01T${scheduleData.breakStart}:00`
+          );
+          const breakEnd = new Date(`1970-01-01T${scheduleData.breakEnd}:00`);
+          const start = new Date(`1970-01-01T${scheduleData.startTime}:00`);
+          const end = new Date(`1970-01-01T${scheduleData.endTime}:00`);
+
+          while (start <= end) {
+            if (start >= breakStart && start < breakEnd) {
+              start.setMinutes(start.getMinutes() + 40);
+              continue;
+            }
+            slots.push(start.toTimeString().substring(0, 5));
+            start.setMinutes(start.getMinutes() + 40);
           }
 
-          // Otherwise keep the time slot (whether it's available or booked by current user)
-        })
-      );
-    }
-  }, [appointments, isLoggedIn]);
+          baseSlots = slots;
+        } else {
+          // Default base slots
+          const slots = [];
+          const start = new Date(`1970-01-01T09:00:00`);
+          const end = new Date(`1970-01-01T19:00:00`);
+          const breakStart = new Date(`1970-01-01T13:00:00`);
+          const breakEnd = new Date(`1970-01-01T14:00:00`);
+
+          while (start <= end) {
+            if (start >= breakStart && start < breakEnd) {
+              start.setMinutes(start.getMinutes() + 40);
+              continue;
+            }
+            slots.push(start.toTimeString().substring(0, 5));
+            start.setMinutes(start.getMinutes() + 40);
+          }
+
+          baseSlots = slots;
+        }
+
+        // Process appointments and custom slots
+        const availableSlots = await processAppointmentsAndSlots(baseSlots);
+        setTimeSlots(availableSlots);
+      }
+    };
+
+    updateAvailableSlots();
+  }, [appointments, formattedDateString]);
+
+  // useEffect(() => {
+  //   if (appointments.length > 0) {
+  //     setTimeSlots((prev) =>
+  //       prev.filter((timeSlot) => {
+  //         const isBookedByOthers = appointments.some(
+  //           (appointment) => timeSlot === appointment.timeSlot
+  //         );
+
+  //         // If it's booked by someone else, filter it out
+  //         if (isBookedByOthers) {
+  //           return false;
+  //         } else {
+  //           return true;
+  //         }
+
+  //         // Otherwise keep the time slot (whether it's available or booked by current user)
+  //       })
+  //     );
+  //   }
+  // }, [appointments, isLoggedIn]);
 
   return (
     <div className="border bg-white">
@@ -197,8 +513,8 @@ const Calendar = () => {
         <DateCalendar
           value={date}
           onChange={(newDate) => setDate(newDate)}
-          minDate={isLoggedIn.user.role === "admin" ? undefined : minDate}
-          maxDate={isLoggedIn.user.role === "admin" ? undefined : maxDate}
+          minDate={minDate}
+          maxDate={maxDate}
           openTo="day"
           views={["day"]}
         />
@@ -217,7 +533,10 @@ const Calendar = () => {
           </Typography>{" "}
         </>
       )}
-      <Divider textAlign="right"> Available appointments </Divider>
+      <Divider textAlign="center">
+        {" "}
+        Available appointments for {formattedDateString}
+      </Divider>
       <div className="grid grid-cols-4 gap-5 p-5 ml-2 mr-2 ">
         {timeSlots.map((timeSlot, index) => (
           <Appointment
@@ -227,6 +546,12 @@ const Calendar = () => {
             appointments={appointments}
             setCurrentUserAppointments={setCurrentUserAppointments}
             refreshAppointments={refreshData}
+            timeSlots={timeSlots}
+            calculateNextTimeSlot={calculateNextTimeSlot}
+            slotDuration={getSlotType(timeSlot).duration}
+            isRegularSlot={isRegularSlot(timeSlot)}
+            isShiftedSlot={getSlotType(timeSlot).isShiftedSlot}
+            isIntermediateSlot={getSlotType(timeSlot).isIntermediateSlot }
           />
         ))}
       </div>
@@ -236,18 +561,30 @@ const Calendar = () => {
           <div className="m-2 p-2">
             {appointments
               .filter(
-                (appointment) => appointment._id === currentUserAppointments._id
+                (appointment) => appointment.userId._id === isLoggedIn.user._id
               )
-              .map((appointmentObj) => (
-                <Appointment
-                  key={appointmentObj._id}
-                  timeSlot={appointmentObj.timeSlot}
-                  date={formattedDateString}
-                  appointments={appointments}
-                  setCurrentUserAppointments={setCurrentUserAppointments}
-                  refreshAppointments={refreshData}
-                />
-              ))}
+              .map((appointmentObj) => {
+                // Get slot type information for user appointment
+                const slotTypeInfo = getSlotType(appointmentObj.timeSlot);
+
+                return (
+                  <Appointment
+                    key={appointmentObj._id}
+                    timeSlot={appointmentObj.timeSlot}
+                    date={formattedDateString}
+                    appointments={appointments}
+                    setCurrentUserAppointments={setCurrentUserAppointments}
+                    refreshAppointments={refreshData}
+                    timeSlots={timeSlots}
+                    calculateNextTimeSlot={calculateNextTimeSlot}
+                    isRegularSlot={slotTypeInfo.duration === 40}
+                    slotDuration={slotTypeInfo.duration}
+                    isShiftedSlot={slotTypeInfo.isShiftedSlot}
+                    isIntermediateSlot={slotTypeInfo.isIntermediateSlot}
+                    userAppointment={true}
+                  />
+                );
+              })}
           </div>
         </div>
       )}
