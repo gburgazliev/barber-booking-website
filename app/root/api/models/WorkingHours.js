@@ -4,8 +4,8 @@ const WorkingHoursSchema = new mongoose.Schema({
   date: { type: String, required: true }, // Format: YYYY-MM-DD
   startTime: { type: String, required: true }, // Example: "09:00"
   endTime: { type: String, required: true }, // Example: "18:00"
-  breakStart: {type: String, required: true},
-  breakEnd: {type: String, required: true},
+  breakStart: {type: String},
+  breakEnd: {type: String},
   
   // Fields for custom slot patterns
   hasCustomSlotPattern: { type: Boolean, default: false },
@@ -32,6 +32,12 @@ const WorkingHoursSchema = new mongoose.Schema({
     createdDueToAppointmentId: { type: mongoose.Schema.Types.ObjectId, ref: "Appointments" },
     isBooked: { type: Boolean, default: false },
     bookedAppointmentId: { type: mongoose.Schema.Types.ObjectId, ref: "Appointments", default: null }
+  }],
+
+  blockedSlots: [{
+    timeSlot: { type: String },  // The time slot that's blocked "09:00"
+    blockedBy: { type: mongoose.Schema.Types.ObjectId, ref: "Appointment" }, // Who blocked it
+    blockedAt: { type: Date, default: Date.now },
   }],
   
   expiresAt: {
