@@ -63,9 +63,13 @@ const calculateTimeWithOffset = (timeSlot, offsetMinutes) => {
     
     const [startH, startM] = startTime.split(':').map(Number);
     const startMinutes = startH * 60 + startM;
-    
+    // Add 30 mins to end time to include the last slot
+
     const [endH, endM] = endTime.split(':').map(Number);
-    const endMinutes = endH * 60 + endM;
+    // const endMinutes = endH * 60 + endM;
+    const endMinutes = getMinutesSinceMidnight(endTime) + 30; // Add 30 mins to end time to include the last slot
+    
+
     
     const [breakStartH, breakStartM] = breakStart.split(':').map(Number);
     const breakStartMinutes = breakStartH * 60 + breakStartM;
