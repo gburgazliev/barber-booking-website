@@ -422,7 +422,7 @@ const date = appointment.date;
         workingHours = await WorkingHours.create({
           date,
           startTime: "09:00",
-          endTime: "19:00",
+          endTime: "18:00",
           breakStart: "",
           breakEnd: "",
           hasCustomSlotPattern: true,
