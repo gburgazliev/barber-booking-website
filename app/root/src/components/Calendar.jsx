@@ -354,7 +354,7 @@ const Calendar = () => {
         // Generate default base slots
         const slots = [];
         let start = new Date(`1970-01-01T09:00:00`);
-        const end = new Date(`1970-01-01T18:00:00`);
+        const end = new Date(`1970-01-01T18:20:00`);
         const breakStart = new Date(`1970-01-01T13:00:00`);
         const breakEnd = new Date(`1970-01-01T14:00:00`);
 
