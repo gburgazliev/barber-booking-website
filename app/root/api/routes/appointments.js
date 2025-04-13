@@ -221,9 +221,40 @@ router.post("/book", verifyCookie, async (req, res, next) => {
       });
     }
 
-    // Generate confirmation token
+    
+    let workingHours = await WorkingHours.findOne({ date });
+    if (workingHours) {
+      if (isShiftedSlot) {
+        const isThereShiftedSlot = workingHours.shiftedSlots.find(
+          (slot) => slot.shiftedTime === timeSlot && date === slot.date
+        );
+        if (!isThereShiftedSlot) {
+          return res.status(400).json({
+            message: "This shifted slot is no longer available!",
+          });
+        }
+      } else if (isIntermediateSlot) {
+        const isThereIntermediateSlot = workingHours.intermediateSlots.find(
+          (slot) => slot.slotTime === timeSlot && date === slot.date
+        );
+        if (!isThereIntermediateSlot) {
+          return res.status(400).json({
+            message: "This intermediate slot is no longer available!",
+          });
+        }
+      } else {
+        const isThereBlockedSlot = workingHours.blockedSlots.find(
+          (slot) => slot.timeSlot === timeSlot && date === slot.date
+        );
+        if (isThereBlockedSlot) {
+          return res.status(400).json({
+            message: "This time slot is blocked!",
+          });
+        }
+      }
+    }
+// Generate confirmation token
     const confirmationToken = crypto.randomBytes(32).toString("hex");
-
     // Create the appointment
     const createdAppointment = await Appointment.create({
       date,
@@ -318,7 +349,7 @@ router.post("/book", verifyCookie, async (req, res, next) => {
     // }
 
     // Send confirmation email
-    const confirmationLink = `${process.env.FRONTEND_URL}/confirm-appointment/:${confirmationToken}`;
+    const confirmationLink = `${process.env.FRONTEND_URL_TEST}/confirm-appointment/:${confirmationToken}`;
     const mailOptions = {
       from: process.env.EMAIL,
       to: email,
@@ -354,12 +385,13 @@ router.get("/confirmation/:confirmHex", async (req, res) => {
     const appointment = await Appointment.findOne({
       confirmationHex: confirmHex,
     });
-    
+    const date = appointment?.date;
+    let workingHours = await WorkingHours.findOne({ date });
 
     if (!appointment) {
       return res.status(410).json({ message: "Confirmation link expired!" });
     }
-const date = appointment.date;
+
     // Check if user already has a confirmed booking for this date
     const hasUserBooked = await Appointment.findOne({
       date: appointment.date,
@@ -382,6 +414,15 @@ const date = appointment.date;
 
     if (isBooked) {
       return res.status(400).json({ message: "Slot is already booked!" });
+    }
+
+    const isBlocked = workingHours.blockedSlots.find(
+      (slot) => slot.timeSlot === appointment.timeSlot && date === slot.date
+    );
+    if (isBlocked) {
+      return res.status(400).json({
+        message: "Invalid slot!",
+      });
     }
 
     // For Hair and Beard service, check if the next slot is still available
@@ -415,7 +456,6 @@ const date = appointment.date;
       }
 
       // Get working hours for the day
-      let workingHours = await WorkingHours.findOne({ date });
 
       if (!workingHours) {
         // Create default working hours if not found
@@ -448,8 +488,8 @@ const date = appointment.date;
       const intermediateSlot = calculateTimeWithOffset(nextTimeSlot, 20); // 20 minutes after the second slot starts
 
       workingHours.blockedSlots.push(
-        { timeSlot: nextTimeSlot, blockedBy: appointment._id, date },
-        { timeSlot: thirdSlot, blockedBy: appointment._id, date }
+        { timeSlot: nextTimeSlot, blockedBy: appointment._id, date: date },
+        { timeSlot: thirdSlot, blockedBy: appointment._id, date: date }
       );
       // Check if these slots are within working hours
       if (
@@ -467,6 +507,7 @@ const date = appointment.date;
           shiftedTime: shiftedSlot,
           createdDueToAppointmentId: appointment._id,
           isBooked: false,
+          date: date,
         });
       }
 
@@ -483,6 +524,7 @@ const date = appointment.date;
         workingHours.intermediateSlots.push({
           slotTime: intermediateSlot,
           createdDueToAppointmentId: appointment._id,
+          date: date,
           isBooked: false,
         });
       }
@@ -493,12 +535,19 @@ const date = appointment.date;
     // If confirming a slot that was created due to another appointment,
     // mark it as booked in the working hours document
     if (appointment.isShiftedSlot || appointment.isIntermediateSlot) {
-      const workingHours = await WorkingHours.findOne({
-        date: appointment.date,
-      });
-     
       if (workingHours) {
         if (appointment.isShiftedSlot) {
+          const isThereShiftedSlot = workingHours.shiftedSlots.find(
+            (slot) =>
+              slot.shiftedTime === appointment.timeSlot && date === slot.date
+          );
+          if (!isThereShiftedSlot) {
+            res.status(400).json({
+              message: "This shifted slot is no longer available!",
+            });
+            return;
+          }
+
           const slotIndex = workingHours.shiftedSlots.findIndex(
             (slot) => slot.shiftedTime === appointment.timeSlot
           );
@@ -511,6 +560,17 @@ const date = appointment.date;
         }
 
         if (appointment.isIntermediateSlot) {
+          const isThereIntermediateSlot = workingHours.intermediateSlots.find(
+            (slot) =>
+              slot.slotTime === appointment.timeSlot && date === slot.date
+          );
+          if (!isThereIntermediateSlot) {
+            res.status(400).json({
+              message: "This intermediate slot is no longer available!",
+            });
+            return;
+          }
+
           const slotIndex = workingHours.intermediateSlots.findIndex(
             (slot) => slot.slotTime === appointment.timeSlot
           );
@@ -620,12 +680,12 @@ router.delete("/cancel/:id", async (req, res) => {
               )
             ) {
               if (bookedIntermediateSlot) {
-              workingHours.intermediateSlots.push({
-                slotTime: newSlotTime,
-                createdDueToAppointmentId: appointmentToCancel._id,
-                isBooked: false,
-              });
-            }
+                workingHours.intermediateSlots.push({
+                  slotTime: newSlotTime,
+                  createdDueToAppointmentId: appointmentToCancel._id,
+                  isBooked: false,
+                });
+              }
               if (bookedShiftedSlot) {
                 workingHours.shiftedSlots.push({
                   originalTime: bookedShiftedSlot.originalTime,
@@ -667,7 +727,7 @@ router.delete("/cancel/:id", async (req, res) => {
         });
 
         if (workingHours) {
-          // Update the slot's booked status to false 
+          // Update the slot's booked status to false
 
           const slotIndex = workingHours.intermediateSlots.findIndex(
             (slot) =>
@@ -676,23 +736,16 @@ router.delete("/cancel/:id", async (req, res) => {
           );
           if (slotIndex >= 0) {
             workingHours.intermediateSlots[slotIndex].isBooked = false;
-            workingHours.intermediateSlots[slotIndex].bookedAppointmentId = null;
+            workingHours.intermediateSlots[slotIndex].bookedAppointmentId =
+              null;
           }
           // Remove the intermediate slot from the list of booked slots
-           
-
-
-
 
           // workingHours.intermediateSlots.push({
           //   slotTime: appointmentToCancel.timeSlot,
           //   createdDueToAppointmentId: appointmentToCancel._id,
           //   isBooked: false,
           // });
-
-       
-
-         
         }
         workingHours.save();
       }
@@ -721,59 +774,78 @@ router.delete("/cancel/:id", async (req, res) => {
         }
       }
 
-      if(appointmentToCancel.isShiftedSlot || appointmentToCancel.isIntermediateSlot){
-       // Get all shifted slots and intermediate slots with the same createdDueToAppointmentId from workingHours into an array
-       const workingHours = await WorkingHours.findOne({
+      if (
+        appointmentToCancel.isShiftedSlot ||
+        appointmentToCancel.isIntermediateSlot
+      ) {
+        // Get all shifted slots and intermediate slots with the same createdDueToAppointmentId from workingHours into an array
+        const workingHours = await WorkingHours.findOne({
           date: appointmentToCancel.date,
         });
-      let slotObj;
-      if (appointmentToCancel.isShiftedSlot) {
-        slotObj = workingHours.shiftedSlots.find((slot) =>
-          slot.shiftedTime === appointmentToCancel.timeSlot
-        );
-      } else if (appointmentToCancel.isIntermediateSlot) {
-        slotObj = workingHours.intermediateSlots.find((slot) =>
-          slot.slotTime === appointmentToCancel.timeSlot
-        );
-      }
+        let slotObj;
+        if (appointmentToCancel.isShiftedSlot) {
+          slotObj = workingHours.shiftedSlots.find(
+            (slot) => slot.shiftedTime === appointmentToCancel.timeSlot
+          );
+        } else if (appointmentToCancel.isIntermediateSlot) {
+          slotObj = workingHours.intermediateSlots.find(
+            (slot) => slot.slotTime === appointmentToCancel.timeSlot
+          );
+        }
         if (workingHours) {
           const relativeSlots = [
             ...workingHours.shiftedSlots.filter((slot) =>
-              slot.createdDueToAppointmentId.equals(slotObj.createdDueToAppointmentId)
+              slot.createdDueToAppointmentId.equals(
+                slotObj.createdDueToAppointmentId
+              )
             ),
             ...workingHours.intermediateSlots.filter((slot) =>
-              slot.createdDueToAppointmentId.equals(slotObj.createdDueToAppointmentId)
+              slot.createdDueToAppointmentId.equals(
+                slotObj.createdDueToAppointmentId
+              )
             ),
           ];
-         
-          const  isAnyBooked = relativeSlots.some((slot) => slot.isBooked && !slot.bookedAppointmentId.equals(appointmentToCancel._id));
+
+          const isAnyBooked = relativeSlots.some(
+            (slot) =>
+              slot.isBooked &&
+              !slot.bookedAppointmentId.equals(appointmentToCancel._id)
+          );
 
           const existingAppointment = await Appointment.findOne({
             _id: slotObj.createdDueToAppointmentId,
-          }); 
-          if(!isAnyBooked && !existingAppointment){
+          });
+          if (!isAnyBooked && !existingAppointment) {
             // Remove shifted and intermediate slots with this createdDueToAppointmentId from workingHours
 
             workingHours.shiftedSlots = workingHours.shiftedSlots.filter(
-              (slot) => !slot.createdDueToAppointmentId.equals(slotObj.createdDueToAppointmentId)
+              (slot) =>
+                !slot.createdDueToAppointmentId.equals(
+                  slotObj.createdDueToAppointmentId
+                )
             );
-            workingHours.intermediateSlots = workingHours.intermediateSlots.filter(
-              (slot) => !slot.createdDueToAppointmentId.equals(slotObj.createdDueToAppointmentId)
-            );
+            workingHours.intermediateSlots =
+              workingHours.intermediateSlots.filter(
+                (slot) =>
+                  !slot.createdDueToAppointmentId.equals(
+                    slotObj.createdDueToAppointmentId
+                  )
+              );
 
             workingHours.blockedSlots = workingHours.blockedSlots.filter(
-              (slot) => !slot.blockedBy.equals(slotObj.createdDueToAppointmentId)
+              (slot) =>
+                !slot.blockedBy.equals(slotObj.createdDueToAppointmentId)
             );
-
           }
 
           // Remove the slots from the working hours
           workingHours.shiftedSlots = workingHours.shiftedSlots.filter(
             (slot) => !relativeSlots.includes(slot)
           );
-          workingHours.intermediateSlots = workingHours.intermediateSlots.filter(
-            (slot) => !relativeSlots.includes(slot)
-          );
+          workingHours.intermediateSlots =
+            workingHours.intermediateSlots.filter(
+              (slot) => !relativeSlots.includes(slot)
+            );
 
           await workingHours.save();
         }
