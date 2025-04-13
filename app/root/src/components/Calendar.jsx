@@ -505,7 +505,7 @@ const Calendar = () => {
   // }, [appointments, isLoggedIn]);
 
   return (
-    <div className="border bg-red-50 rounded-lg p-5 m-5 shadow-lg  shadow-black self-start flex">
+    <div className="border bg-red-50 rounded-lg  p-5 m-5 shadow-lg  shadow-black self-start flex sm:flex-col p-0 m-0 md:flex-row md:p-5 m-5 lg:flex-row lg:p-5 lg:m-5 xl:flex-row xl:p-5 xl:m-5">
       <div>
         <h1 className="text-2xl font-bold mb-4">Calendar</h1>
         {isLoggedIn.user.role !== "admin" ? (
@@ -535,7 +535,7 @@ const Calendar = () => {
       </div>
       <div>
         <Divider textAlign="center" className="text-lg font-bold mt-4 mb-4">
-          <span className="text-lg font-bold">Available Appointments {formattedDateString}</span>
+          <span className="sm:text-sm   md:text-lg font-bold">Available Appointments {formattedDateString}</span>
           {" "}
          
         </Divider>
