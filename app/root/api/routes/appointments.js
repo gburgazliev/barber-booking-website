@@ -349,7 +349,7 @@ router.post("/book", verifyCookie, async (req, res, next) => {
     // }
 
     // Send confirmation email
-    const confirmationLink = `${process.env.FRONTEND_URL_TEST}/confirm-appointment/:${confirmationToken}`;
+    const confirmationLink = `${process.env.FRONTEND_URL}/confirm-appointment/:${confirmationToken}`;
     const mailOptions = {
       from: process.env.EMAIL,
       to: email,
