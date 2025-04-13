@@ -9,7 +9,7 @@ const Home = () => {
 
  
   return (
-    <div className=''>
+    <div className='w-full  flex flex-col items-center justify-center'>
       <h1>Home page</h1>
       <Calendar/>
       <a href="">sadadsd</a>
