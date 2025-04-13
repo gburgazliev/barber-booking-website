@@ -505,7 +505,7 @@ const Calendar = () => {
   // }, [appointments, isLoggedIn]);
 
   return (
-    <div className="border bg-red-50 rounded-lg shadow-lg  shadow-black self-start flex sm:flex-col p-0 m-0 md:flex-row md:p-5 m-5 lg:flex-row lg:p-5 lg:m-5 xl:flex-row xl:p-5 xl:m-5">
+    <div className="border bg-red-50 rounded-lg shadow-lg  shadow-black self-start flex sm:flex-col sm:p-0 sm:m-0 md:flex-row md:p-5 m-5 lg:flex-row lg:p-5 lg:m-5 xl:flex-row xl:p-5 xl:m-5">
       <div>
         <h1 className="text-2xl font-bold mb-4">Calendar</h1>
         {isLoggedIn.user.role !== "admin" ? (
