@@ -448,8 +448,8 @@ const date = appointment.date;
       const intermediateSlot = calculateTimeWithOffset(nextTimeSlot, 20); // 20 minutes after the second slot starts
 
       workingHours.blockedSlots.push(
-        { timeSlot: nextTimeSlot, blockedBy: appointment._id },
-        { timeSlot: thirdSlot, blockedBy: appointment._id }
+        { timeSlot: nextTimeSlot, blockedBy: appointment._id, date },
+        { timeSlot: thirdSlot, blockedBy: appointment._id, date }
       );
       // Check if these slots are within working hours
       if (
