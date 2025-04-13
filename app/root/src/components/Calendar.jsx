@@ -417,14 +417,11 @@ const Calendar = () => {
     }
   };
 
-
-
   // Initial data fetch when date changes
   useEffect(() => {
     refreshData();
   }, [formattedDateString]);
 
-  
   // Filter out booked slots and slots after Hair and Beard appointments
   useEffect(() => {
     const updateAvailableSlots = async () => {
@@ -508,86 +505,93 @@ const Calendar = () => {
   // }, [appointments, isLoggedIn]);
 
   return (
-    <div className="border bg-white">
-      {isLoggedIn.user.role !== "admin" ? (
-        <DateCalendar
-          value={date}
-          onChange={(newDate) => setDate(newDate)}
-          minDate={minDate}
-          maxDate={maxDate}
-          openTo="day"
-          views={["day"]}
-        />
-      ) : (
-        <>
-          <StaticDateTimePicker
-            value={selectedDateTime}
-            onChange={handleTimeChange}
-            ampm={false}
-            views={["year", "day", "hours", "minutes"]}
-            onAccept={handleSaveSchedule}
+    <div className="border bg-red-50 rounded-lg p-5 m-5 shadow-lg  shadow-black self-start flex">
+      <div>
+        <h1 className="text-2xl font-bold mb-4">Calendar</h1>
+        {isLoggedIn.user.role !== "admin" ? (
+          <DateCalendar
+            value={date}
+            onChange={(newDate) => setDate(newDate)}
+            minDate={minDate}
+            maxDate={maxDate}
+            openTo="day"
+            views={["day"]}
           />
-          <Typography>
-            Selected Schedule: {startTime.format("h:mm A")} -{" "}
-            {endTime.format("h:mm A")}
-          </Typography>{" "}
-        </>
-      )}
-      <Divider textAlign="center">
-        {" "}
-        Available appointments for {formattedDateString}
-      </Divider>
-      <div className="grid grid-cols-4 gap-5 p-5 ml-2 mr-2 ">
-        {timeSlots.map((timeSlot, index) => (
-          <Appointment
-            key={index}
-            timeSlot={timeSlot}
-            date={formattedDateString}
-            appointments={appointments}
-            setCurrentUserAppointments={setCurrentUserAppointments}
-            refreshAppointments={refreshData}
-            timeSlots={timeSlots}
-            calculateNextTimeSlot={calculateNextTimeSlot}
-            slotDuration={getSlotType(timeSlot).duration}
-            isRegularSlot={isRegularSlot(timeSlot)}
-            isShiftedSlot={getSlotType(timeSlot).isShiftedSlot}
-            isIntermediateSlot={getSlotType(timeSlot).isIntermediateSlot }
-          />
-        ))}
-      </div>
-      {isLoggedIn.status && (
-        <div className="flex flex-col">
-          <Divider textAlign="left">Your appointments </Divider>
-          <div className="m-2 p-2">
-            {appointments
-              .filter(
-                (appointment) => appointment.userId._id === isLoggedIn.user._id
-              )
-              .map((appointmentObj) => {
-                // Get slot type information for user appointment
-                const slotTypeInfo = getSlotType(appointmentObj.timeSlot);
-
-                return (
-                  <Appointment
-                    key={appointmentObj._id}
-                    timeSlot={appointmentObj.timeSlot}
-                    date={formattedDateString}
-                    appointments={appointments}
-                    setCurrentUserAppointments={setCurrentUserAppointments}
-                    refreshAppointments={refreshData}
-                    timeSlots={timeSlots}
-                    calculateNextTimeSlot={calculateNextTimeSlot}
-                    isRegularSlot={slotTypeInfo.duration === 40}
-                    slotDuration={slotTypeInfo.duration}
-                    isShiftedSlot={slotTypeInfo.isShiftedSlot}
-                    isIntermediateSlot={slotTypeInfo.isIntermediateSlot}
-                    userAppointment={true}
-                  />
-                );
-              })}
+        ) : (
+          <div className="flex flex-col items-center justify-center">
+            <StaticDateTimePicker
+              value={selectedDateTime}
+              onChange={handleTimeChange}
+              ampm={false}
+              views={["year", "day", "hours", "minutes"]}
+              onAccept={handleSaveSchedule}
+            />
+            <Typography>
+              Selected Schedule: {startTime.format("h:mm A")} -{" "}
+              {endTime.format("h:mm A")}
+            </Typography>{" "}
           </div>
+        )}
+      </div>
+      <div>
+        <Divider textAlign="center" className="text-lg font-bold mt-4 mb-4">
+          <span className="text-lg font-bold">Available Appointments {formattedDateString}</span>
+          {" "}
+         
+        </Divider>
+        <div className="grid grid-cols-4 gap-5 p-5 ml-2 mr-2 ">
+          {timeSlots.map((timeSlot, index) => (
+            <Appointment
+              key={index}
+              timeSlot={timeSlot}
+              date={formattedDateString}
+              appointments={appointments}
+              setCurrentUserAppointments={setCurrentUserAppointments}
+              refreshAppointments={refreshData}
+              timeSlots={timeSlots}
+              calculateNextTimeSlot={calculateNextTimeSlot}
+              slotDuration={getSlotType(timeSlot).duration}
+              isRegularSlot={isRegularSlot(timeSlot)}
+              isShiftedSlot={getSlotType(timeSlot).isShiftedSlot}
+              isIntermediateSlot={getSlotType(timeSlot).isIntermediateSlot}
+            />
+          ))}
         </div>
-      )}
+        {isLoggedIn.status && (
+          <div className="flex flex-col">
+            <Divider textAlign="left" className="text-lg font-bold mt-4 mb-4"><span className="text-lg font-bold"> Your appointments</span>  </Divider>
+            <div className="m-2 p-2">
+              {appointments
+                .filter(
+                  (appointment) =>
+                    appointment.userId._id === isLoggedIn.user._id
+                )
+                .map((appointmentObj) => {
+                  // Get slot type information for user appointment
+                  const slotTypeInfo = getSlotType(appointmentObj.timeSlot);
+
+                  return (
+                    <Appointment
+                      key={appointmentObj._id}
+                      timeSlot={appointmentObj.timeSlot}
+                      date={formattedDateString}
+                      appointments={appointments}
+                      setCurrentUserAppointments={setCurrentUserAppointments}
+                      refreshAppointments={refreshData}
+                      timeSlots={timeSlots}
+                      calculateNextTimeSlot={calculateNextTimeSlot}
+                      isRegularSlot={slotTypeInfo.duration === 40}
+                      slotDuration={slotTypeInfo.duration}
+                      isShiftedSlot={slotTypeInfo.isShiftedSlot}
+                      isIntermediateSlot={slotTypeInfo.isIntermediateSlot}
+                      userAppointment={true}
+                    />
+                  );
+                })}
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 };
