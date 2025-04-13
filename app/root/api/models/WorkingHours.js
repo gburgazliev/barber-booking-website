@@ -38,6 +38,7 @@ const WorkingHoursSchema = new mongoose.Schema({
     timeSlot: { type: String },  // The time slot that's blocked "09:00"
     blockedBy: { type: mongoose.Schema.Types.ObjectId, ref: "Appointment" }, // Who blocked it
     blockedAt: { type: Date, default: Date.now },
+    date: { type: String }, // Format: YYYY-MM-DD
   }],
   
   expiresAt: {
