@@ -505,7 +505,7 @@ const Calendar = () => {
   // }, [appointments, isLoggedIn]);
 
   return (
-    <div className="border bg-red-50 rounded-lg shadow-lg  shadow-black self-start flex sm:flex-col sm:p-0 sm:m-0 sm:self-center md:flex-row md:p-5 m-5 lg:flex-row lg:p-5 lg:m-5 xl:flex-row xl:p-5 xl:m-5">
+    <div className="self-start  border bg-red-50 rounded-lg shadow-lg shadow-black flex sm:flex-col sm:p-0 sm:m-0 sm:scale-75 md:flex-row md:p-5 m-5 lg:flex-row lg:scale-100 lg:m-5 lg:p-5  xl:flex-row xl:p-5 xl:m-5">
       <div>
         <h1 className="text-2xl font-bold mb-4">Calendar</h1>
         {isLoggedIn.user.role !== "admin" ? (
@@ -535,11 +535,11 @@ const Calendar = () => {
       </div>
       <div>
         <Divider textAlign="center" className="text-lg font-bold mt-4 mb-4">
-          <span className="sm:text-sm   md:text-lg font-bold">Available Appointments {formattedDateString}</span>
-          {" "}
-         
+          <span className="sm:text-sm md:text-lg font-bold">
+            Available Appointments {formattedDateString}
+          </span>{" "}
         </Divider>
-        <div className="grid grid-cols-4 gap-5 p-5 ml-2 mr-2 ">
+        <div className="grid grid-cols-4 gap-5 p-5 ml-2 mr-2">
           {timeSlots.map((timeSlot, index) => (
             <Appointment
               key={index}
@@ -559,7 +559,12 @@ const Calendar = () => {
         </div>
         {isLoggedIn.status && (
           <div className="flex flex-col">
-            <Divider textAlign="left" className="text-lg font-bold mt-4 mb-4"><span className="text-lg font-bold"> Your appointments</span>  </Divider>
+            <Divider
+              textAlign="left"
+              className="text-lg font-bold mt-4 mb-4"
+            >
+              <span className="text-lg font-bold"> Your appointments</span>{" "}
+            </Divider>
             <div className="m-2 p-2">
               {appointments
                 .filter(
