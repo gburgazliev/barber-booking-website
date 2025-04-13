@@ -9,8 +9,8 @@ const Home = () => {
 
  
   return (
-    <div className='w-full  flex flex-col items-center justify-center'>
-      <h1>Home page</h1>
+    <div className='w-full  flex flex-col justify-center items-center'>
+      
       <Calendar/>
       <a href="">sadadsd</a>
     </div>
