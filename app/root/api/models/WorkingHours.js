@@ -23,12 +23,14 @@ const WorkingHoursSchema = new mongoose.Schema({
     shiftedTime: { type: String },
     createdDueToAppointmentId: { type: mongoose.Schema.Types.ObjectId, ref: "Appointments" },
     isBooked: { type: Boolean, default: false },
+    date: { type: String }, // Format: YYYY-MM-DD
     bookedAppointmentId: { type: mongoose.Schema.Types.ObjectId, ref: "Appointments", default: null }
   }],
   
   // New field to track intermediate slots
   intermediateSlots: [{
     slotTime: { type: String },
+    date: { type: String }, // Format: YYYY-MM-DD
     createdDueToAppointmentId: { type: mongoose.Schema.Types.ObjectId, ref: "Appointments" },
     isBooked: { type: Boolean, default: false },
     bookedAppointmentId: { type: mongoose.Schema.Types.ObjectId, ref: "Appointments", default: null }
