@@ -355,8 +355,8 @@ const Calendar = () => {
         const slots = [];
         let start = new Date(`1970-01-01T09:00:00`);
         const end = new Date(`1970-01-01T18:20:00`);
-        const breakStart = new Date(`1970-01-01T13:00:00`);
-        const breakEnd = new Date(`1970-01-01T14:00:00`);
+        const breakStart ='' //new Date(`1970-01-01T13:00:00`);
+        const breakEnd = ''//new Date(`1970-01-01T14:00:00`);
 
         // Ensure we generate slots at exactly 40-minute intervals
         while (start <= end) {
@@ -459,8 +459,8 @@ const Calendar = () => {
           const slots = [];
           const start = new Date(`1970-01-01T09:00:00`);
           const end = new Date(`1970-01-01T19:00:00`);
-          const breakStart = new Date(`1970-01-01T13:00:00`);
-          const breakEnd = new Date(`1970-01-01T14:00:00`);
+          const breakStart = '';//new Date(`1970-01-01T13:00:00`);
+          const breakEnd = '';//new Date(`1970-01-01T14:00:00`);
 
           while (start <= end) {
             if (start >= breakStart && start < breakEnd) {
@@ -505,7 +505,7 @@ const Calendar = () => {
   // }, [appointments, isLoggedIn]);
 
   return (
-    <div className="self-start  border bg-red-50 rounded-lg shadow-lg shadow-black flex sm:flex-col sm:p-0 sm:m-0 sm:scale-75 md:flex-row md:p-5 m-5 lg:flex-row lg:scale-100 lg:m-5 lg:p-5  xl:flex-row xl:p-5 xl:m-5">
+    <div className="border bg-red-50 rounded-lg shadow-lg shadow-black flex sm:flex-col sm:p-0 sm:m-0 sm:scale-75 md:flex-row md:p-5 m-5 md:scale-75 lg:flex-row lg:scale-100 lg:m-5 lg:p-5  xl:flex-row xl:p-5 xl:m-5">
       <div>
         <h1 className="text-2xl font-bold mb-4">Calendar</h1>
         {isLoggedIn.user.role !== "admin" ? (
