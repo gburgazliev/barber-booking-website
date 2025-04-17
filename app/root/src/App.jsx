@@ -15,6 +15,7 @@ import LocationView from "./views/LocationView";
 import AppointmentConfirmation from "./components/AppointmentConfirmation";
 import { LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import Preview from "./components/Preview";
 
 
 function App() {

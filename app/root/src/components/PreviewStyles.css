@@ -1,0 +1,162 @@
+/* Preview Component Styles */
+
+/* Animations */
+@keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  @keyframes pulse {
+    0% {
+      transform: scale(1);
+    }
+    50% {
+      transform: scale(1.05);
+    }
+    100% {
+      transform: scale(1);
+    }
+  }
+  
+  @keyframes float {
+    0% {
+      transform: translateY(0px);
+    }
+    50% {
+      transform: translateY(-10px);
+    }
+    100% {
+      transform: translateY(0px);
+    }
+  }
+  
+  /* Applied Classes */
+  .animate-fade-in {
+    animation: fadeIn 0.6s ease-out forwards;
+  }
+  
+  .animate-pulse-slow {
+    animation: pulse 3s infinite;
+  }
+  
+  .animate-float {
+    animation: float 5s ease-in-out infinite;
+  }
+  
+  /* Staggered animations for service cards */
+  .service-card:nth-child(1) {
+    animation-delay: 0.1s;
+  }
+  
+  .service-card:nth-child(2) {
+    animation-delay: 0.3s;
+  }
+  
+  .service-card:nth-child(3) {
+    animation-delay: 0.5s;
+  }
+  
+  /* Feature cards */
+  .feature-card:nth-child(1) {
+    animation-delay: 0.2s;
+  }
+  
+  .feature-card:nth-child(2) {
+    animation-delay: 0.4s;
+  }
+  
+  .feature-card:nth-child(3) {
+    animation-delay: 0.6s;
+  }
+  
+  .feature-card:nth-child(4) {
+    animation-delay: 0.8s;
+  }
+  
+  /* Scrolling styles */
+  .section-reveal {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+  }
+  
+  .section-reveal.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  
+  /* Custom barber pole animation */
+  @keyframes barberPole {
+    from {
+      background-position: 0 0;
+    }
+    to {
+      background-position: 0 -60px;
+    }
+  }
+  
+  .barber-pole {
+    background: linear-gradient(
+      45deg,
+      #ff0000 25%,
+      #ffffff 25%,
+      #ffffff 50%,
+      #0000ff 50%,
+      #0000ff 75%,
+      #ffffff 75%
+    );
+    background-size: 30px 30px;
+    animation: barberPole 2.5s linear infinite;
+  }
+  
+  /* Button effects */
+  .btn-glow {
+    box-shadow: 0 0 10px 2px rgba(255, 255, 255, 0.2);
+    transition: all 0.3s ease;
+  }
+  
+  .btn-glow:hover {
+    box-shadow: 0 0 15px 5px rgba(255, 255, 255, 0.4);
+  }
+  
+  /* Custom scroll indicator */
+  .scroll-indicator {
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 30px;
+    height: 50px;
+    border: 2px solid currentColor;
+    border-radius: 15px;
+  }
+  
+  .scroll-indicator::after {
+    content: '';
+    position: absolute;
+    top: 8px;
+    left: 50%;
+    width: 4px;
+    height: 10px;
+    background-color: currentColor;
+    border-radius: 2px;
+    transform: translateX(-50%);
+    animation: scrollIndicator 2s infinite;
+  }
+  
+  @keyframes scrollIndicator {
+    0% {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+    100% {
+      opacity: 0;
+      transform: translateX(-50%) translateY(15px);
+    }
+  }
