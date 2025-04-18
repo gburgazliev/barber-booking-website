@@ -297,7 +297,7 @@ const Preview = () => {
           {features.map((feature, index) => (
             <div
               key={index}
-              className="card bg-base-100 shadow-xl hover:bg-primary hover:text-primary-content transition-colors duration-300 feature-card animate-fade-in"
+              className="card bg-base-100 shadow-xl hover:bg-secondary hover:text-primary-content transition-colors duration-300 feature-card animate-fade-in"
             >
               <div className="card-body items-center text-center">
                 <div className="text-3xl mb-2 animate-pulse-slow">
