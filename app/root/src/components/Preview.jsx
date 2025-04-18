@@ -71,7 +71,7 @@ const Preview = () => {
       name: "Beard",
       price: "20 lv",
       description: "Expert beard trimming, shaping, and styling",
-      duration: "30-40 min",
+      duration: "40 min",
       icon: <BeardIcon size={48} />,
     },
     {
@@ -116,10 +116,10 @@ const Preview = () => {
   };
  // w-full max-w-6xl mx-auto
   return (
-    <div className="w-full max-w-7xl mx-auto px-4">
+    <div className="w-full max-w-7xl  sm:flex sm:flex-col sm:gap-5">
       {/* Hero Section */}
-      <div className="hero min-h-screen bg-base-200 rounded-lg overflow-hidden relative">
-        <div className="hero-content flex-col lg:flex-row-reverse">
+      <div className="hero min-h-[800px] bg-base-200  rounded-lg overflow-hidden relative">
+        <div className="hero-content flex-col lg:flex-row-reverse sm:p-0">
           <div className="lg:w-1/2">
             <svg viewBox="0 0 800 400" className="w-full h-auto">
               {/* Background */}
@@ -172,8 +172,8 @@ const Preview = () => {
               </defs>
             </svg>
           </div>
-          <div className="lg:w-1/2 animate-fade-in">
-            <h1 className="text-5xl font-bold">Barber Booking</h1>
+          <div className="lg:w-1/2  animate-fade-in">
+            <h1 className="text-5xl font-bold font-mono">BARBERIA</h1>
             <p className="py-6">
               Professional haircuts and beard grooming services. Book your appointment today and experience the difference.
             </p>
@@ -185,7 +185,7 @@ const Preview = () => {
         
         {/* Scroll indicator */}
         <div className="absolute bottom-10 left-1/2 transform -translate-x-1/2 text-center">
-          <p className="mb-2">Scroll to explore</p>
+          <p className="sm:mb-20">Scroll to explore</p>
           <div className="scroll-indicator"></div>
         </div>
       </div>
@@ -239,11 +239,11 @@ const Preview = () => {
       {/* Testimonials Section */}
       <div 
         ref={sectionRefs.testimonials}
-        className={`py-16 bg-base-200 rounded-lg section-reveal ${sectionsVisible.testimonials ? 'visible' : ''}`}
+        className={` bg-base-200 sm:scale-75 rounded-lg section-reveal ${sectionsVisible.testimonials ? 'visible' : ''}`}
       >
-        <h2 className="text-3xl font-bold text-center mb-12">What Our Customers Say</h2>
-        <div className="carousel w-full px-6">
-          <div id="testimonial1" className="carousel-item relative w-full">
+        <h2 className="text-3xl font-bold text-center md:mb-12 sm:mb-0">What Our Customers Say</h2>
+        <div className="carousel w-full px-6 sm:scale-75 md:scale-100 lg:scale-100 xl:scale-100">
+          <div id="testimonial1" className="carousel-item relative sm:w-[300px]  sm:scale-75 md:scale-100 md:w-full lg:w-full lg:scale-100 xl:scale-100">
             <div className="flex flex-col items-center justify-center w-full max-w-4xl mx-auto">
               <div className="card bg-base-100 shadow-xl w-full animate-fade-in">
                 <div className="card-body">
@@ -268,13 +268,10 @@ const Preview = () => {
                 </div>
               </div>
             </div>
-            <div className="absolute flex justify-between transform -translate-y-1/2 left-5 right-5 top-1/2">
-              <a href="#testimonial3" className="btn btn-circle btn-glow">❮</a> 
-              <a href="#testimonial2" className="btn btn-circle btn-glow">❯</a>
-            </div>
+         
           </div> 
           
-          <div id="testimonial2" className="carousel-item relative w-full">
+          <div id="testimonial2" className="carousel-item relative w-full sm:w-[300px] md:scale-100 md:w-full lg:w-full lg:scale-100 xl:scale-100">
             <div className="flex flex-col items-center justify-center w-full max-w-4xl mx-auto">
               <div className="card bg-base-100 shadow-xl w-full animate-fade-in">
                 <div className="card-body">
@@ -299,13 +296,10 @@ const Preview = () => {
                 </div>
               </div>
             </div>
-            <div className="absolute flex justify-between transform -translate-y-1/2 left-5 right-5 top-1/2">
-              <a href="#testimonial1" className="btn btn-circle btn-glow">❮</a> 
-              <a href="#testimonial3" className="btn btn-circle btn-glow">❯</a>
-            </div>
+            
           </div> 
           
-          <div id="testimonial3" className="carousel-item relative w-full">
+          <div id="testimonial3" className="carousel-item relative w-full sm:w-[300px] sm:scale-75 md:scale-100 md:w-full lg:w-full lg:scale-100 xl:scale-100">
             <div className="flex flex-col items-center justify-center w-full max-w-4xl mx-auto">
               <div className="card bg-base-100 shadow-xl w-full animate-fade-in">
                 <div className="card-body">
@@ -326,20 +320,17 @@ const Preview = () => {
                       </div>
                     </div>
                   </div>
-                  <p className="text-lg">"My beard has never looked better. The barber knew exactly how to shape it to complement my face. Will definitely be back!"</p>
+                  <p className="sm:text-md md:text-lg">"My beard has never looked better. The barber knew exactly how to shape it to complement my face. Will definitely be back!"</p>
                 </div>
               </div>
             </div>
-            <div className="absolute flex justify-between transform -translate-y-1/2 left-5 right-5 top-1/2">
-              <a href="#testimonial2" className="btn btn-circle btn-glow">❮</a> 
-              <a href="#testimonial1" className="btn btn-circle btn-glow">❯</a>
-            </div>
+          
           </div>
         </div>
         
         {/* Carousel Indicators */}
         <div className="flex justify-center w-full py-4 gap-2">
-          <a href="#testimonial1" className="btn btn-xs btn-glow">1</a> 
+          <a href="#testimonial1"  className="btn btn-xs btn-glow">1</a> 
           <a href="#testimonial2" className="btn btn-xs btn-glow">2</a> 
           <a href="#testimonial3" className="btn btn-xs btn-glow">3</a> 
         </div>
@@ -372,13 +363,13 @@ const Preview = () => {
           </div>
           <div className="lg:w-1/2 animate-fade-in" style={{animationDelay: '0.4s'}}>
             <div className="card bg-base-100 shadow-xl hover:shadow-2xl transition-all duration-300">
-              <div className="card-body">
+              <div className="card-body p-2 md:w-auto sm:w-[300px]">
                 <h3 className="card-title justify-center mb-4">
                   <ClockIcon size={24} className="mr-2" />
                   Opening Hours
                 </h3>
                 <ul className="space-y-2">
-                  <li className="flex justify-between">
+                  <li className="flex justify-between"> 
                     <span>Monday - Friday:</span>
                     <span>9:00 AM - 7:00 PM</span>
                   </li>
