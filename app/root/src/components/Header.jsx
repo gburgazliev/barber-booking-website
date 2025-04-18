@@ -92,14 +92,14 @@ const Header = () => {
             <ul className="menu menu-horizontal">
               {/* Navbar menu content here */}
               <li>
-                <details className="dropdown">
+                {isLoggedIn.status && <details className="dropdown">
                   <summary role="btn ">Notifications</summary>
                   <ul className="menu dropdown-content bg-base-200 rounded-box z-[1] w-52 p-2 shadow">
                     <li>
                       <a>Item 2</a>
                     </li>
                   </ul>
-                </details>
+                </details>}
               </li>
               <li>
                 <details className="dropdown">
@@ -158,7 +158,7 @@ const Header = () => {
                       </details>
                     </li>
                     <li>
-                      <a>Item 2</a>
+                     {isLoggedIn.status && <Link>Profile</Link>}
                     </li>
                   </ul>
                 </details>
