@@ -416,7 +416,7 @@ router.get("/confirmation/:confirmHex", async (req, res) => {
       return res.status(400).json({ message: "Slot is already booked!" });
     }
 
-    const isBlocked = workingHours.blockedSlots.find(
+    const isBlocked = workingHours?.blockedSlots.find(
       (slot) => slot.timeSlot === appointment.timeSlot && date === slot.date
     );
     if (isBlocked) {
