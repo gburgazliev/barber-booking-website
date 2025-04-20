@@ -5,6 +5,7 @@ const cookieParser = require("cookie-parser");
 const rateLimit = require("express-rate-limit");
 const helmet = require("helmet");
 
+
 const CORS_OPTIONS = {
   origin: [
     "http://localhost:5173",
@@ -48,10 +49,11 @@ const startServer = async () => {
   const UserRouter = require("./routes/users");
   const ScheduleRouter = require("./routes/workingHours");
   const AppointmentRouter =  require("./routes/appointments");
-
+  const AdminRouter = require("./routes/admin");
   app.use("/api/users", UserRouter);
   app.use("/api/schedule", ScheduleRouter);
   app.use("/api/appointments", AppointmentRouter);
+  app.use("/api/admin", AdminRouter);
   app.use((err, req, res, next) => {
     console.error(err.stack);
     res
