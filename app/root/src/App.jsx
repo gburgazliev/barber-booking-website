@@ -15,6 +15,8 @@ import LocationView from "./views/LocationView";
 import AppointmentConfirmation from "./components/AppointmentConfirmation";
 import { LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import ProfileView from "./views/ProfileView";
+
 import AdminAuth from './hoc/AdminAuth';
 import AdminLayout from './components/AdminLayout';
 import AdminDashboard from './components/AdminDashboard';
@@ -82,11 +84,13 @@ function App() {
               />
               <Route path="/location" element={<LocationView />} />
               <Route path="/" element={<HomeView />} />
+              <Route path="/profile" element={<ProfileView />} />
               <Route path="/reset-password" element={<ResetPasswordView />} />
               <Route
                 path="/reset-password/:resetToken"
                 element={<NewPasswordView />}
               />
+               <Route path="*" element={<div>nonono</div>} />
             </Routes>
           </LocalizationProvider>
         </AuthContext.Provider>

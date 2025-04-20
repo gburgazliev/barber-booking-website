@@ -41,7 +41,7 @@ const Header = () => {
     </>
   ) : (
     <li>
-      <button onClick={handleLogout}>Logout</button>
+      <button className="btn bg-primary rounded-lg " onClick={handleLogout}>Logout</button>
     </li>
   );
 
@@ -158,7 +158,7 @@ const Header = () => {
                       </details>
                     </li>
                     <li>
-                     {isLoggedIn.status && <Link>Profile</Link>}
+                     {isLoggedIn.status && <Link to='/profile'>Profile</Link>}
                     </li>
                   </ul>
                 </details>
