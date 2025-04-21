@@ -107,7 +107,7 @@ const AdminLayout = () => {
       </div>
       
       {/* Mobile header */}
-      <div className="md:hidden bg-base-200 p-4">
+      <div className="md:hidden bg-base-200 p-4 z-10">
         <div className="flex justify-between items-center">
           <h1 className="text-xl font-bold">BARBERIA Admin</h1>
           <div className="dropdown dropdown-end">
