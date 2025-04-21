@@ -212,6 +212,17 @@ router.post("/book", verifyCookie, async (req, res, next) => {
             "The next time slot is not available for Hair and Beard service!",
         });
       }
+      // check if next slot is blocked by timeslot and date
+      const isBlocked = await WorkingHours.findOne({
+        date,
+        blockedSlots: { $elemMatch: { timeSlot: nextTimeSlot, date } },
+      });
+      if (isBlocked) {
+        return res.status(409).json({
+          message:
+            "The next time slot is not available for Hair and Beard service!",
+        });
+      }
     }
 
     // Check if the slot duration is valid for the service type
@@ -684,6 +695,7 @@ router.delete("/cancel/:id", async (req, res) => {
                   slotTime: newSlotTime,
                   createdDueToAppointmentId: appointmentToCancel._id,
                   isBooked: false,
+                  date: date,
                 });
               }
               if (bookedShiftedSlot) {
@@ -692,6 +704,7 @@ router.delete("/cancel/:id", async (req, res) => {
                   shiftedTime: newSlotTime,
                   createdDueToAppointmentId: appointmentToCancel._id,
                   isBooked: false,
+                  date: date,
                 });
               }
             }
@@ -728,26 +741,19 @@ router.delete("/cancel/:id", async (req, res) => {
 
         if (workingHours) {
           // Update the slot's booked status to false
-
           const slotIndex = workingHours.intermediateSlots.findIndex(
             (slot) =>
-              slot.createdDueToAppointmentId.equals(appointmentToCancel._id) &&
-              slot.isBooked
+              slot.slotTime === appointmentToCancel.timeSlot && 
+              appointmentToCancel.date === slot.date
           );
+          
           if (slotIndex >= 0) {
             workingHours.intermediateSlots[slotIndex].isBooked = false;
-            workingHours.intermediateSlots[slotIndex].bookedAppointmentId =
-              null;
+            workingHours.intermediateSlots[slotIndex].bookedAppointmentId = null;
           }
-          // Remove the intermediate slot from the list of booked slots
-
-          // workingHours.intermediateSlots.push({
-          //   slotTime: appointmentToCancel.timeSlot,
-          //   createdDueToAppointmentId: appointmentToCancel._id,
-          //   isBooked: false,
-          // });
+          
+          await workingHours.save();
         }
-        workingHours.save();
       }
 
       // If canceling a shifted slot appointment
@@ -759,13 +765,11 @@ router.delete("/cancel/:id", async (req, res) => {
         if (workingHours) {
           const slotIndex = workingHours.shiftedSlots.findIndex(
             (slot) =>
-              slot.bookedAppointmentId &&
-              slot.bookedAppointmentId.equals(appointmentToCancel._id)
+              slot.shiftedTime === appointmentToCancel.timeSlot && 
+              appointmentToCancel.date === slot.date
           );
 
           if (slotIndex >= 0) {
-            // Remove the shifted slot
-
             workingHours.shiftedSlots[slotIndex].isBooked = false;
             workingHours.shiftedSlots[slotIndex].bookedAppointmentId = null;
           }
@@ -774,80 +778,80 @@ router.delete("/cancel/:id", async (req, res) => {
         }
       }
 
+      // Only clean up slots if they're created by this specific appointment
+      // and it's a derived slot that's being canceled
       if (
         appointmentToCancel.isShiftedSlot ||
         appointmentToCancel.isIntermediateSlot
       ) {
-        // Get all shifted slots and intermediate slots with the same createdDueToAppointmentId from workingHours into an array
         const workingHours = await WorkingHours.findOne({
           date: appointmentToCancel.date,
         });
-        let slotObj;
-        if (appointmentToCancel.isShiftedSlot) {
-          slotObj = workingHours.shiftedSlots.find(
-            (slot) => slot.shiftedTime === appointmentToCancel.timeSlot
-          );
-        } else if (appointmentToCancel.isIntermediateSlot) {
-          slotObj = workingHours.intermediateSlots.find(
-            (slot) => slot.slotTime === appointmentToCancel.timeSlot
-          );
-        }
+        
         if (workingHours) {
-          const relativeSlots = [
-            ...workingHours.shiftedSlots.filter((slot) =>
-              slot.createdDueToAppointmentId.equals(
-                slotObj.createdDueToAppointmentId
-              )
-            ),
-            ...workingHours.intermediateSlots.filter((slot) =>
-              slot.createdDueToAppointmentId.equals(
-                slotObj.createdDueToAppointmentId
-              )
-            ),
-          ];
-
-          const isAnyBooked = relativeSlots.some(
-            (slot) =>
-              slot.isBooked &&
-              !slot.bookedAppointmentId.equals(appointmentToCancel._id)
-          );
-
-          const existingAppointment = await Appointment.findOne({
-            _id: slotObj.createdDueToAppointmentId,
-          });
-          if (!isAnyBooked && !existingAppointment) {
-            // Remove shifted and intermediate slots with this createdDueToAppointmentId from workingHours
-
-            workingHours.shiftedSlots = workingHours.shiftedSlots.filter(
-              (slot) =>
-                !slot.createdDueToAppointmentId.equals(
-                  slotObj.createdDueToAppointmentId
-                )
+          // Get the slot object that's being canceled
+          let slotObj;
+          if (appointmentToCancel.isShiftedSlot) {
+            slotObj = workingHours.shiftedSlots.find(
+              (slot) => slot.shiftedTime === appointmentToCancel.timeSlot && 
+                        appointmentToCancel.date === slot.date
             );
-            workingHours.intermediateSlots =
-              workingHours.intermediateSlots.filter(
-                (slot) =>
-                  !slot.createdDueToAppointmentId.equals(
-                    slotObj.createdDueToAppointmentId
-                  )
-              );
-
-            workingHours.blockedSlots = workingHours.blockedSlots.filter(
-              (slot) =>
-                !slot.blockedBy.equals(slotObj.createdDueToAppointmentId)
+          } else if (appointmentToCancel.isIntermediateSlot) {
+            slotObj = workingHours.intermediateSlots.find(
+              (slot) => slot.slotTime === appointmentToCancel.timeSlot && 
+                        appointmentToCancel.date === slot.date
             );
           }
-
-          // Remove the slots from the working hours
-          workingHours.shiftedSlots = workingHours.shiftedSlots.filter(
-            (slot) => !relativeSlots.includes(slot)
-          );
-          workingHours.intermediateSlots =
-            workingHours.intermediateSlots.filter(
-              (slot) => !relativeSlots.includes(slot)
+          
+          // Only if we found the actual slot object
+          if (slotObj && slotObj.createdDueToAppointmentId) {
+            // Find the original appointment
+            const originalAppointmentId = slotObj.createdDueToAppointmentId;
+            const originalAppointment = await Appointment.findOne({
+              _id: originalAppointmentId,
+            });
+            
+            // Find all slots related to the original appointment
+            const relatedShiftedSlots = workingHours.shiftedSlots.filter(
+              (slot) => slot.createdDueToAppointmentId && 
+                        slot.createdDueToAppointmentId.equals(originalAppointmentId)
             );
-
-          await workingHours.save();
+            
+            const relatedIntermediateSlots = workingHours.intermediateSlots.filter(
+              (slot) => slot.createdDueToAppointmentId && 
+                        slot.createdDueToAppointmentId.equals(originalAppointmentId)
+            );
+            
+            // Check if ANY of the related slots are still booked (except this one being canceled)
+            const isAnySlotStillBooked = [...relatedShiftedSlots, ...relatedIntermediateSlots].some(
+              (slot) => slot.isBooked && 
+                       (!slot.bookedAppointmentId || 
+                        !slot.bookedAppointmentId.equals(appointmentToCancel._id))
+            );
+            
+            // ONLY clean up ALL slots if:
+            // 1. The original appointment doesn't exist anymore AND
+            // 2. No other slots related to this original appointment are booked
+            if (!originalAppointment && !isAnySlotStillBooked) {
+              // Remove all slots related to the original appointment
+              workingHours.shiftedSlots = workingHours.shiftedSlots.filter(
+                (slot) => !slot.createdDueToAppointmentId || 
+                          !slot.createdDueToAppointmentId.equals(originalAppointmentId)
+              );
+              
+              workingHours.intermediateSlots = workingHours.intermediateSlots.filter(
+                (slot) => !slot.createdDueToAppointmentId || 
+                          !slot.createdDueToAppointmentId.equals(originalAppointmentId)
+              );
+              
+              // Also clean up related blocked slots
+              workingHours.blockedSlots = workingHours.blockedSlots.filter(
+                (slot) => !slot.blockedBy.equals(originalAppointmentId)
+              );
+            }
+            
+            await workingHours.save();
+          }
         }
       }
 
