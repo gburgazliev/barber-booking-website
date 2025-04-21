@@ -67,6 +67,13 @@ const ScheduleManagement = () => {
     // Parse break times if provided
     let breakStart = null;
     let breakEnd = null;
+
+    if (workingHours.breakStart && workingHours.breakEnd) {
+        const [breakStartHour, breakStartMinute] = workingHours.breakStart.split(':').map(Number);
+        const [breakEndHour, breakEndMinute] = workingHours.breakEnd.split(':').map(Number);
+        breakStart = dayjs().hour(breakStartHour).minute(breakStartMinute).second(0);
+        breakEnd = dayjs().hour(breakEndHour).minute(breakEndMinute).second(0);
+    }
     
     if (workingHours.breakStart && workingHours.breakEnd) {
       const [breakStartHour, breakStartMinute] = workingHours.breakStart.split(':').map(Number);
