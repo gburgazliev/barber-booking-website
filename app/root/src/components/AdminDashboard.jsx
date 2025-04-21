@@ -77,10 +77,10 @@ const AdminDashboard = () => {
   }
 
   return (
-    <div className="p-6">
+    <div className="p-6 ">
       <div className="flex justify-between items-center mb-8">
-        <h1 className="text-3xl font-bold">Admin Dashboard</h1>
-        <div className="flex gap-2">
+        <h1 className="text-3xl sm:text-xl font-bold">Admin Dashboard</h1>
+        <div className="flex gap-2 sm:flex-col md:flex-row">
           <button 
             className="btn btn-primary"
             onClick={fetchStats}
