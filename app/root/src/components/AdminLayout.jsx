@@ -24,7 +24,7 @@ const AdminLayout = () => {
   };
 
   return (
-    <div className="flex flex-col sm:w-96 md:w-full  md:flex-row h-screen bg-base-100">
+    <div className="flex flex-col justify-items-center  md:w-full  md:flex-row h-screen bg-base-100">
       {/* Sidebar for desktop */}
       <div className="hidden  md:flex md:w-64 bg-base-200 flex-col">
         <div className="p-4 border-b border-base-300">
@@ -153,7 +153,7 @@ const AdminLayout = () => {
       </div>
       
       {/* Main content */}
-      <div className="flex-1 overflow-auto">
+      <div className="flex-1  overflow-auto">
         <Outlet />
       </div>
     </div>
