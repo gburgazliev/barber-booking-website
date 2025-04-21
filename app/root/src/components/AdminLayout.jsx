@@ -24,9 +24,9 @@ const AdminLayout = () => {
   };
 
   return (
-    <div className="flex flex-col md:flex-row h-screen bg-base-100">
+    <div className="flex flex-col sm:w-96 md:w-full  md:flex-row h-screen bg-base-100">
       {/* Sidebar for desktop */}
-      <div className="hidden md:flex md:w-64 bg-base-200 flex-col">
+      <div className="hidden  md:flex md:w-64 bg-base-200 flex-col">
         <div className="p-4 border-b border-base-300">
           <h1 className="text-2xl font-bold">BARBERIA</h1>
           <p className="text-sm opacity-70">Admin Dashboard</p>
