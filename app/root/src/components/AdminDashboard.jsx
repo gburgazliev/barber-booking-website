@@ -198,7 +198,7 @@ const AdminDashboard = () => {
       
       {/* Recent Appointments Section */}
       <div className="card bg-base-100 shadow-xl">
-        <div className="card-body">
+        <div className="card-body ">
           <div className="flex justify-between items-center mb-4">
             <h2 className="card-title">Recent Appointments</h2>
             <Link to="/admin/appointments" className="btn btn-sm btn-primary">
@@ -206,7 +206,7 @@ const AdminDashboard = () => {
             </Link>
           </div>
           
-          <div className="overflow-x-auto">
+          <div className="overflow-x-auto w-full">
             <table className="table w-full">
               <thead>
                 <tr>

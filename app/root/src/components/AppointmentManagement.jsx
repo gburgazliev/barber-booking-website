@@ -113,8 +113,8 @@ const AppointmentManagement = () => {
   const timeSlots = generateTimeSlots();
   
   return (
-    <div className="p-6">
-      <div className="flex justify-between items-center mb-8">
+    <div className="p-6 w-full">
+      <div className="flex sm:justify-center sm:flex-col  md:flex-row md:justify-between items-center mb-8">
         <h1 className="text-3xl font-bold">Appointment Management</h1>
         <button 
           className="btn btn-primary"
@@ -124,19 +124,30 @@ const AppointmentManagement = () => {
         </button>
       </div>
       
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 w-full max-w-full">
         {/* Calendar */}
-        <div className="card bg-base-100 shadow-xl">
-          <div className="card-body">
-            <h2 className="card-title mb-4">Select Date</h2>
-            <DateCalendar 
-              value={selectedDate}
-              onChange={(newDate) => setSelectedDate(newDate)}
-              disablePast
-            />
-          </div>
-        </div>
-        
+        <div className="card bg-base-100 sm:!p-0 md:!p-6  shadow-xl w-full overflow-hidden">
+  <div className="card-body p-0">
+    <h2 className="card-title mb-4">Select Date</h2>
+    <div className="overflow-x-auto max-w-full">
+      <DateCalendar
+        value={selectedDate}
+        onChange={(newDate) => setSelectedDate(newDate)}
+        disablePast
+        className="bg-white shadow-md max-w-full"
+        sx={{
+          padding: 0,
+          margin: 0,
+          width: '100%',
+          maxWidth: '100%',
+          minWidth: 0,
+  
+        }}
+      />
+    </div>
+  </div>
+</div>
+
         {/* Appointments List */}
         <div className="card bg-base-100 shadow-xl lg:col-span-2">
           <div className="card-body">
@@ -151,7 +162,7 @@ const AppointmentManagement = () => {
                 <span>No appointments found for this date.</span>
               </div>
             ) : (
-              <div className="overflow-x-auto">
+              <div className="overflow-x-auto max-w-full">
                 <table className="table w-full">
                   <thead>
                     <tr>
@@ -245,7 +256,7 @@ const AppointmentManagement = () => {
       
       {/* Add Appointment Modal */}
       <dialog id="add_appointment_modal" className="modal">
-        <div className="modal-box">
+        <div className="modal-box max-w-lg overflow-y-auto max-h-[90vh]">
           <h3 className="font-bold text-lg mb-4">Add New Appointment</h3>
           <form onSubmit={handleAddAppointment}>
             <div className="form-control mb-4">
