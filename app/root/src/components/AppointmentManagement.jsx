@@ -5,50 +5,152 @@ import ALERT_TYPES from '../constants/alertTypeConstants';
 import { DateCalendar } from '@mui/x-date-pickers/DateCalendar';
 import dayjs from 'dayjs';
 
+/**
+ * Admin component for managing barber shop appointments
+ * Allows viewing, canceling, and creating appointments
+ * Handles special slot types (shifted and intermediate slots)
+ */
 const AppointmentManagement = () => {
   const [appointments, setAppointments] = useState([]);
+  const [availableTimeSlots, setAvailableTimeSlots] = useState([]);
   const [selectedDate, setSelectedDate] = useState(dayjs());
   const [loading, setLoading] = useState(false);
   const [selectedAppointment, setSelectedAppointment] = useState(null);
+  const [selectedTimeSlot, setSelectedTimeSlot] = useState("");
+  const [availableServices, setAvailableServices] = useState({
+    "Hair": true,
+    "Beard": true,
+    "Hair and Beard": true
+  });
   const { addAlert } = useContext(AlertContext);
   
   const formattedDate = selectedDate.format('YYYY-MM-DD');
   
-  const fetchAppointments = async () => {
+  // Generate all possible time slots for the day (40-minute intervals)
+  const generateAllTimeSlots = () => {
+    const slots = [];
+    let startTime = dayjs().hour(9).minute(0);
+    const endTime = dayjs().hour(19).minute(0);
+    
+    while (startTime.isBefore(endTime)) {
+      slots.push(startTime.format('HH:mm'));
+      startTime = startTime.add(40, 'minute');
+    }
+    
+    return slots;
+  };
+
+  // Fetch schedule and appointments for the selected date
+  const fetchData = async () => {
     try {
       setLoading(true);
-      const response = await fetch(SERVER_URL(`api/admin/appointments/${formattedDate}`), {
+      
+      // Fetch appointments and special slots
+      const appointmentsResponse = await fetch(SERVER_URL(`api/appointments/:${formattedDate}`), {
         credentials: 'include'
       });
       
-      if (response.ok) {
-        const data = await response.json();
-        setAppointments(data);
-      } else {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to fetch appointments');
+      if (!appointmentsResponse.ok) {
+        throw new Error('Failed to fetch appointments');
       }
+      
+      const appointmentsData = await appointmentsResponse.json();
+      console.log("API response:", appointmentsData);
+      
+      setAppointments(appointmentsData.appointments || []);
+      
+      // Get all possible time slots
+      const allTimeSlots = generateAllTimeSlots();
+      console.log("All slots generated:", allTimeSlots);
+      
+      // Track which slots are booked or blocked
+      const bookedSlots = new Set();
+      
+      // Add confirmed appointments to bookedSlots
+      (appointmentsData.appointments || []).forEach(appointment => {
+        bookedSlots.add(appointment.timeSlot);
+        
+        // If it's "Hair and Beard" appointment, also block the next slot
+        if (appointment.type === 'Hair and Beard') {
+          const [hours, minutes] = appointment.timeSlot.split(':').map(Number);
+          let newHours = hours;
+          let newMinutes = minutes + 40;
+          
+          if (newMinutes >= 60) {
+            newMinutes -= 60;
+            newHours += 1;
+          }
+          
+          const nextSlot = `${String(newHours).padStart(2, '0')}:${String(newMinutes).padStart(2, '0')}`;
+          bookedSlots.add(nextSlot);
+        }
+      });
+      
+      // Add blocked slots to the set
+      (appointmentsData.blockedSlots || []).forEach(slot => {
+        bookedSlots.add(slot.timeSlot);
+      });
+      
+      console.log("Booked slots:", [...bookedSlots]);
+      
+      // Filter out booked slots
+      let available = allTimeSlots.filter(slot => !bookedSlots.has(slot));
+      console.log("Available regular slots after filtering:", available);
+      
+      // Add shifted slots that aren't booked
+      (appointmentsData.shiftedSlots || []).forEach(slot => {
+        // Only add if it's not booked and not already in available slots or bookedSlots
+        if (!slot.isBooked && !available.includes(slot.shiftedTime) && !bookedSlots.has(slot.shiftedTime)) {
+          console.log(`Adding shifted slot: ${slot.shiftedTime}`);
+          available.push(slot.shiftedTime);
+        }
+      });
+      
+      // Add intermediate slots that aren't booked
+      (appointmentsData.intermediateSlots || []).forEach(slot => {
+        // Only add if it's not booked and not already in available slots or bookedSlots
+        if (!slot.isBooked && !available.includes(slot.slotTime) && !bookedSlots.has(slot.slotTime)) {
+          console.log(`Adding intermediate slot: ${slot.slotTime}`);
+          available.push(slot.slotTime);
+        }
+      });
+      
+      // Sort all slots chronologically
+      available.sort((a, b) => {
+        const [hoursA, minutesA] = a.split(':').map(Number);
+        const [hoursB, minutesB] = b.split(':').map(Number);
+        
+        if (hoursA !== hoursB) {
+          return hoursA - hoursB;
+        }
+        return minutesA - minutesB;
+      });
+      
+      console.log("Final available slots:", available);
+      setAvailableTimeSlots(available);
+      
     } catch (error) {
-      addAlert(`Error loading appointments: ${error.message}`, ALERT_TYPES.ERROR);
+      console.error("Error loading data:", error);
+      addAlert(`Error loading data: ${error.message}`, ALERT_TYPES.ERROR);
     } finally {
       setLoading(false);
     }
   };
   
   useEffect(() => {
-    fetchAppointments();
+    fetchData();
   }, [formattedDate]);
   
   const handleCancelAppointment = async (id) => {
     try {
-      const response = await fetch(SERVER_URL(`api/admin/appointments/${id}`), {
+      const response = await fetch(SERVER_URL(`api/appointments/cancel/:${id}`), {
         method: 'DELETE',
         credentials: 'include'
       });
       
       if (response.ok) {
         addAlert('Appointment cancelled successfully', ALERT_TYPES.SUCCESS);
-        fetchAppointments();
+        fetchData();
         setSelectedAppointment(null);
       } else {
         const errorData = await response.json();
@@ -59,17 +161,60 @@ const AppointmentManagement = () => {
     }
   };
   
+  // Update available services based on selected time slot
+  const updateAvailableServices = (timeSlot) => {
+    setSelectedTimeSlot(timeSlot);
+    
+    if (!timeSlot) {
+      // Reset services if no time slot is selected
+      setAvailableServices({
+        "Hair": true,
+        "Beard": true,
+        "Hair and Beard": false
+      });
+      return;
+    }
+    
+    // Check if the slot has a consecutive available slot (for Hair and Beard)
+    const [hours, minutes] = timeSlot.split(':').map(Number);
+    let newHours = hours;
+    let newMinutes = minutes + 40;
+    
+    if (newMinutes >= 60) {
+      newMinutes -= 60;
+      newHours += 1;
+    }
+    
+    const nextSlot = `${String(newHours).padStart(2, '0')}:${String(newMinutes).padStart(2, '0')}`;
+    const hasNextSlotAvailable = availableTimeSlots.includes(nextSlot);
+    
+    // Update available services
+    setAvailableServices({
+      "Hair": true,  // Hair service always available in any slot
+      "Beard": true, // Beard service always available in any slot
+      "Hair and Beard": hasNextSlotAvailable // Only available if next slot is free
+    });
+  };
+
   const handleAddAppointment = async (event) => {
     event.preventDefault();
     
     // Get form data
     const formData = new FormData(event.target);
+    const timeSlot = formData.get('timeSlot');
+    const serviceType = formData.get('type');
+    
+    // Double-check service availability
+    if (serviceType === 'Hair and Beard' && !availableServices['Hair and Beard']) {
+      addAlert('Hair and Beard service requires two consecutive slots which are not available for this time', ALERT_TYPES.ERROR);
+      return;
+    }
+    
     const appointmentData = {
       date: formattedDate,
-      timeSlot: formData.get('timeSlot'),
-      type: formData.get('type'),
-      userId: formData.get('userId'),
-      status: 'Confirmed'
+      timeSlot: timeSlot,
+      type: serviceType,
+      userEmail: formData.get('userEmail')
     };
     
     try {
@@ -84,9 +229,10 @@ const AppointmentManagement = () => {
       
       if (response.ok) {
         addAlert('Appointment added successfully', ALERT_TYPES.SUCCESS);
-        fetchAppointments();
+        fetchData();
         document.getElementById('add_appointment_modal').close();
         event.target.reset();
+        setSelectedTimeSlot("");
       } else {
         const errorData = await response.json();
         throw new Error(errorData.message || 'Failed to add appointment');
@@ -96,25 +242,9 @@ const AppointmentManagement = () => {
     }
   };
   
-  // Generate time slots for the form
-  const generateTimeSlots = () => {
-    const slots = [];
-    let startTime = dayjs().hour(9).minute(0);
-    const endTime = dayjs().hour(19).minute(0);
-    
-    while (startTime.isBefore(endTime)) {
-      slots.push(startTime.format('HH:mm'));
-      startTime = startTime.add(40, 'minute');
-    }
-    
-    return slots;
-  };
-  
-  const timeSlots = generateTimeSlots();
-  
   return (
     <div className="p-6 w-full">
-      <div className="flex sm:justify-center sm:flex-col  md:flex-row md:justify-between items-center mb-8">
+      <div className="flex sm:justify-center sm:flex-col md:flex-row md:justify-between items-center mb-8">
         <h1 className="text-3xl font-bold">Appointment Management</h1>
         <button 
           className="btn btn-primary"
@@ -126,27 +256,26 @@ const AppointmentManagement = () => {
       
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 w-full max-w-full">
         {/* Calendar */}
-        <div className="card bg-base-100 sm:!p-0 md:!p-6  shadow-xl w-full overflow-hidden">
-  <div className="card-body p-0">
-    <h2 className="card-title mb-4">Select Date</h2>
-    <div className="overflow-x-auto max-w-full">
-      <DateCalendar
-        value={selectedDate}
-        onChange={(newDate) => setSelectedDate(newDate)}
-        disablePast
-        className="bg-white shadow-md max-w-full"
-        sx={{
-          padding: 0,
-          margin: 0,
-          width: '100%',
-          maxWidth: '100%',
-          minWidth: 0,
-  
-        }}
-      />
-    </div>
-  </div>
-</div>
+        <div className="card bg-base-100 sm:!p-0 md:!p-6 shadow-xl w-full overflow-hidden">
+          <div className="card-body p-0">
+            <h2 className="card-title mb-4">Select Date</h2>
+            <div className="overflow-x-auto max-w-full">
+              <DateCalendar
+                value={selectedDate}
+                onChange={(newDate) => setSelectedDate(newDate)}
+                disablePast
+                className="bg-white shadow-md max-w-full"
+                sx={{
+                  padding: 0,
+                  margin: 0,
+                  width: '100%',
+                  maxWidth: '100%',
+                  minWidth: 0,
+                }}
+              />
+            </div>
+          </div>
+        </div>
 
         {/* Appointments List */}
         <div className="card bg-base-100 shadow-xl lg:col-span-2">
@@ -239,6 +368,7 @@ const AppointmentManagement = () => {
                 <p>Status: {selectedAppointment.status}</p>
                 {selectedAppointment.isShiftedSlot && <p>Shifted Slot: Yes</p>}
                 {selectedAppointment.isIntermediateSlot && <p>Intermediate Slot: Yes</p>}
+                <p>Duration: {selectedAppointment.duration} minutes</p>
               </div>
             </div>
             
@@ -263,12 +393,27 @@ const AppointmentManagement = () => {
               <label className="label">
                 <span className="label-text">Time Slot</span>
               </label>
-              <select name="timeSlot" className="select select-bordered w-full" required>
-                <option value="" disabled selected>Select a time slot</option>
-                {timeSlots.map(slot => (
-                  <option key={slot} value={slot}>{slot}</option>
-                ))}
+              <select 
+                name="timeSlot" 
+                className="select select-bordered w-full" 
+                required
+                value={selectedTimeSlot}
+                onChange={(e) => updateAvailableServices(e.target.value)}
+              >
+                <option value="" disabled>Select a time slot</option>
+                {availableTimeSlots.length > 0 ? (
+                  availableTimeSlots.map(slot => (
+                    <option key={slot} value={slot}>{slot}</option>
+                  ))
+                ) : (
+                  <option value="" disabled>No available slots for this date</option>
+                )}
               </select>
+              {availableTimeSlots.length === 0 && (
+                <label className="label">
+                  <span className="label-text-alt text-error">All slots are booked or blocked for this date</span>
+                </label>
+              )}
             </div>
             
             <div className="form-control mb-4">
@@ -277,31 +422,54 @@ const AppointmentManagement = () => {
               </label>
               <select name="type" className="select select-bordered w-full" required>
                 <option value="" disabled selected>Select a service</option>
-                <option value="Hair">Hair</option>
-                <option value="Beard">Beard</option>
-                <option value="Hair and Beard">Hair and Beard</option>
+                <option value="Hair" disabled={!availableServices["Hair"]}>
+                  Hair {!availableServices["Hair"] && "(Not available for this slot)"}
+                </option>
+                <option value="Beard" disabled={!availableServices["Beard"]}>
+                  Beard {!availableServices["Beard"] && "(Not available for this slot)"}
+                </option>
+                <option value="Hair and Beard" disabled={!availableServices["Hair and Beard"]}>
+                  Hair and Beard {!availableServices["Hair and Beard"] && "(Requires consecutive slot)"}
+                </option>
               </select>
+              {selectedTimeSlot && !availableServices["Hair and Beard"] && (
+                <label className="label">
+                  <span className="label-text-alt text-warning">Hair and Beard service requires two consecutive slots</span>
+                </label>
+              )}
             </div>
             
             <div className="form-control mb-4">
               <label className="label">
-                <span className="label-text">Customer ID</span>
+                <span className="label-text">Customer email</span>
               </label>
               <input
-                type="text"
-                name="userId"
-                placeholder="Enter customer ID"
+                type="email"
+                name="userEmail"
+                placeholder="Enter customer email"
                 className="input input-bordered w-full"
                 required
               />
               <label className="label">
-                <span className="label-text-alt">Enter the MongoDB ObjectId of the customer</span>
+                <span className="label-text-alt">Enter the email of the registered customer</span>
               </label>
             </div>
             
             <div className="modal-action">
-              <button type="submit" className="btn btn-primary">Add Appointment</button>
-              <button type="button" className="btn" onClick={() => document.getElementById('add_appointment_modal').close()}>Cancel</button>
+              <button 
+                type="submit" 
+                className="btn btn-primary" 
+                disabled={availableTimeSlots.length === 0}
+              >
+                Add Appointment
+              </button>
+              <button 
+                type="button" 
+                className="btn" 
+                onClick={() => document.getElementById('add_appointment_modal').close()}
+              >
+                Cancel
+              </button>
             </div>
           </form>
         </div>
