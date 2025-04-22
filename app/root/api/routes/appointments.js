@@ -280,88 +280,8 @@ router.post("/book", verifyCookie, async (req, res, next) => {
       originalSlotTime: isShiftedSlot ? req.body.originalSlotTime : null,
     });
 
-    // ONLY for Hair and Beard: Create shifted and intermediate slots
-    // if (type === "Hair and Beard") {
-    //   const nextSlot = calculateNextTimeSlot(timeSlot);
-
-    //   // Get working hours for the day
-    //   let workingHours = await WorkingHours.findOne({ date });
-
-    //   if (!workingHours) {
-    //     // Create default working hours if not found
-    //     workingHours = await WorkingHours.create({
-    //       date,
-    //       startTime: "09:00",
-    //       endTime: "19:00",
-    //       breakStart: "",
-    //       breakEnd: "",
-    //       hasCustomSlotPattern: true,
-    //       expiresAt: new Date(
-    //         new Date(date).setDate(new Date(date).getDate() + 1)
-    //       ),
-    //     });
-    //   }
-
-    //   // Mark this pattern as custom
-    //   workingHours.hasCustomSlotPattern = true;
-
-    //   // Important: The third slot is the one AFTER the next slot
-    //   // If Hair and Beard is at 09:40, it blocks 09:40 and 10:20, so third slot is 11:00
-    //   const thirdSlot = calculateNextTimeSlot(nextSlot);
-
-    //   // Create a shifted slot (the third slot + 10 minutes)
-    //   // If third slot is 11:00, shifted would be 11:10
-    //   const shiftedSlot = calculateShiftedSlot(thirdSlot);
-
-    //   // Create an intermediate slot between the end of first slot and start of third slot
-    //   // If first slot ends at 10:20 and third is 11:00, intermediate is around 10:40
-    //   const intermediateSlot = calculateTimeWithOffset(nextSlot, 20); // 20 minutes after the second slot starts
-
-    //   workingHours.blockedSlots.push(
-    //     { timeSlot: nextSlot, blockedBy: createdAppointment._id },
-    //     { timeSlot: thirdSlot, blockedBy: createdAppointment._id }
-    //   );
-    //   // Check if these slots are within working hours
-    //   if (
-    //     isWithinWorkingHours(
-    //       shiftedSlot,
-    //       workingHours.startTime,
-    //       workingHours.endTime,
-    //       workingHours.breakStart,
-    //       workingHours.breakEnd
-    //     )
-    //   ) {
-    //     // Add shifted slot
-    //     workingHours.shiftedSlots.push({
-    //       originalTime: thirdSlot,
-    //       shiftedTime: shiftedSlot,
-    //       createdDueToAppointmentId: createdAppointment._id,
-    //       isBooked: false,
-    //     });
-    //   }
-
-    //   if (
-    //     isWithinWorkingHours(
-    //       intermediateSlot,
-    //       workingHours.startTime,
-    //       workingHours.endTime,
-    //       workingHours.breakStart,
-    //       workingHours.breakEnd
-    //     )
-    //   ) {
-    //     // Add intermediate slot
-    //     workingHours.intermediateSlots.push({
-    //       slotTime: intermediateSlot,
-    //       createdDueToAppointmentId: createdAppointment._id,
-    //       isBooked: false,
-    //     });
-    //   }
-
-    //   await workingHours.save();
-    // }
-
     // Send confirmation email
-    const confirmationLink = `${process.env.FRONTEND_URL}/confirm-appointment/:${confirmationToken}`;
+    const confirmationLink = `${process.env.FRONTEND_URL_TEST}/confirm-appointment/:${confirmationToken}`;
     const mailOptions = {
       from: process.env.EMAIL,
       to: email,
@@ -392,11 +312,17 @@ router.get("/confirmation/:confirmHex", async (req, res) => {
   try {
     let { confirmHex } = req.params;
     confirmHex = confirmHex.slice(1);
+    
 
     // Find the appointment with this confirmation token
     const appointment = await Appointment.findOne({
       confirmationHex: confirmHex,
     });
+
+   
+    await appointment?.populate("userId");
+    const  isAdmin = appointment.userId.role === "admin" ;
+    
     const date = appointment?.date;
     let workingHours = await WorkingHours.findOne({ date });
 
@@ -411,11 +337,11 @@ router.get("/confirmation/:confirmHex", async (req, res) => {
       status: "Confirmed",
     });
 
-    // if (hasUserBooked) {
-    //   return res
-    //     .status(400)
-    //     .json({ message: "You have already booked a slot for this date!" });
-    // }
+    if (hasUserBooked && !isAdmin) {
+      return res
+        .status(400)
+        .json({ message: "You have already booked a slot for this date!" });
+    }
 
     // Check if the slot is still available
     const isBooked = await Appointment.findOne({
@@ -617,7 +543,7 @@ router.get("/confirmation/:confirmHex", async (req, res) => {
   }
 });
 
-router.delete("/cancel/:id", verifyCookie, verifyAdmin, async (req, res) => {
+router.delete("/cancel/:id", verifyCookie, async (req, res) => {
   try {
     let { id } = req.params;
     id = id.slice(1);
