@@ -10,7 +10,7 @@ import updateForm from "../helpers/updateForm";
 const Login = () => {
   const [form, setForm] = useState({ email: "", password: "" });
   const [loading, setIsLoading] = useState(false);
-  const { setIsLoggedIn } = useContext(AuthContext);
+  const { setIsLoggedIn, isLoggedIn } = useContext(AuthContext);
   const { addAlert } = useContext(AlertContext);
   const location = useLocation();
   const navigate = useNavigate();
@@ -23,9 +23,17 @@ const Login = () => {
 
       if (user) {
         setIsLoggedIn({ status: true, user: { ...user } });
-
+  
         addAlert("Login successful!", ALERT_TYPES.SUCCESS, undefined, true, undefined, false);
-        navigate(location?.from?.pathname || "/");
+
+        if (user.role === "admin") {
+          addAlert("Welcome Admin!", ALERT_TYPES.SUCCESS, undefined, true, undefined, false);
+          console.log("Admin logged in", user);
+          navigate("/admin");
+        } else {
+          navigate(location?.from?.pathname || "/");
+        }
+        
       }
     } catch (error) {
       addAlert(`Error signing in: ${error.message}`, undefined, undefined, true, undefined, false);
