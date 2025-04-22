@@ -146,8 +146,8 @@ router.post("/appointments", verifyCookie, verifyAdmin, async (req, res) => {
     let workingHours = await WorkingHours.findOne({ date });
     // Validate user email
 
-    const user = await User.findOne({ email:userEmail });
-     console.log(user)
+    const user = await User.findOne({ email: userEmail });
+
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
@@ -164,7 +164,7 @@ router.post("/appointments", verifyCookie, verifyAdmin, async (req, res) => {
         .status(409)
         .json({ message: "This time slot is already booked" });
     }
-const appointment = new Appointment({
+    const appointment = new Appointment({
       date,
       timeSlot,
       type,
@@ -275,53 +275,38 @@ const appointment = new Appointment({
           isBooked: false,
         });
       }
-
-      
     }
     // Check if appointment slot is matching a intermediate or shifted slot and mark it as booked
     const isIntermediateSlot = workingHours.intermediateSlots.find(
-      (slot) =>
-        slot.slotTime === timeSlot &&
-        slot.date === date
+      (slot) => slot.slotTime === timeSlot && slot.date === date
     );
-    
+
     const isShiftedSlot = workingHours.shiftedSlots.find(
-      (slot) =>
-        slot.shiftedTime === timeSlot &&
-        slot.date === date
+      (slot) => slot.shiftedTime === timeSlot && slot.date === date
     );
     if (isIntermediateSlot) {
-
       const slotIndex = workingHours.intermediateSlots.findIndex(
-        (slot) =>
-          slot.slotTime === timeSlot && slot.date === date
+        (slot) => slot.slotTime === timeSlot && slot.date === date
       );
       if (slotIndex !== -1) {
         workingHours.intermediateSlots[slotIndex].isBooked = true;
         workingHours.intermediateSlots[slotIndex].bookedAppointmentId =
           appointment._id;
-      } 
+      }
       // isIntermediateSlot.isBooked = true;
       // isIntermediateSlot.bookedAppointmentId = appointment._id;
     } else if (isShiftedSlot) {
-
-
-
-
       const slotIndex = workingHours.shiftedSlots.findIndex(
-        (slot) =>
-          slot.shiftedTime === timeSlot && slot.date === date
+        (slot) => slot.shiftedTime === timeSlot && slot.date === date
       );
       if (slotIndex !== -1) {
         workingHours.shiftedSlots[slotIndex].isBooked = true;
         workingHours.shiftedSlots[slotIndex].bookedAppointmentId =
           appointment._id;
+      }
+    }
+    // If it's not an intermediate or shifted slot, just block i
 
-   
-    } 
-  }
-      // If it's not an intermediate or shifted slot, just block i
-   console.log(isIntermediateSlot)
     await workingHours.save();
     appointment.bookedAt = new Date();
     const appointmentDate = new Date(appointment.date + "T00:00:00Z"); // Ensure UTC
@@ -335,8 +320,8 @@ const appointment = new Appointment({
       appointment.isIntermediateSlot = true;
     } else if (isShiftedSlot) {
       appointment.isShiftedSlot = true;
-    } 
-    
+    }
+
     await appointment.save();
 
     res.status(201).json({
@@ -370,67 +355,6 @@ router.get(
   }
 );
 
-// Cancel an appointment
-// router.delete(
-//   "/appointments/:id",
-//   verifyCookie,
-//   verifyAdmin,
-//   async (req, res) => {
-//     try {
-//       const { id } = req.params;
-
-//       if (!mongoose.Types.ObjectId.isValid(id)) {
-//         return res.status(400).json({ message: "Invalid appointment ID" });
-//       }
-
-//       const appointment = await Appointment.findById(id);
-
-//       if (!appointment) {
-//         return res.status(404).json({ message: "Appointment not found" });
-//       }
-
-//       // Handle special cases for different appointment types
-//       // Similar to your existing cancelAppointment logic but without time restriction
-
-//       if (appointment.type === "Hair and Beard") {
-//         // Handle special case for Hair and Beard appointments
-//         // Clear associated slots in WorkingHours
-//         const workingHours = await WorkingHours.findOne({
-//           date: appointment.date,
-//         });
-
-//         if (workingHours) {
-//           // Remove any blocked slots for this appointment
-//           workingHours.blockedSlots = workingHours.blockedSlots.filter(
-//             (slot) => !slot.blockedBy.equals(appointment._id)
-//           );
-
-//           // Remove any intermediate slots for this appointment
-//           workingHours.intermediateSlots =
-//             workingHours.intermediateSlots.filter(
-//               (slot) => !slot.createdDueToAppointmentId.equals(appointment._id)
-//             );
-
-//           // Remove any shifted slots for this appointment
-//           workingHours.shiftedSlots = workingHours.shiftedSlots.filter(
-//             (slot) => !slot.createdDueToAppointmentId.equals(appointment._id)
-//           );
-
-//           await workingHours.save();
-//         }
-//       }
-
-//       // Delete the appointment
-//       await Appointment.findByIdAndDelete(id);
-
-//       res.status(200).json({ message: "Appointment cancelled successfully" });
-//     } catch (error) {
-//       console.error("Error cancelling appointment:", error);
-//       res.status(500).json({ message: "Error cancelling appointment" });
-//     }
-//   }
-// );
-
 // Get all users
 router.get("/users", verifyCookie, verifyAdmin, async (req, res) => {
   try {
@@ -442,151 +366,7 @@ router.get("/users", verifyCookie, verifyAdmin, async (req, res) => {
   }
 });
 //
-router.delete("/appointments/:id", verifyCookie, verifyAdmin, async (req, res) => {
-  try {
-    let { id } = req.params;
-     // Remove any colons from the ID
-     id = id.replace(/:/g, "");
-    console.log(id)
-    console.log("Deleting appointment with ID:", id);
 
-    if (!mongoose.Types.ObjectId.isValid(id)) {
-      return res.status(400).json({ message: "Invalid appointment ID" });
-    }
-
-    const appointment = await Appointment.findById(id);
-    if (!appointment) {
-      return res.status(404).json({ message: "Appointment not found" });
-    }
-     
-    // Handle special cases for different appointment types
-    // Similar to your existing cancelAppointment logic but without time restriction
-       const workingHours = await WorkingHours.findOne({
-        date: appointment.date,
-      });
-    if (appointment.type === "Hair and Beard") {
-      // Handle special case for Hair and Beard appointments
-      // Clear associated slots in WorkingHours
-    
-       
-      if (workingHours) {
-        // Check if any intermediate slots created by this appointment were booked
-        const bookedIntermediateSlot = workingHours.intermediateSlots.find(
-          (slot) =>
-            slot.createdDueToAppointmentId.equals(appointment._id) &&
-            slot.isBooked
-        );
-
-        // Check if any shifted slots created by this appointment were booked
-        const bookedShiftedSlot = workingHours.shiftedSlots.find(
-          (slot) =>
-            slot.createdDueToAppointmentId.equals(appointment._id) &&
-            slot.isBooked
-        );
-
-        if (bookedIntermediateSlot || bookedShiftedSlot) {
-          // Create a new slot 30 minutes before the intermediate slot
-          let newSlotTime = originalSlot; // Default to original slot time
-          if (bookedIntermediateSlot) {
-            newSlotTime = calculateTimeWithOffset(
-              bookedIntermediateSlot.slotTime,
-              -30 // 30 minutes before the intermediate or shifted slot
-            );
-          }
-
-          if (bookedShiftedSlot) {
-            newSlotTime = calculateTimeWithOffset(
-              bookedShiftedSlot.shiftedTime,
-              -60 // 10 minutes before the shifted slot
-            );
-          }
-
-          // Check if the new slot is within working hours
-          if (
-            isWithinWorkingHours(
-              newSlotTime,
-              workingHours.startTime,
-              workingHours.endTime,
-              workingHours.breakStart,
-              workingHours.breakEnd
-            )
-          ) {
-            if (bookedIntermediateSlot) {
-              workingHours.intermediateSlots.push({
-                slotTime: newSlotTime,
-                createdDueToAppointmentId: appointment._id,
-                isBooked: false,
-              });
-            }
-            if (bookedShiftedSlot) {
-              workingHours.shiftedSlots.push({
-                originalTime: bookedShiftedSlot.originalTime,
-                shiftedTime: newSlotTime,
-                createdDueToAppointmentId: appointment._id,
-                isBooked: false,
-              });
-            }
-          }
-        } else {
-          // If no conflicts, remove the shifted and intermediate slots
-          workingHours.intermediateSlots =
-            workingHours.intermediateSlots.filter(
-              (slot) =>
-                !slot.createdDueToAppointmentId.equals(
-                  appointment._id
-                )
-            );
-
-          workingHours.shiftedSlots = workingHours.shiftedSlots.filter(
-            (slot) =>
-              !slot.createdDueToAppointmentId.equals(appointment._id)
-          );
-
-          // Remove blocked slots
-          workingHours.blockedSlots = workingHours.blockedSlots.filter(
-            (slot) => !slot.blockedBy.equals(appointment._id)
-          );
-        }
-
-        await workingHours.save();
-      }
-    } else {
-      const isIntermediateSlot = workingHours.intermediateSlots.find(
-        (slot) =>
-          slot.bookedAppointmentId &&
-          slot.bookedAppointmentId.equals(appointment._id) &&
-          slot.date === appointment.date
-      );
-      const isShiftedSlot = workingHours.shiftedSlots.find(
-        (slot) =>
-          slot.bookedAppointmentId &&
-          slot.bookedAppointmentId.equals(appointment._id) &&
-          slot.date === appointment.date
-      );
-      if (isIntermediateSlot) {
-        isIntermediateSlot.isBooked = false;
-        isIntermediateSlot.bookedAppointmentId = null;
-      } else if (isShiftedSlot) {
-        isShiftedSlot.isBooked = false;
-        isShiftedSlot.bookedAppointmentId = null;
-      }
-      // Remove blocked slots
-     
-    }
-
-    // Delete the appointment
-    await Appointment.findByIdAndDelete(id);
-    res.status(200).json({ message: "Appointment cancelled successfully" });
-  } catch (error) {
-    console.error("Error cancelling appointment:", error);
-    res.status(500).json({ message: "Error cancelling appointment" });
-  }
-});
-
-
-    
-
-    
 // Update user role
 router.patch("/users/:id/role", verifyCookie, verifyAdmin, async (req, res) => {
   try {
