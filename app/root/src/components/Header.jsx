@@ -91,7 +91,7 @@ const Header = () => {
           <div className="hidden lg:flex navbar-end">
             <ul className="menu menu-horizontal">
               {/* Navbar menu content here */}
-              <li>
+              <li  className="mt-1">
                 {isLoggedIn.status && <details className="dropdown">
                   <summary role="btn ">Notifications</summary>
                   <ul className="menu dropdown-content bg-base-200 rounded-box z-[1] w-52 p-2 shadow">
@@ -101,7 +101,7 @@ const Header = () => {
                   </ul>
                 </details>}
               </li>
-              <li>
+              <li className="mt-1">
                 <details className="dropdown">
                   <summary role="btn ">Settings</summary>
                   <ul className="menu dropdown-content bg-base-200 rounded-box z-[1] w-52 p-2 shadow">
