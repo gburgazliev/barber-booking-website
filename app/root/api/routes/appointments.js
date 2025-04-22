@@ -23,6 +23,7 @@ const {
   isWithinWorkingHours,
   isRegularSlot,
 } = require("../helpers/slot-management-utilities");
+const verifyAdmin = require("../middleware/verifyAdmin");
 
 router.get("/:date", async (req, res, next) => {
   let { date } = req.params;
@@ -616,7 +617,7 @@ router.get("/confirmation/:confirmHex", async (req, res) => {
   }
 });
 
-router.delete("/cancel/:id", async (req, res) => {
+router.delete("/cancel/:id", verifyCookie, verifyAdmin, async (req, res) => {
   try {
     let { id } = req.params;
     id = id.slice(1);
@@ -632,8 +633,8 @@ router.delete("/cancel/:id", async (req, res) => {
       const bookingTime = new Date(appointmentToCancel.bookedAt);
       const currentTime = new Date();
       const timeDiff = Math.floor((currentTime - bookingTime) / 1000); // difference in seconds
-
-      if (timeDiff > 600) {
+     const isAdmin = req.user.role === "admin" ;
+      if (!isAdmin && timeDiff > 600) {
         // 10 minutes = 600 seconds
         return res
           .status(403)
