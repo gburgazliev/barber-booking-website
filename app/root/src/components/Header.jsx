@@ -5,6 +5,8 @@ import AuthContext from "../context/AuthContext";
 import { logout } from "../service/authentication-service";
 import ALERT_TYPES from "../constants/alertTypeConstants";
 import AlertContext from "../context/AlertContext";
+import { PiSignIn } from "react-icons/pi";
+import { PiSignOut } from "react-icons/pi";
 /// change a with LINK
 const Header = () => {
   const navigate = useNavigate();
@@ -35,13 +37,13 @@ const Header = () => {
       </li>
       <li>
         <Link to="/auth" state={{ auth: "login" }}>
-          Sign in
+       Sign in
         </Link>
       </li>
     </>
   ) : (
     <li>
-      <button className="btn bg-primary rounded-lg " onClick={handleLogout}>Logout</button>
+      <button className="btn bg-primary rounded-lg " onClick={handleLogout}><PiSignOut size={25}/></button>
     </li>
   );
 
