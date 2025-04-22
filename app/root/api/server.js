@@ -82,7 +82,7 @@ const startServer = async () => {
   const AppointmentRouter = require("./routes/appointments");
 
   // Apply auth limiter to authentication routes
-  app.use("/api/users/login", authLimiter);
+ 
   app.use("/api/users/register", authLimiter);
   app.use("/api/users/reset-password", authLimiter);
   
