@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const WorkingHours = require("../models/WorkingHours");
 const verifyCookie = require("../middleware/verifyCookie");
+const Appointment = require("../models/Appointment");
 
 router.get("/get-working-hours/:date", async (req, res, next) => {
   try {
@@ -22,7 +23,7 @@ router.get("/get-working-hours/:date", async (req, res, next) => {
       breakEnd: workingHours.breakEnd,
       shiftedSlots: workingHours.shiftedSlots || [],
       intermediateSlots: workingHours.intermediateSlots || [],
-      blockedSlots: workingHours.blockedSlots || []
+      blockedSlots: workingHours.blockedSlots || [],
     });
   } catch (error) {
     next(error);
@@ -40,21 +41,42 @@ router.post("/set-working-hours", async (req, res, next) => {
     }
 
     // Set expiration date to 1 day after `date`
-    const expiresAt = new Date(appointmentDate.setDate(appointmentDate.getDate() + 1));
+    const expiresAt = new Date(
+      appointmentDate.setDate(appointmentDate.getDate() + 1)
+    );
+    // Check if the start time and the end time dont conflict with any booked slots
+    const bookedAppointments = await Appointment.find({ date });
+    let conflictFlag = false;
+    bookedAppointments.forEach((appointment) => {
+      const appointmentStartTime = new Date(
+        `${date}T${appointment.timeSlot}:00Z`
+      );
+      if (
+        appointmentStartTime <= new Date(`${date}T${startTime}:00Z`) ||
+        appointmentStartTime >= new Date(`${date}T${endTime}:00Z`)
+      ) {
+        conflictFlag = true;
+      }
+    });
+
+    if (conflictFlag) {
+      return res
+        .status(400)
+        .json({ message: "Working hours conflict with booked appointments" });
+    }
+
     const updatedObject = await WorkingHours.findOneAndUpdate(
       { date },
       { startTime, endTime, expiresAt, breakEnd, breakStart },
       { upsert: true, new: true }
     );
 
-    res
-      .status(200)
-      .json({
-        startTime: updatedObject.startTime,
-        endTime: updatedObject.endTime,
-        breakStart: updatedObject.breakStart,
-        breakEnd: updatedObject.breakEnd
-      });
+    res.status(200).json({
+      startTime: updatedObject.startTime,
+      endTime: updatedObject.endTime,
+      breakStart: updatedObject.breakStart,
+      breakEnd: updatedObject.breakEnd,
+    });
   } catch (error) {
     next(error);
   }
@@ -64,23 +86,23 @@ router.get("/custom-slots/:date", async (req, res, next) => {
   try {
     let { date } = req.params;
     date = date.slice(1);
-    
+
     const workingHours = await WorkingHours.findOne({ date });
-    
+
     if (!workingHours || !workingHours.hasCustomSlotPattern) {
-      return res.status(200).json({ 
+      return res.status(200).json({
         hasCustomPattern: false,
         canceledHairAndBeardSlots: [],
         shiftedSlots: [],
-        intermediateSlots: []
+        intermediateSlots: [],
       });
     }
-    
+
     res.status(200).json({
       hasCustomPattern: true,
       canceledHairAndBeardSlots: workingHours.canceledHairAndBeardSlots || [],
       shiftedSlots: workingHours.shiftedSlots || [],
-      intermediateSlots: workingHours.intermediateSlots || []
+      intermediateSlots: workingHours.intermediateSlots || [],
     });
   } catch (error) {
     next(error);
@@ -92,20 +114,20 @@ router.get("/dynamic-slots/:date", async (req, res, next) => {
   try {
     let { date } = req.params;
     date = date.slice(1);
-    
+
     const workingHours = await WorkingHours.findOne({ date });
-    
+
     if (!workingHours) {
       return res.status(200).json({
         shiftedSlots: [],
-        intermediateSlots: []
+        intermediateSlots: [],
       });
     }
-    
+
     // Return both shifted and intermediate slots
     res.status(200).json({
       shiftedSlots: workingHours.shiftedSlots || [],
-      intermediateSlots: workingHours.intermediateSlots || []
+      intermediateSlots: workingHours.intermediateSlots || [],
     });
   } catch (error) {
     next(error);
@@ -116,49 +138,51 @@ router.get("/dynamic-slots/:date", async (req, res, next) => {
 router.post("/update-slot-status", async (req, res, next) => {
   try {
     const { date, slotTime, slotType, isBooked, appointmentId } = req.body;
-    
+
     const workingHours = await WorkingHours.findOne({ date });
-    
+
     if (!workingHours) {
-      return res.status(404).json({ message: "Working hours not found for this date" });
+      return res
+        .status(404)
+        .json({ message: "Working hours not found for this date" });
     }
-    
-    if (slotType === 'shifted') {
+
+    if (slotType === "shifted") {
       const slotIndex = workingHours.shiftedSlots.findIndex(
-        slot => slot.shiftedTime === slotTime
+        (slot) => slot.shiftedTime === slotTime
       );
-      
+
       if (slotIndex === -1) {
         return res.status(404).json({ message: "Shifted slot not found" });
       }
-      
+
       workingHours.shiftedSlots[slotIndex].isBooked = isBooked;
-      
+
       if (appointmentId) {
-        workingHours.shiftedSlots[slotIndex].bookedAppointmentId = appointmentId;
+        workingHours.shiftedSlots[slotIndex].bookedAppointmentId =
+          appointmentId;
       }
-    } 
-    else if (slotType === 'intermediate') {
+    } else if (slotType === "intermediate") {
       const slotIndex = workingHours.intermediateSlots.findIndex(
-        slot => slot.slotTime === slotTime
+        (slot) => slot.slotTime === slotTime
       );
-      
+
       if (slotIndex === -1) {
         return res.status(404).json({ message: "Intermediate slot not found" });
       }
-      
+
       workingHours.intermediateSlots[slotIndex].isBooked = isBooked;
-      
+
       if (appointmentId) {
-        workingHours.intermediateSlots[slotIndex].bookedAppointmentId = appointmentId;
+        workingHours.intermediateSlots[slotIndex].bookedAppointmentId =
+          appointmentId;
       }
-    }
-    else {
+    } else {
       return res.status(400).json({ message: "Invalid slot type" });
     }
-    
+
     await workingHours.save();
-    
+
     res.status(200).json({ message: "Slot status updated successfully" });
   } catch (error) {
     next(error);
