@@ -1,8 +1,8 @@
-import React, { useState, useEffect, useContext } from 'react';
-import { Link } from 'react-router-dom';
-import AlertContext from '../context/AlertContext';
-import ALERT_TYPES from '../constants/alertTypeConstants';
-import { SERVER_URL } from '../constants/serverUrl';
+import React, { useState, useEffect, useContext } from "react";
+import { Link } from "react-router-dom";
+import AlertContext from "../context/AlertContext";
+import ALERT_TYPES from "../constants/alertTypeConstants";
+import { SERVER_URL } from "../constants/serverUrl";
 import {
   BarChart,
   PieChart,
@@ -14,17 +14,23 @@ import {
   Tooltip,
   Legend,
   ResponsiveContainer,
-  Bar
-} from 'recharts';
-import { CalendarIcon, ClockIcon, BeardIcon, ScissorsIcon } from './BarberIcons';
+  Bar,
+} from "recharts";
+import {
+  CalendarIcon,
+  ClockIcon,
+  BeardIcon,
+  ScissorsIcon,
+} from "./BarberIcons";
 
 const AdminDashboard = () => {
   const [stats, setStats] = useState({
     todayCount: 0,
     weekCount: 0,
     monthCount: 0,
+    appointmentsByDay: [],
     serviceDistribution: [],
-    recentAppointments: []
+    recentAppointments: [],
   });
   const [loading, setLoading] = useState(true);
   const { addAlert } = useContext(AlertContext);
@@ -32,41 +38,38 @@ const AdminDashboard = () => {
   const fetchStats = async () => {
     try {
       setLoading(true);
-      const response = await fetch(SERVER_URL('api/admin/stats'), {
-        credentials: 'include'
+      const response = await fetch(SERVER_URL("api/admin/stats"), {
+        credentials: "include",
       });
-      
+
       if (response.ok) {
         const data = await response.json();
         setStats(data);
       } else {
         const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to fetch dashboard data');
+        throw new Error(errorData.message || "Failed to fetch dashboard data");
       }
     } catch (error) {
-      addAlert(`Error loading dashboard data: ${error.message}`, ALERT_TYPES.ERROR);
+      addAlert(
+        `Error loading dashboard data: ${error.message}`,
+        ALERT_TYPES.ERROR
+      );
     } finally {
       setLoading(false);
     }
   };
-  
+
   useEffect(() => {
     fetchStats();
   }, []);
-  
+
+
+
   // Colors for pie chart
-  const COLORS = ['#0088FE', '#00C49F', '#FFBB28'];
-  
+  const COLORS = ["#0088FE", "#00C49F", "#FFBB28"];
+
   // Data for weekly appointments chart
-  const weeklyData = [
-    { name: 'Mon', appointments: 4 },
-    { name: 'Tue', appointments: 6 },
-    { name: 'Wed', appointments: 8 },
-    { name: 'Thu', appointments: 7 },
-    { name: 'Fri', appointments: 9 },
-    { name: 'Sat', appointments: 10 },
-    { name: 'Sun', appointments: 2 },
-  ];
+
 
   if (loading) {
     return (
@@ -81,10 +84,7 @@ const AdminDashboard = () => {
       <div className="flex justify-between items-center mb-8">
         <h1 className="text-3xl sm:text-xl font-bold">Admin Dashboard</h1>
         <div className="flex gap-2 sm:flex-col md:flex-row">
-          <button 
-            className="btn btn-primary"
-            onClick={fetchStats}
-          >
+          <button className="btn btn-primary" onClick={fetchStats}>
             Refresh Data
           </button>
           <Link to="/admin/schedule" className="btn btn-outline">
@@ -92,7 +92,7 @@ const AdminDashboard = () => {
           </Link>
         </div>
       </div>
-      
+
       {/* Stats Overview */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         <div className="card bg-primary text-primary-content shadow-xl">
@@ -105,7 +105,7 @@ const AdminDashboard = () => {
             <p className="text-sm opacity-80">Appointments today</p>
           </div>
         </div>
-        
+
         <div className="card bg-secondary text-secondary-content shadow-xl">
           <div className="card-body">
             <div className="flex justify-between">
@@ -116,7 +116,7 @@ const AdminDashboard = () => {
             <p className="text-sm opacity-80">Appointments this week</p>
           </div>
         </div>
-        
+
         <div className="card bg-accent text-accent-content shadow-xl">
           <div className="card-body">
             <div className="flex justify-between">
@@ -127,7 +127,7 @@ const AdminDashboard = () => {
             <p className="text-sm opacity-80">Appointments this month</p>
           </div>
         </div>
-        
+
         <div className="card bg-neutral text-neutral-content shadow-xl">
           <div className="card-body">
             <div className="flex justify-between">
@@ -135,15 +135,16 @@ const AdminDashboard = () => {
               <ScissorsIcon size={24} />
             </div>
             <p className="text-4xl font-bold">
-              {stats.serviceDistribution.length > 0 
-                ? stats.serviceDistribution.sort((a, b) => b.value - a.value)[0].name 
-                : 'N/A'}
+              {stats.serviceDistribution.length > 0
+                ? stats.serviceDistribution.sort((a, b) => b.value - a.value)[0]
+                    .name
+                : "N/A"}
             </p>
             <p className="text-sm opacity-80">Most requested service</p>
           </div>
         </div>
       </div>
-      
+
       {/* Charts Section */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
         {/* Service Distribution Chart */}
@@ -164,7 +165,10 @@ const AdminDashboard = () => {
                     label
                   >
                     {stats.serviceDistribution.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                      <Cell
+                        key={`cell-${index}`}
+                        fill={COLORS[index % COLORS.length]}
+                      />
                     ))}
                   </Pie>
                   <Tooltip />
@@ -178,13 +182,13 @@ const AdminDashboard = () => {
             )}
           </div>
         </div>
-        
+
         {/* Weekly Trend Chart */}
         <div className="card bg-base-100 shadow-xl">
           <div className="card-body">
             <h2 className="card-title mb-4">Weekly Appointment Trend</h2>
             <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={weeklyData}>
+              <BarChart data={stats.appointmentsByDay}>
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="name" />
                 <YAxis />
@@ -195,7 +199,7 @@ const AdminDashboard = () => {
           </div>
         </div>
       </div>
-      
+
       {/* Recent Appointments Section */}
       <div className="card bg-base-100 shadow-xl">
         <div className="card-body ">
@@ -205,7 +209,7 @@ const AdminDashboard = () => {
               View All
             </Link>
           </div>
-          
+
           <div className="overflow-x-auto w-full">
             <table className="table w-full">
               <thead>
@@ -218,15 +222,22 @@ const AdminDashboard = () => {
                 </tr>
               </thead>
               <tbody>
-                {stats.recentAppointments && stats.recentAppointments.length > 0 ? (
-                  stats.recentAppointments.map(appointment => (
+                {stats.recentAppointments &&
+                stats.recentAppointments.length > 0 ? (
+                  stats.recentAppointments.map((appointment) => (
                     <tr key={appointment._id}>
                       <td>{appointment.date}</td>
                       <td>{appointment.timeSlot}</td>
                       <td>{`${appointment.userId.firstname} ${appointment.userId.lastname}`}</td>
                       <td>{appointment.type}</td>
                       <td>
-                        <span className={`badge ${appointment.status === 'Confirmed' ? 'badge-success' : 'badge-warning'}`}>
+                        <span
+                          className={`badge ${
+                            appointment.status === "Confirmed"
+                              ? "badge-success"
+                              : "badge-warning"
+                          }`}
+                        >
                           {appointment.status}
                         </span>
                       </td>
@@ -234,7 +245,9 @@ const AdminDashboard = () => {
                   ))
                 ) : (
                   <tr>
-                    <td colSpan="5" className="text-center">No recent appointments</td>
+                    <td colSpan="5" className="text-center">
+                      No recent appointments
+                    </td>
                   </tr>
                 )}
               </tbody>
