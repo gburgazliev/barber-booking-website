@@ -35,8 +35,11 @@ router.get("/stats", verifyCookie, verifyAdmin, async (req, res) => {
     const currentDate = new Date();
     const startOfWeek = new Date(currentDate);
     startOfWeek.setDate(currentDate.getDate() - currentDate.getDay());
-    const weekStart = startOfWeek.toISOString().split("T")[0];
+    const endOfWeek = new Date(currentDate);
+    endOfWeek.setDate(currentDate.getDate() + (6 - currentDate.getDay()));
 
+    const weekStart = startOfWeek.toISOString().split("T")[0];
+    const weekEnd = endOfWeek.toISOString().split("T")[0];
     // Get start of current month
     const startOfMonth = new Date(
       currentDate.getFullYear(),
@@ -52,8 +55,24 @@ router.get("/stats", verifyCookie, verifyAdmin, async (req, res) => {
     });
 
     const weekCount = await Appointment.countDocuments({
-      date: { $gte: weekStart },
+      date: { $gte: weekStart, $lte: weekEnd },
       status: "Confirmed",
+    });
+
+    const weeklyAppointments = await Appointment.find({
+      date: { $gte: weekStart, $lte: weekEnd },
+      status: "Confirmed",
+    });
+
+    // Initialize counts for each day of the week
+    const dayNames = [ "Mon", "Tue", "Wed", "Thu", "Fri", "Sat","Sun"];
+    const appointmentsByDay = dayNames.map(name => ({ name, appointments: 0 }));
+
+    // Count appointments for each day
+    weeklyAppointments.forEach(appointment => {
+      const appointmentDate = new Date(appointment.date);
+      const dayOfWeek = appointmentDate.getDay(); 
+      appointmentsByDay[dayOfWeek].appointments++;
     });
 
     const monthCount = await Appointment.countDocuments({
@@ -74,12 +93,16 @@ router.get("/stats", verifyCookie, verifyAdmin, async (req, res) => {
       .limit(5)
       .populate("userId", "firstname lastname email");
 
+    
+
+
     res.status(200).json({
       todayCount,
       weekCount,
       monthCount,
       serviceDistribution,
       recentAppointments,
+      appointmentsByDay,
     });
   } catch (error) {
     console.error("Error fetching dashboard stats:", error);
@@ -277,11 +300,11 @@ router.post("/appointments", verifyCookie, verifyAdmin, async (req, res) => {
       }
     }
     // Check if appointment slot is matching a intermediate or shifted slot and mark it as booked
-    const isIntermediateSlot = workingHours.intermediateSlots.find(
+    const isIntermediateSlot = workingHours?.intermediateSlots.find(
       (slot) => slot.slotTime === timeSlot && slot.date === date
     );
 
-    const isShiftedSlot = workingHours.shiftedSlots.find(
+    const isShiftedSlot = workingHours?.shiftedSlots.find(
       (slot) => slot.shiftedTime === timeSlot && slot.date === date
     );
     if (isIntermediateSlot) {
@@ -307,7 +330,7 @@ router.post("/appointments", verifyCookie, verifyAdmin, async (req, res) => {
     }
     // If it's not an intermediate or shifted slot, just block i
 
-    await workingHours.save();
+    await workingHours?.save();
     appointment.bookedAt = new Date();
     const appointmentDate = new Date(appointment.date + "T00:00:00Z"); // Ensure UTC
 
