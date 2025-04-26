@@ -63,7 +63,34 @@ const UserManagement = () => {
       addAlert(`Error updating user role: ${error.message}`, ALERT_TYPES.ERROR);
     }
   };
-  
+
+  const handleAttendanceChange = async (userId, newAttendance) => {
+   
+    try {
+      const response = await fetch(SERVER_URL(`api/users/update-attendance/:${userId}`), {
+        method: 'PATCH',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ attendance: newAttendance }),
+      });
+      
+      if (response.ok) {
+        // Update local state
+        setUsers(users.map(user => 
+          user._id === userId ? { ...user, attendance: newAttendance } : user
+        ));
+        
+        addAlert('User attendance updated successfully', ALERT_TYPES.SUCCESS);
+      } else {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to update user attendance');
+      }
+    } catch (error) {
+      addAlert(`Error updating user attendance: ${error.message}`, ALERT_TYPES.ERROR);
+}
+  }
   const fetchUserAppointments = async (userId) => {
     try {
       setLoadingAppointments(true);
@@ -99,6 +126,14 @@ const UserManagement = () => {
       user.email.toLowerCase().includes(searchLower)
     );
   });
+
+  useEffect(() => {
+    users.map((user) => {
+      if(user.email === 'bg_rest@abv.bg') {
+        console.log(user)
+      }
+    })
+  }, [users]);
   
   return (
     <div className="p-6">
@@ -173,6 +208,17 @@ const UserManagement = () => {
                           >
                             <option value="user">User</option>
                             <option value="admin">Admin</option>
+                          </select>
+                          <select value={user.attendance?.toString()} onChange={(e) => handleAttendanceChange(user._id, e.target.value)} className="select select-bordered select-sm">
+                            <option value="-3">-3</option>
+                            <option value="-2">-2</option>
+                            <option value="-1">-1</option>
+                            <option value="0">0</option>
+                            <option value="1">1</option>
+                            <option value="2">2</option>
+                            <option value="3">3</option>
+                            <option value="4">4</option>
+                            <option value="5">5</option>
                           </select>
                           <button 
                             className="btn btn-xs btn-info"
