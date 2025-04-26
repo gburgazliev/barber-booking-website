@@ -6,6 +6,7 @@ const bcrypt = require("bcryptjs");
 const verifyCookie = require("../middleware/verifyCookie");
 const signJWT = require("../helpers/signJWT");
 const nodemailer = require("nodemailer");
+const verifyAdmin = require("../middleware/verifyAdmin");
 
 const COOKIE_OPTIONS = {
   httpOnly: true,
@@ -83,6 +84,8 @@ router.post("/login", async (req, res, next) => {
       role: user.role,
       firstname: user.firstname,
       lastname: user.lastname,
+      rights: user.rights,
+      attendance: user.attendance,
     };
 
     const token = signJWT(userForToken);
@@ -206,6 +209,26 @@ router.post("/new-password", async (req, res) => {
   user.resetTokenExpirationTime = null;
   await user.save();
   res.status(200).json({ message: "Password reset successfully" });
+});
+
+router.patch("/update-attendance/:id", verifyCookie, verifyAdmin, async (req, res) => {
+  
+  let { id } = req.params;
+  id = id.slice(1)
+  const { attendance } = req.body;
+
+  try {
+    const user = await User.findById(id);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    user.attendance = attendance;
+    user.save();
+    res.status(200).json({ message: "Attendance updated successfully", user });
+  } catch (error) {
+    console.error("Error updating attendance:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
 });
 
 module.exports = router;
