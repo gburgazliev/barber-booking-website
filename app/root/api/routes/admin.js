@@ -381,7 +381,7 @@ router.get(
 // Get all users
 router.get("/users", verifyCookie, verifyAdmin, async (req, res) => {
   try {
-    const users = await User.find({}, "firstname lastname email role");
+    const users = await User.find({}, "firstname lastname email role attendance rights");
     res.status(200).json(users);
   } catch (error) {
     console.error("Error fetching users:", error);
