@@ -34,6 +34,11 @@ const Calendar = () => {
   const [shiftedSlots, setShiftedSlots] = useState([]);
   const [intermediateSlots, setIntermediateSlots] = useState([]);
   const [blockedSlots, setBlockedSlots] = useState([]);
+  const [prices, setPrices] = useState({
+    Hair: 0,
+    Beard: 0,
+    "Hair and Beard": 0,
+  });
   const { addAlert } = useContext(AlertContext);
   const { isLoggedIn } = useContext(AuthContext);
   const minDate = dayjs();
@@ -317,7 +322,7 @@ const Calendar = () => {
         setBlockedSlots(scheduleData.blockedSlots);
         setIntermediateSlots(scheduleData.intermediateSlots);
         setShiftedSlots(scheduleData.shiftedSlots);
-        console.log(scheduleData);
+       
         const startTimeArr = scheduleData.startTime.split(":");
         const endTimeArr = scheduleData.endTime.split(":");
         setStartTime((prev) =>
@@ -378,7 +383,7 @@ const Calendar = () => {
 
       if (appointmentsResponse.ok) {
         const appointmentsData = await appointmentsResponse.json();
-        console.log(appointmentsData);
+       
         setAppointments(appointmentsData.appointments);
         // setBlockedSlots(appointmentsData.blockedSlots);
 
@@ -421,6 +426,39 @@ const Calendar = () => {
   useEffect(() => {
     refreshData();
   }, [formattedDateString]);
+
+  useEffect(() => {
+   const fetchPrices = async () => {
+      try {
+        const response = await fetch(SERVER_URL("api/prices/"), {
+          method: "GET",
+          credentials: "include",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
+        if (response.ok) {
+          const data = await response.json();
+        
+          const priceMap = data.reduce((acc, price) => {
+            acc[price.type] = price.price;
+            return acc;
+          }, {});
+          setPrices(priceMap);
+          
+
+          
+        } else {
+          console.error("Failed to fetch prices:", response.statusText);
+        }
+      }
+      catch (error) {
+        console.error("Error fetching prices:", error.message);
+      }
+    }
+    fetchPrices();
+  }, [])
+  
 
   // Filter out booked slots and slots after Hair and Beard appointments
   useEffect(() => {
@@ -553,6 +591,7 @@ const Calendar = () => {
               slotDuration={getSlotType(timeSlot).duration}
               isRegularSlot={isRegularSlot(timeSlot)}
               isShiftedSlot={getSlotType(timeSlot).isShiftedSlot}
+              prices={prices}
               isIntermediateSlot={getSlotType(timeSlot).isIntermediateSlot}
             />
           ))}
@@ -589,6 +628,7 @@ const Calendar = () => {
                       slotDuration={slotTypeInfo.duration}
                       isShiftedSlot={slotTypeInfo.isShiftedSlot}
                       isIntermediateSlot={slotTypeInfo.isIntermediateSlot}
+                      prices={prices}
                       userAppointment={true}
                     />
                   );
