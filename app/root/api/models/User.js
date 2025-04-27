@@ -9,6 +9,7 @@ const UserSchema = new mongoose.Schema({
     resetToken: String,
     resetTokenExpirationTime: Date,
     attendance: {type: Number, default: 0, min: -3, max: 5}, 
+    discountEligible: {type: Boolean, default: false},
     rights: {type:String, default:'regular', enum:['regular', 'suspended']},
 })
 
