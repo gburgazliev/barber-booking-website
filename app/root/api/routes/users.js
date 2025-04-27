@@ -86,6 +86,7 @@ router.post("/login", async (req, res, next) => {
       lastname: user.lastname,
       rights: user.rights,
       attendance: user.attendance,
+      discountEligible: user.discountEligible,
     };
 
     const token = signJWT(userForToken);
