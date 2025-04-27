@@ -273,14 +273,25 @@ const AppointmentManagement = () => {
       return;
     }
 
-    const appointmentData = {
-      date: formattedDate,
-      timeSlot: timeSlot,
-      type: serviceType,
-      userEmail: formData.get("userEmail"),
-    };
+   
+
+
+   
 
     try {
+ const pricesDoc = await fetch(SERVER_URL("api/prices/"));
+      const pricesData = await pricesDoc.json();
+      const price = pricesData.find((price) => price.type === serviceType)?.price || 0;
+    
+      const appointmentData = {
+        date: formattedDate,
+        timeSlot: timeSlot,
+        type: serviceType,
+        userEmail: formData.get("userEmail"),
+        price: price,
+      };
+      console.log("Appointment data:", appointmentData);
+
       const response = await fetch(SERVER_URL("api/admin/appointments"), {
         method: "POST",
         credentials: "include",
@@ -369,6 +380,7 @@ const AppointmentManagement = () => {
                       <th>Actions</th>
                       <th>Attendence</th>
                       <th>Discount</th>
+                       <th>Price</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -425,7 +437,7 @@ const AppointmentManagement = () => {
                         </td>
 
                         <td>{appointment.discountApplied ? 'Yes' : 'No'}</td>
-                       
+                        <td>{appointment.price}</td>
                       </tr>
                     ))}
                   </tbody>
