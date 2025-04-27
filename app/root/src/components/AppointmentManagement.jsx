@@ -368,6 +368,7 @@ const AppointmentManagement = () => {
                       <th>Status</th>
                       <th>Actions</th>
                       <th>Attendence</th>
+                      <th>Discount</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -422,6 +423,9 @@ const AppointmentManagement = () => {
                             <span className="text-gray-500">{appointment.attended ? 'Attended' :  "Did not attend"  }</span>
                           )}
                         </td>
+
+                        <td>{appointment.discountApplied ? 'Yes' : 'No'}</td>
+                       
                       </tr>
                     ))}
                   </tbody>
