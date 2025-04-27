@@ -4,6 +4,7 @@ const verifyCookie = require("../middleware/verifyCookie");
 const verifyAdmin = require("../middleware/verifyAdmin");
 const crypto = require("crypto");
 const Appointment = require("../models/Appointment");
+const Price = require("../models/Price");
 const WorkingHours = require("../models/WorkingHours");
 const nodemailer = require("nodemailer");
 const { default: mongoose } = require("mongoose");
@@ -47,6 +48,21 @@ const sanitizeDate = (dateStr) => {
   // Return null if invalid format
   return null;
 };
+
+async function getServicePrice(serviceType) {
+  // Fetch the price from the database or use a default value
+  const price = await Price.findOne({ type: serviceType });
+  switch (serviceType) {
+    case 'Hair':
+      return 20; // 20 lv
+    case 'Beard':
+      return 20; // 20 lv
+    case 'Hair and Beard':
+      return 30; // 30 lv
+    default:
+      throw new Error('Invalid service type');
+  }
+}
 
 /**
  * Sanitizes time string to prevent injection
@@ -147,7 +163,7 @@ router.get("/", async (req, res) => {
 router.post(
   "/book",
   verifyCookie,
- 
+
   appointmentValidationRules,
   async (req, res, next) => {
     try {
@@ -158,6 +174,7 @@ router.post(
         duration = 40,
         isShiftedSlot = false,
         isIntermediateSlot = false,
+        useDiscount = false,
       } = req.body;
 
       // Sanitize inputs
@@ -184,15 +201,41 @@ router.post(
       }
 
       const userId = req.user._id;
-      const { email, firstname,role,rights } = req.user;
+      const { email, firstname, role, rights } = req.user;
 
       // Check if user is allowed to book appointments
-      if(rights ==='suspended') {
+      if (rights === "suspended") {
         return res.status(403).json({
           message: "You are not allowed to book appointments!",
         });
       }
 
+         // Get user and check discount eligibility
+    const user = await User.findById(userId);
+    let applyDiscount = false;
+    
+    // Only apply discount if user wants to use it and is eligible
+    if (useDiscount && user.discountEligible) {
+      applyDiscount = true;
+      // Reset discount eligibility and attendance count
+      user.discountEligible = false;
+      user.attendance = 0;
+      await user.save();
+    }
+    
+    // Calculate price with discount
+    let priceDoc = await Price.findOne({type: sanitizedType}, 'price');
+    if (!priceDoc || typeof priceDoc.price !== 'number') {
+      return res.status(400).json({ message: "Invalid price data" });
+    }
+    
+    let price = priceDoc.price;
+    if (applyDiscount) {
+      price = price * 0.5; // 50% discount
+     
+    }
+    
+  
       // Check if user already has a booking for this date
       const hasUserBooked = await Appointment.findOne({
         userId: userId,
@@ -323,7 +366,7 @@ router.post(
       // Generate confirmation token
       const confirmationToken = crypto.randomBytes(32).toString("hex");
       // Create the appointment
-      const createdAppointment = await Appointment.create({
+       await Appointment.create({
         date: sanitizedDate,
         timeSlot: sanitizedTimeSlot,
         type: sanitizedType,
@@ -335,6 +378,8 @@ router.post(
         originalSlotTime: isShiftedSlot
           ? sanitizeTime(req.body.originalSlotTime)
           : null,
+          price,
+          discountApplied: applyDiscount
       });
 
       // Send confirmation email
@@ -917,7 +962,7 @@ router.patch(
       const updatedAppointment = await Appointment.findByIdAndUpdate(
         sanitizedId,
         { attended },
-        { new: attended }
+        { new: true }
       );
 
       if (!updatedAppointment) {
@@ -927,40 +972,45 @@ router.patch(
       const didAttend = JSON.parse(attended);
       const userId = updatedAppointment.userId;
       const user = await User.findById(userId);
-     if (didAttend) {
+      if (didAttend) {
         user.attendance = user.attendance + 1;
-         
-     } else {
-        user.attendance = user.attendance - 1;
-      }
-
-     
-      if(user.attendance === 5) {
-        // Send email to user for 50% discount on next appointment
-        const mailOptions = {
-          from: process.env.EMAIL,
-          to: user.email,
-          subject: "Congratulations! You've earned a discount!",
-          html: `
-            <h2>Congratulations!</h2>
-            <p>Dear ${user.firstname},</p>
-            <p>You've attended 5 appointments with us!</p>
-            <p>As a token of our appreciation, you are eligible for a 50% discount on your next appointment.</p>
-            <p>Thank you for being a valued customer!</p>
-            <p>Best Regards,</p>
-            <p>Barber Booking Team</p>
-          `,
-        };
-        await transporter.sendMail(mailOptions);
-        user.attendance = 0; // Reset attendance after sending discount
-      } else if (user.attendance === -3) {
-// send email for appointments ban 
-  
+        if (user.attendance === 5) {
+          // They're now eligible for a discount
+          user.discountEligible = true;
+          
+          // Send email notification about discount eligibility
           const mailOptions = {
             from: process.env.EMAIL,
             to: user.email,
-            subject: "Appointment Ban Notification",
+            subject: "Congratulations! You've earned a discount!",
             html: `
+              <h2>Congratulations!</h2>
+              <p>Dear ${user.firstname},</p>
+              <p>You've attended 5 appointments with us!</p>
+              <p>As a token of our appreciation, you are eligible for a 50% discount on your next appointment.</p>
+              <p>Thank you for being a valued customer!</p>
+              <p>Best Regards,</p>
+              <p>Barber Booking Team</p>
+            `,
+          };
+          await transporter.sendMail(mailOptions);
+        }
+      } else {
+        if (user.attendance > 0) {
+          user.attendance = 0;
+        } else {
+          user.attendance = user.attendance - 1;
+        }
+      }
+
+       if (user.attendance === -3) {
+        // send email for appointments ban
+
+        const mailOptions = {
+          from: process.env.EMAIL,
+          to: user.email,
+          subject: "Appointment Ban Notification",
+          html: `
               <h2>Appointment Ban Notification</h2>
               <p>Dear ${user.firstname},</p>
               <p>Due to multiple cancellations, your appointment booking privileges have been temporarily suspended.</p>
@@ -968,14 +1018,11 @@ router.patch(
               <p>Best Regards,</p>
               <p>Barber Booking Team</p>
             `,
-          };
-          await transporter.sendMail(mailOptions);
-          
+        };
+        await transporter.sendMail(mailOptions);
       }
 
- await user.save();
-    
-     
+      await user.save();
 
       res.status(200).json({ message: "Appointment updated successfully!" });
     } catch (error) {
