@@ -165,7 +165,7 @@ router.get("/appointments", verifyCookie, verifyAdmin, async (req, res) => {
 // Add a new appointment
 router.post("/appointments", verifyCookie, verifyAdmin, async (req, res) => {
   try {
-    const { date, timeSlot, type, userEmail, status = "Confirmed" } = req.body;
+    const { date, timeSlot, type, userEmail, status = "Confirmed", price } = req.body;
     let workingHours = await WorkingHours.findOne({ date });
     // Validate user email
 
@@ -191,6 +191,7 @@ router.post("/appointments", verifyCookie, verifyAdmin, async (req, res) => {
       date,
       timeSlot,
       type,
+      price,
       userId: user._id,
       status,
       bookedAt: new Date(),
