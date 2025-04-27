@@ -81,6 +81,7 @@ const startServer = async () => {
   const ScheduleRouter = require("./routes/workingHours");
   const AppointmentRouter = require("./routes/appointments");
   const AdminRouter = require("./routes/admin");
+  const PriceRouter = require("./routes/prices");
 
   // Apply auth limiter to authentication routes
  
@@ -92,6 +93,7 @@ const startServer = async () => {
   app.use("/api/schedule", ScheduleRouter);
   app.use("/api/appointments", AppointmentRouter);
   app.use("/api/admin", AdminRouter);
+  app.use("/api/prices", PriceRouter);
   
   // Error handling middleware
   app.use((err, req, res, next) => {
