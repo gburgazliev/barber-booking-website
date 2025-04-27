@@ -15,7 +15,8 @@ const AppointmentSchema = new mongoose.Schema({
   isIntermediateSlot: {type: Boolean, default: false},
   originalSlotTime: {type: String}, // Original time for shifted slots
   attended: {type: Boolean, default: null}, // Track if the appointment was attended
-  
+  price: {type: Number},
+  discountApplied: {type: Boolean, default: false, required: true}, // Track if a discount was applied
   expiresAt: { 
     type: Date, 
     default: () => new Date(Date.now() + 600000), 
