@@ -20,7 +20,8 @@ const Appointment = memo(
     userAppointment,
     slotDuration = 40,
     isShiftedSlot = false,
-    isIntermediateSlot = false
+    isIntermediateSlot = false,
+    prices= {},
   }) => {
     const [selectedService, setSelectedService] = useState("");
     const [selectedServiceText, setSelectedServiceText] = useState("");
@@ -30,6 +31,7 @@ const Appointment = memo(
     const [currentUserAppointment, setCurrentUserAppointment] = useState({});
     const [isCurrentUserAppointment, setIsCurrentUserAppointment] = useState(false);
     const [isHairAndBeardAvailable, setIsHairAndBeardAvailable] = useState(true);
+    const [useDiscount, setUseDiscount] = useState(false);
     const { addAlert } = useContext(AlertContext);
     const { isLoggedIn } = useContext(AuthContext);
     const navigate = useNavigate();
@@ -85,7 +87,8 @@ const Appointment = memo(
             type: selectedService, 
             duration: slotDuration,
             isShiftedSlot,
-            isIntermediateSlot
+            isIntermediateSlot,
+            useDiscount: useDiscount,
           }),
         });
         
@@ -124,7 +127,7 @@ const Appointment = memo(
         );
       }
     };
-
+ 
     const handleCancelAppointment = async () => {
       try {
         const response = await cancelAppointment(currentUserAppointment._id);
@@ -212,13 +215,35 @@ const Appointment = memo(
             <option value="Beard">Beard - 20lv</option>
           </select>
         )}
-
+    
         {selectedService === "Hair and Beard" && (
           <p className="text-sm text-info">
             This service requires two time slots (80 minutes)
           </p>
         )}
-
+        
+        {/* Add discount checkbox if user is eligible */}
+        {isLoggedIn.user?.discountEligible  && selectedService && (
+          <div className="form-control mt-2">
+            <label className="label cursor-pointer justify-start gap-2">
+              <input 
+                type="checkbox" 
+                className="checkbox checkbox-accent" 
+                checked={useDiscount}
+                onChange={(e) => setUseDiscount(e.target.checked)}
+              />
+              <span className="label-text">Use my 50% discount (5 visits completed)</span>
+            </label>
+            
+            {useDiscount && (
+              <div className="badge badge-accent text-lg mt-2">
+                Price with discount: {prices[selectedService] / 2} lv 
+                <span className="text-xs ml-2">(Regular: {prices[selectedService]} lv)</span>
+              </div>
+            )}
+          </div>
+        )}
+    
         <form method="dialog">
           <button className="w-1/2" onClick={bookAppointment}>
             Book
