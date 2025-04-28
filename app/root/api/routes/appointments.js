@@ -974,7 +974,7 @@ router.patch(
       const user = await User.findById(userId);
       if (didAttend) {
         user.attendance = user.attendance + 1;
-        if (user.attendance === 5) {
+        if (user.attendance >= 5) {
           // They're now eligible for a discount
           user.discountEligible = true;
           
@@ -994,6 +994,7 @@ router.patch(
             `,
           };
           await transporter.sendMail(mailOptions);
+          user.attendance = 0; // Reset attendance count after discount eligibility
         }
       } else {
         if (user.attendance > 0) {
