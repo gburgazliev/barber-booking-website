@@ -71,7 +71,7 @@ async function getServicePrice(serviceType) {
  */
 const sanitizeTime = (timeStr) => {
   // Remove any characters that aren't digits or colons
-  let sanitized = timeStr.replace(/[^0-9:]/g, "");
+  let sanitized = timeStr?.replace(/[^0-9:]/g, "");
 
   // Ensure it matches HH:MM format
   if (/^([01]?[0-9]|2[0-3]):[0-5][0-9]$/.test(sanitized)) {
@@ -383,7 +383,7 @@ router.post(
       });
 
       // Send confirmation email
-      const confirmationLink = `${process.env.FRONTEND_URL}/confirm-appointment/:${confirmationToken}`;
+      const confirmationLink = `${process.env.FRONTEND_URL_TEST}/confirm-appointment/:${confirmationToken}`;
 
       // Sanitize email content
       const safeFirstName = validator.escape(firstname);
