@@ -339,7 +339,7 @@ const AppointmentManagement = () => {
               <DateCalendar
                 value={selectedDate}
                 onChange={(newDate) => setSelectedDate(newDate)}
-                disablePast
+                
                 className="bg-white shadow-md max-w-full"
                 sx={{
                   padding: 0,
