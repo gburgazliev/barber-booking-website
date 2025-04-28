@@ -85,8 +85,8 @@ const startServer = async () => {
 
   // Apply auth limiter to authentication routes
  
-  app.use("/api/users/register", authLimiter);
-  app.use("/api/users/reset-password", authLimiter);
+  // app.use("/api/users/register", authLimiter);
+  // app.use("/api/users/reset-password", authLimiter);
   
   // Apply routes
   app.use("/api/users", UserRouter);
