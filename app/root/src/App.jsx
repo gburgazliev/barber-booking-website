@@ -17,12 +17,12 @@ import { LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import ProfileView from "./views/ProfileView";
 
-import AdminAuth from './hoc/AdminAuth';
-import AdminLayout from './components/AdminLayout';
-import AdminDashboard from './components/AdminDashboard';
-import AppointmentManagement from './components/AppointmentManagement';
-import ScheduleManagement from './components/ScheduleManagement';
-import UserManagement from './components/UserManagement';
+import AdminAuth from "./hoc/AdminAuth";
+import AdminLayout from "./components/AdminLayout";
+import AdminDashboard from "./components/AdminDashboard";
+import AppointmentManagement from "./components/AppointmentManagement";
+import ScheduleManagement from "./components/ScheduleManagement";
+import UserManagement from "./components/UserManagement";
 
 function App() {
   const [authValue, setAuthValue] = useState({ status: false, user: {} });
@@ -64,19 +64,22 @@ function App() {
         >
           <LocalizationProvider dateAdapter={AdapterDayjs}>
             <Routes>
-            <Route 
-  path="/admin" 
-  element={
-    <AdminAuth>
-      <AdminLayout />
-    </AdminAuth>
-  }
->
-  <Route index element={<AdminDashboard />} />
-  <Route path="appointments" element={<AppointmentManagement />} />
-  <Route path="schedule" element={<ScheduleManagement />} />
-  <Route path="users" element={<UserManagement />} />
-</Route>
+              <Route
+                path="/admin"
+                element={
+                  <AdminAuth>
+                    <AdminLayout />
+                  </AdminAuth>
+                }
+              >
+                <Route index element={<AdminDashboard />} />
+                <Route
+                  path="appointments"
+                  element={<AppointmentManagement />}
+                />
+                <Route path="schedule" element={<ScheduleManagement />} />
+                <Route path="users" element={<UserManagement />} />
+              </Route>
               <Route path="/auth" element={<AuthView />} />
               <Route
                 path="/confirm-appointment/:confirmationToken"
@@ -90,7 +93,7 @@ function App() {
                 path="/reset-password/:resetToken"
                 element={<NewPasswordView />}
               />
-               <Route path="*" element={<div>nonono</div>} />
+              <Route path="*" element={<div>nonono</div>} />
             </Routes>
           </LocalizationProvider>
         </AuthContext.Provider>
