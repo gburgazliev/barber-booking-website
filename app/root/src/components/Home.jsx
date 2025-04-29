@@ -4,7 +4,7 @@ import { autoLogin } from "../service/authentication-service";
 import AlertContext from "../context/AlertContext";
 import Calendar from "./Calendar";
 import HomePhotosContainer from "./HomePhotosContainer";
-import Preview from "./Preview";
+import Preview from "./Preview/Preview";
 const Home = () => {
   const { isLoggedIn } = useContext(AuthContext);
   const { addAlert } = useContext(AlertContext);

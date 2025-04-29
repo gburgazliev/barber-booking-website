@@ -1,9 +1,9 @@
 import React, { useContext, useEffect, useState, useRef } from "react";
 import { Link } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
-import AuthContext from "../context/AuthContext";
+import AuthContext from "../../context/AuthContext";
 import "./PreviewStyles.css";
-import BarberPole from "./BarberPole";
+import BarberPole from "../BarberPole";
 import {
   ScissorsIcon,
   RazorIcon,
@@ -14,7 +14,7 @@ import {
   LocationIcon,
   CancelIcon,
   StarIcon,
-} from "./BarberIcons";
+} from "../BarberIcons";
 
 const Preview = () => {
   const { isLoggedIn } = useContext(AuthContext);
