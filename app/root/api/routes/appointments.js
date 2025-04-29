@@ -411,7 +411,7 @@ router.post(
 
       await transporter.sendMail(mailOptions);
 
-      res.status(200).json({ message: "Confirmation link sent to email!" });
+      res.status(200).json({ message: "Confirmation link sent to email!", user: {attendance: user.attendance, discountEligible: user.discountEligible} });
     } catch (error) {
       next(error);
     }

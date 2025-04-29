@@ -21,7 +21,7 @@ const Appointment = memo(
     slotDuration = 40,
     isShiftedSlot = false,
     isIntermediateSlot = false,
-    prices= {},
+    prices = {},
   }) => {
     const [selectedService, setSelectedService] = useState("");
     const [selectedServiceText, setSelectedServiceText] = useState("");
@@ -29,11 +29,13 @@ const Appointment = memo(
     const [canCancel, setCanCancel] = useState(true);
     const [canceled, setCanceled] = useState(false);
     const [currentUserAppointment, setCurrentUserAppointment] = useState({});
-    const [isCurrentUserAppointment, setIsCurrentUserAppointment] = useState(false);
-    const [isHairAndBeardAvailable, setIsHairAndBeardAvailable] = useState(true);
+    const [isCurrentUserAppointment, setIsCurrentUserAppointment] =
+      useState(false);
+    const [isHairAndBeardAvailable, setIsHairAndBeardAvailable] =
+      useState(true);
     const [useDiscount, setUseDiscount] = useState(false);
     const { addAlert } = useContext(AlertContext);
-    const { isLoggedIn } = useContext(AuthContext);
+    const { isLoggedIn, setIsLoggedIn } = useContext(AuthContext);
     const navigate = useNavigate();
     const modalId = `modal_${date}_${timeSlot.replace(":", "")}`;
     const CANCEL_APPOINTMENT_TIME = 600;
@@ -41,7 +43,7 @@ const Appointment = memo(
     // Add special styling based on slot type
     const getSlotStyle = () => {
       let className = "btn";
-      
+
       if (isShiftedSlot) {
         className += " bg-purple-600 hover:bg-purple-700"; // Purple for shifted slots
       } else if (isIntermediateSlot) {
@@ -49,7 +51,7 @@ const Appointment = memo(
       } else if (!isRegularSlot) {
         className += " bg-blue-600 hover:bg-blue-700"; // Blue for 30-minute slots
       }
-      
+
       return className;
     };
 
@@ -71,33 +73,48 @@ const Appointment = memo(
           throw new Error("You should select a service first!");
         }
 
-        if (slotDuration === 30 && selectedService !== "Beard" && selectedService !== 'Hair') {
-          throw new Error("Only Beard or Hair service can be booked in 30-minute slots!");
+        if (
+          slotDuration === 30 &&
+          selectedService !== "Beard" &&
+          selectedService !== "Hair"
+        ) {
+          throw new Error(
+            "Only Beard or Hair service can be booked in 30-minute slots!"
+          );
         }
-        
+
         const response = await fetch(SERVER_URL("api/appointments/book"), {
           method: "POST",
           credentials: "include",
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ 
-            timeSlot, 
-            date, 
-            type: selectedService, 
+          body: JSON.stringify({
+            timeSlot,
+            date,
+            type: selectedService,
             duration: slotDuration,
             isShiftedSlot,
             isIntermediateSlot,
             useDiscount: useDiscount,
           }),
         });
-        
+
         if (response.status === 401) {
           navigate("auth", { state: { auth: "login" } });
           return;
         }
-        
+
         if (response.ok) {
+          const data = await response.json();
+          setIsLoggedIn((prev) => ({
+            ...prev,
+            user: {
+              ...prev.user,
+              attendance: data.user.attendance,
+              discountEligible: data.user.discountEligible,
+            },
+          }));
           addAlert(
             "Confirmation email has been sent",
             ALERT_TYPES.INFO,
@@ -127,7 +144,7 @@ const Appointment = memo(
         );
       }
     };
- 
+
     const handleCancelAppointment = async () => {
       try {
         const response = await cancelAppointment(currentUserAppointment._id);
@@ -195,7 +212,9 @@ const Appointment = memo(
             value={selectedService}
             onChange={handleSelectChange}
           >
-            <option disabled value="">Choose service</option>
+            <option disabled value="">
+              Choose service
+            </option>
             <option value="Beard">Beard - 20lv</option>
             <option value="Hair">Hair - 20lv</option>
           </select>
@@ -206,7 +225,9 @@ const Appointment = memo(
             value={selectedService}
             onChange={handleSelectChange}
           >
-            <option disabled value="">Choose service</option>
+            <option disabled value="">
+              Choose service
+            </option>
             <option value="Hair">Hair - 20lv</option>
             <option value="Hair and Beard" disabled={!isHairAndBeardAvailable}>
               Hair and Beard - 30lv{" "}
@@ -215,35 +236,39 @@ const Appointment = memo(
             <option value="Beard">Beard - 20lv</option>
           </select>
         )}
-    
+
         {selectedService === "Hair and Beard" && (
           <p className="text-sm text-info">
             This service requires two time slots (80 minutes)
           </p>
         )}
-        
+
         {/* Add discount checkbox if user is eligible */}
-        {isLoggedIn.user?.discountEligible  && selectedService && (
+        {isLoggedIn.user?.discountEligible && selectedService && (
           <div className="form-control mt-2">
             <label className="label cursor-pointer justify-start gap-2">
-              <input 
-                type="checkbox" 
-                className="checkbox checkbox-accent" 
+              <input
+                type="checkbox"
+                className="checkbox checkbox-accent"
                 checked={useDiscount}
                 onChange={(e) => setUseDiscount(e.target.checked)}
               />
-              <span className="label-text">Use my 50% discount (5 visits completed)</span>
+              <span className="label-text">
+                Use my 50% discount (5 visits completed)
+              </span>
             </label>
-            
+
             {useDiscount && (
               <div className="badge badge-accent text-lg mt-2">
-                Price with discount: {prices[selectedService] / 2} lv 
-                <span className="text-xs ml-2">(Regular: {prices[selectedService]} lv)</span>
+                Price with discount: {prices[selectedService] / 2} lv
+                <span className="text-xs ml-2">
+                  (Regular: {prices[selectedService]} lv)
+                </span>
               </div>
             )}
           </div>
         )}
-    
+
         <form method="dialog">
           <button className="w-1/2" onClick={bookAppointment}>
             Book
@@ -252,11 +277,9 @@ const Appointment = memo(
       </div>
     );
 
-   
-
     useEffect(() => {
       if (!timeSlots || !appointments || !calculateNextTimeSlot) return;
-        console.log(isRegularSlot, timeSlot)
+    
       // Only check for Hair and Beard availability on regular 40-minute slots
       if (slotDuration === 40) {
         const nextTimeSlot40mins = calculateNextTimeSlot(timeSlot)[0];
@@ -265,45 +288,52 @@ const Appointment = memo(
         // Check if the next time slot exists in available slots
         const nextSlotOneExists = timeSlots.includes(nextTimeSlot40mins);
         const nextSlotTwoExists = timeSlots.includes(nextTimeSlot30mins);
-        
+
         // If the next slot doesn't exist in available slots, Hair and Beard is not available
         setIsHairAndBeardAvailable(nextSlotOneExists || nextSlotTwoExists);
       } else {
         // 30-minute slots can't be used for Hair and Beard
         setIsHairAndBeardAvailable(false);
       }
-    }, [timeSlot, timeSlots, appointments, date, calculateNextTimeSlot, slotDuration]);
+    }, [
+      timeSlot,
+      timeSlots,
+      appointments,
+      date,
+      calculateNextTimeSlot,
+      slotDuration,
+    ]);
 
     useEffect(() => {
       // Check if the appointment is current user's appointment
-  if (!appointments || !isLoggedIn.user?._id) return;
-  
-  // First, check regular appointments
-  const currentUserAppointment = appointments.find(
-    (appointment) =>
-      appointment.userId._id === isLoggedIn?.user._id &&
-      appointment.date === date &&
-      appointment.timeSlot === timeSlot
-  );
+      if (!appointments || !isLoggedIn.user?._id) return;
 
-  if (currentUserAppointment) {
-    setCurrentUserAppointments(currentUserAppointment);
-    const appointmentDate = new Date(currentUserAppointment.bookedAt);
-    const cancelDeadline = new Date(appointmentDate);
-    cancelDeadline.setSeconds(
-      cancelDeadline.getSeconds() + CANCEL_APPOINTMENT_TIME
-    );
+      // First, check regular appointments
+      const currentUserAppointment = appointments.find(
+        (appointment) =>
+          appointment.userId._id === isLoggedIn?.user._id &&
+          appointment.date === date &&
+          appointment.timeSlot === timeSlot
+      );
 
-    // Set expiry timestamp for the timer
-    setExpiryTimestamp(cancelDeadline);
-    setCurrentUserAppointment(currentUserAppointment);
-    setIsCurrentUserAppointment(true);
-    return;
-  }
-  
-  // If no regular appointment is found, reset the state
-  setCurrentUserAppointment({});
-  setIsCurrentUserAppointment(false);
+      if (currentUserAppointment) {
+        setCurrentUserAppointments(currentUserAppointment);
+        const appointmentDate = new Date(currentUserAppointment.bookedAt);
+        const cancelDeadline = new Date(appointmentDate);
+        cancelDeadline.setSeconds(
+          cancelDeadline.getSeconds() + CANCEL_APPOINTMENT_TIME
+        );
+
+        // Set expiry timestamp for the timer
+        setExpiryTimestamp(cancelDeadline);
+        setCurrentUserAppointment(currentUserAppointment);
+        setIsCurrentUserAppointment(true);
+        return;
+      }
+
+      // If no regular appointment is found, reset the state
+      setCurrentUserAppointment({});
+      setIsCurrentUserAppointment(false);
     }, [appointments, isLoggedIn, date, timeSlot, setCurrentUserAppointments]);
 
     return (
@@ -318,7 +348,9 @@ const Appointment = memo(
           <div className="modal-box">
             <h3 className="font-bold text-lg">
               Book your appointment here!
-              <span className="text-sm block font-normal">{getSlotTypeTitle()}</span>
+              <span className="text-sm block font-normal">
+                {getSlotTypeTitle()}
+              </span>
             </h3>
             {modalContent}
             <div className="modal-action">
