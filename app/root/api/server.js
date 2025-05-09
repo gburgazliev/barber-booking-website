@@ -77,7 +77,7 @@ const startServer = async () => {
   // Create log directory if it doesn't exist
   const logDir = path.join(__dirname, 'logs');
   if (!fs.existsSync(logDir)) {
-    fs.mkdirSync(logDir);
+    fs.mkdirSync(logDir,{ recursive: true });
   }
 
   // Setup HTTP request logging
