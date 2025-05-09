@@ -49,43 +49,43 @@ const authLimiter = rateLimit({
 });
 
 
-// Create logger
-const logger = winston.createLogger({
-  level: process.env.NODE_ENV === 'production' ? 'info' : 'debug',
-  format: winston.format.combine(
-    winston.format.timestamp(),
-    winston.format.json()
-  ),
-  transports: [
-    new winston.transports.File({ filename: 'logs/error.log', level: 'error' }),
-    new winston.transports.File({ filename: 'logs/combined.log' }),
-  ],
-});
+// // Create logger
+// const logger = winston.createLogger({
+//   level: process.env.NODE_ENV === 'production' ? 'info' : 'debug',
+//   format: winston.format.combine(
+//     winston.format.timestamp(),
+//     winston.format.json()
+//   ),
+//   transports: [
+//     new winston.transports.File({ filename: 'logs/error.log', level: 'error' }),
+//     new winston.transports.File({ filename: 'logs/combined.log' }),
+//   ],
+// });
 
-// Add console transport in development
-if (process.env.NODE_ENV !== 'production') {
-  logger.add(new winston.transports.Console({
-    format: winston.format.simple(),
-  }));
-}
+// // Add console transport in development
+// if (process.env.NODE_ENV !== 'production') {
+//   logger.add(new winston.transports.Console({
+//     format: winston.format.simple(),
+//   }));
+// }
 
 const startServer = async () => {
   await connectDB();
 
   const app = express();
 
-  // Create log directory if it doesn't exist
-  const logDir = path.join(__dirname, 'logs');
-  if (!fs.existsSync(logDir)) {
-    fs.mkdirSync(logDir,{ recursive: true });
-  }
+  // // Create log directory if it doesn't exist
+  // const logDir = path.join(__dirname, 'logs');
+  // if (!fs.existsSync(logDir)) {
+  //   fs.mkdirSync(logDir,{ recursive: true });
+  // }
 
-  // Setup HTTP request logging
-  const accessLogStream = fs.createWriteStream(
-    path.join(logDir, 'access.log'),
-    { flags: 'a' }
-  );
-  app.use(morgan('combined', { stream: accessLogStream }));
+  // // Setup HTTP request logging
+  // const accessLogStream = fs.createWriteStream(
+  //   path.join(logDir, 'access.log'),
+  //   { flags: 'a' }
+  // );
+  // app.use(morgan('combined', { stream: accessLogStream }));
 
   // Security headers
   app.use(helmet());
@@ -136,13 +136,13 @@ const startServer = async () => {
   // Error handling middleware
   // Add global error handler with logging
   app.use((err, req, res, next) => {
-    logger.error({
-      message: err.message,
-      stack: err.stack,
-      path: req.path,
-      method: req.method,
-      ip: req.ip
-    });
+    // logger.error({
+    //   message: err.message,
+    //   stack: err.stack,
+    //   path: req.path,
+    //   method: req.method,
+    //   ip: req.ip
+    // });
 
     const message = process.env.NODE_ENV === 'production'
       ? "Something went wrong!"
@@ -152,14 +152,14 @@ const startServer = async () => {
   });
 
   // Make logger available throughout the application
-  app.locals.logger = logger;
+  // app.locals.logger = logger;
 
   console.log(`Server started on port ${port}`);
-  logger.info(`Server started on port ${port}`);
+  // logger.info(`Server started on port ${port}`);
 };
 
 startServer().catch(err => {
   console.error("Failed to start server:", err);
-  logger.error("Failed to start server:", err);
+  // logger.error("Failed to start server:", err);
   process.exit(1);
 });
