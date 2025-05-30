@@ -19,7 +19,7 @@ const Home = () => {
       <div id="calendar-section" ref={calendarRef} className="my-16 w-full pt-10  flex   items-center justify-evenly sm:flex-col md:flex-col lg:flex-row">
         
           <Calendar />
-       <HomePhotosContainer />
+       
       </div>
     </div>
   );
