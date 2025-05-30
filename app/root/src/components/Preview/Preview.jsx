@@ -4,6 +4,9 @@ import { useNavigate } from "react-router-dom";
 import AuthContext from "../../context/AuthContext";
 import "./PreviewStyles.css";
 import BarberPole from "../BarberPole";
+import salon1 from "../../assets/salon1.png";
+import salon2 from "../../assets/salon2.png";
+import salon3 from "../../assets/salon3.png";
 import {
   ScissorsIcon,
   RazorIcon,
@@ -18,8 +21,11 @@ import {
 
 const Preview = () => {
   const { isLoggedIn } = useContext(AuthContext);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [photos] = useState([salon1, salon2, salon3]);
   const navigate = useNavigate();
   const [sectionsVisible, setSectionsVisible] = useState({});
+  
   const sectionRefs = {
     services: useRef(null),
     features: useRef(null),
@@ -27,6 +33,15 @@ const Preview = () => {
     location: useRef(null),
     calendar: useRef(null),
   };
+
+  // Auto-advance carousel
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentImageIndex((prev) => (prev + 1) % photos.length);
+    }, 5000); // Change image every 5 seconds
+
+    return () => clearInterval(interval);
+  }, [photos.length]);
 
   // Function to check if element is in viewport
   const isInViewport = (element) => {
@@ -114,128 +129,81 @@ const Preview = () => {
       // Scroll to calendar section if the user is already logged in
       document
         .getElementById("calendar-section")
-        .scrollIntoView({ behavior: "smooth" });
+        ?.scrollIntoView({ behavior: "smooth" });
     }
   };
-  // w-full max-w-6xl mx-auto
+
+  const goToImage = (index) => {
+    setCurrentImageIndex(index);
+  };
+
+  const goToPrevious = () => {
+    setCurrentImageIndex((prev) => (prev === 0 ? photos.length - 1 : prev - 1));
+  };
+
+  const goToNext = () => {
+    setCurrentImageIndex((prev) => (prev + 1) % photos.length);
+  };
+
   return (
-    <div className="w-full max-w-7xl  sm:flex sm:flex-col sm:gap-5">
+    <div className="w-full max-w-7xl mx-auto sm:flex sm:flex-col sm:gap-8  ">
       {/* Hero Section */}
-      <div className="hero min-h-[800px] bg-base-200  rounded-lg overflow-hidden relative">
+      <div className="hero min-h-[800px] bg-base-200 rounded-lg overflow-hidden relative p-3">
         <div className="hero-content flex-col lg:flex-row-reverse sm:p-0">
-          <div className="lg:w-1/2">
-            <svg viewBox="0 0 800 400" className="w-full h-auto">
-              {/* Background */}
-              <rect width="800" height="400" fill="#1a1a1a" />
-
-              {/* Barber Pole */}
-              <g transform="translate(650, 100)">
-                <rect
-                  x="0"
-                  y="0"
-                  width="30"
-                  height="200"
-                  rx="15"
-                  fill="#d1d5db"
-                />
-                <rect
-                  x="0"
-                  y="0"
-                  width="30"
-                  height="200"
-                  rx="15"
-                  fill="url(#barberStripes)"
-                />
-                <circle cx="15" cy="0" r="15" fill="gold" />
-                <circle cx="15" cy="200" r="15" fill="gold" />
-              </g>
-
-              {/* Scissors */}
-              <g transform="translate(100, 200) rotate(-15)">
-                <path
-                  d="M0,0 L100,100 M0,100 L100,0"
-                  stroke="#e5e7eb"
-                  strokeWidth="10"
-                  strokeLinecap="round"
-                />
-                <circle cx="0" cy="0" r="20" fill="#d1d5db" />
-                <circle cx="0" cy="100" r="20" fill="#d1d5db" />
-                <circle cx="0" cy="0" r="10" fill="#1a1a1a" />
-                <circle cx="0" cy="100" r="10" fill="#1a1a1a" />
-              </g>
-
-              {/* Razor */}
-              <g transform="translate(300, 180)">
-                <rect
-                  x="0"
-                  y="0"
-                  width="120"
-                  height="40"
-                  rx="5"
-                  fill="#e5e7eb"
-                />
-                <rect
-                  x="120"
-                  y="10"
-                  width="60"
-                  height="20"
-                  rx="5"
-                  fill="#9ca3af"
-                />
-                <rect
-                  x="180"
-                  y="15"
-                  width="20"
-                  height="10"
-                  rx="2"
-                  fill="#6b7280"
-                />
-                <line
-                  x1="10"
-                  y1="20"
-                  x2="110"
-                  y2="20"
-                  stroke="#9ca3af"
-                  strokeWidth="2"
-                />
-              </g>
-
-              {/* Comb */}
-              <g transform="translate(500, 250) rotate(30)">
-                <rect
-                  x="0"
-                  y="0"
-                  width="120"
-                  height="30"
-                  rx="5"
-                  fill="#6b7280"
-                />
-                <rect x="10" y="0" width="5" height="10" fill="#1a1a1a" />
-                <rect x="25" y="0" width="5" height="10" fill="#1a1a1a" />
-                <rect x="40" y="0" width="5" height="10" fill="#1a1a1a" />
-                <rect x="55" y="0" width="5" height="10" fill="#1a1a1a" />
-                <rect x="70" y="0" width="5" height="10" fill="#1a1a1a" />
-                <rect x="85" y="0" width="5" height="10" fill="#1a1a1a" />
-                <rect x="100" y="0" width="5" height="10" fill="#1a1a1a" />
-              </g>
-
-              {/* Pattern Definitions */}
-              <defs>
-                <pattern
-                  id="barberStripes"
-                  patternUnits="userSpaceOnUse"
-                  width="30"
-                  height="40"
-                  patternTransform="rotate(0)"
+          {/* Image Carousel */}
+          <div className="lg:w-1/2 relative">
+            <div className="carousel w-full h-96 rounded-lg overflow-hidden shadow-xl sm:w-[300px]  md:w-[500px]">
+              {photos.map((photo, index) => (
+                <div
+                  key={index}
+                  className={`  carousel-item w-full transition-opacity duration-500  ${
+                    index === currentImageIndex ? "opacity-100" : "opacity-0 absolute"
+                  }`}
+                  style={{ zIndex: 1 }}
                 >
-                  <rect width="10" height="40" fill="red" />
-                  <rect x="10" width="10" height="40" fill="white" />
-                  <rect x="20" width="10" height="40" fill="blue" />
-                </pattern>
-              </defs>
-            </svg>
+                  <img
+                    src={photo}
+                    className=" absolute inset-0 w-full h-full object-cover"
+                    alt={`Salon ${index + 1}`}
+                  />
+                </div>
+              ))}
+              
+              {/* Navigation Arrows */}
+              <div className="absolute flex justify-between transform -translate-y-1/2 left-5 right-5 top-1/2 z-10">
+                <button 
+                  onClick={goToPrevious}
+                  className="btn btn-circle bg-black/50 border-none hover:bg-black/70 text-white"
+                >
+                  ❮
+                </button>
+                <button 
+                  onClick={goToNext}
+                  className="btn btn-circle bg-black/50 border-none hover:bg-black/70 text-white"
+                >
+                  ❯
+                </button>
+              </div>
+            </div>
+            
+            {/* Indicators */}
+            <div className="flex justify-center w-full py-2 gap-2 relative z-10 bg-semi-transparent backdrop-blur-sm rounded-lg mt-4">
+              {photos.map((_, index) => (
+                <button
+                  key={index}
+                  onClick={() => goToImage(index)}
+                  className={`btn btn-xs ${
+                    index === currentImageIndex ? "btn-primary" : "btn-outline"
+                  }`}
+                >
+                  {index + 1}
+                </button>
+              ))}
+            </div>
           </div>
-          <div className="lg:w-1/2  animate-fade-in">
+          
+          {/* Hero Content */}
+          <div className="lg:w-1/2 animate-fade-in">
             <h1 className="text-5xl font-bold font-mono">BARBERIA</h1>
             <p className="py-6">
               Professional haircuts and beard grooming services. Book your
@@ -250,11 +218,7 @@ const Preview = () => {
           </div>
         </div>
 
-        {/* Scroll indicator */}
-        <div className="absolute bottom-10 left-1/2 transform -translate-x-1/2 text-center">
-          <p className="sm:mb-20">Scroll to explore</p>
-          <div className="scroll-indicator"></div>
-        </div>
+       
       </div>
 
       {/* Services Section */}
@@ -314,153 +278,88 @@ const Preview = () => {
       {/* Testimonials Section */}
       <div
         ref={sectionRefs.testimonials}
-        className={` bg-base-200 sm:scale-75 rounded-lg section-reveal ${
+        className={`py-16 bg-base-200 rounded-lg section-reveal ${
           sectionsVisible.testimonials ? "visible" : ""
         }`}
       >
-        <h2 className="text-3xl font-bold text-center md:mb-12 sm:mb-0">
+        <h2 className="text-3xl font-bold text-center mb-12">
           What Our Customers Say
         </h2>
-        <div className="carousel w-full px-6 sm:scale-75 md:scale-100 lg:scale-100 xl:scale-100">
-          <div
-            id="testimonial1"
-            className="carousel-item relative sm:w-[300px]  sm:scale-75 md:scale-100 md:w-full lg:w-full lg:scale-100 xl:scale-100"
-          >
-            <div className="flex flex-col items-center justify-center w-full max-w-4xl mx-auto">
-              <div className="card bg-base-100 shadow-xl w-full animate-fade-in">
-                <div className="card-body">
-                  <div className="flex items-center mb-4">
-                    <div className="avatar placeholder">
-                      <div className="bg-neutral text-neutral-content rounded-full w-12">
-                        <span>MK</span>
-                      </div>
-                    </div>
-                    <div className="ml-4">
-                      <h3 className="font-bold">Martin K.</h3>
-                      <div className="flex text-yellow-500">
-                        <StarIcon filled={true} />
-                        <StarIcon filled={true} />
-                        <StarIcon filled={true} />
-                        <StarIcon filled={true} />
-                        <StarIcon filled={true} />
-                      </div>
-                    </div>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="card bg-base-100 shadow-xl animate-fade-in">
+            <div className="card-body">
+              <div className="flex items-center mb-4">
+                <div className="avatar placeholder">
+                  <div className="bg-neutral text-neutral-content rounded-full w-12">
+                    <span>MK</span>
                   </div>
-                  <p className="text-lg">
-                    "The best haircut I've ever had! The barber took their time
-                    and listened to exactly what I wanted."
-                  </p>
+                </div>
+                <div className="ml-4">
+                  <h3 className="font-bold">Martin K.</h3>
+                  <div className="flex text-yellow-500">
+                    {[...Array(5)].map((_, i) => (
+                      <StarIcon key={i} filled={true} />
+                    ))}
+                  </div>
                 </div>
               </div>
+              <p>
+                "The best haircut I've ever had! The barber took their time
+                and listened to exactly what I wanted."
+              </p>
             </div>
           </div>
 
-          <div
-            id="testimonial2"
-            className="carousel-item relative w-full sm:w-[300px] md:scale-100 md:w-full lg:w-full lg:scale-100 xl:scale-100"
-          >
-            <div className="flex flex-col items-center justify-center w-full max-w-4xl mx-auto">
-              <div className="card bg-base-100 shadow-xl w-full animate-fade-in">
-                <div className="card-body">
-                  <div className="flex items-center mb-4">
-                    <div className="avatar placeholder">
-                      <div className="bg-neutral text-neutral-content rounded-full w-12">
-                        <span>JS</span>
-                      </div>
-                    </div>
-                    <div className="ml-4">
-                      <h3 className="font-bold">John S.</h3>
-                      <div className="flex text-yellow-500">
-                        <StarIcon filled={true} />
-                        <StarIcon filled={true} />
-                        <StarIcon filled={true} />
-                        <StarIcon filled={true} />
-                        <StarIcon filled={true} />
-                      </div>
-                    </div>
+          <div className="card bg-base-100 shadow-xl animate-fade-in">
+            <div className="card-body">
+              <div className="flex items-center mb-4">
+                <div className="avatar placeholder">
+                  <div className="bg-neutral text-neutral-content rounded-full w-12">
+                    <span>JS</span>
                   </div>
-                  <p className="text-lg">
-                    "Great atmosphere, professional service, and the online
-                    booking system is so convenient. Highly recommend!"
-                  </p>
+                </div>
+                <div className="ml-4">
+                  <h3 className="font-bold">John S.</h3>
+                  <div className="flex text-yellow-500">
+                    {[...Array(5)].map((_, i) => (
+                      <StarIcon key={i} filled={true} />
+                    ))}
+                  </div>
                 </div>
               </div>
+              <p>
+                "Great atmosphere, professional service, and the online
+                booking system is so convenient. Highly recommend!"
+              </p>
             </div>
           </div>
 
-          <div
-            id="testimonial3"
-            className="carousel-item relative w-full sm:w-[300px] sm:scale-75 md:scale-100 md:w-full lg:w-full lg:scale-100 xl:scale-100"
-          >
-            <div className="flex flex-col items-center justify-center w-full max-w-4xl mx-auto">
-              <div className="card bg-base-100 shadow-xl w-full animate-fade-in">
-                <div className="card-body">
-                  <div className="flex items-center mb-4">
-                    <div className="avatar placeholder">
-                      <div className="bg-neutral text-neutral-content rounded-full w-12">
-                        <span>TD</span>
-                      </div>
-                    </div>
-                    <div className="ml-4">
-                      <h3 className="font-bold">Thomas D.</h3>
-                      <div className="flex text-yellow-500">
-                        <StarIcon filled={true} />
-                        <StarIcon filled={true} />
-                        <StarIcon filled={true} />
-                        <StarIcon filled={true} />
-                        <StarIcon filled={false} />
-                      </div>
-                    </div>
+          <div className="card bg-base-100 shadow-xl animate-fade-in">
+            <div className="card-body">
+              <div className="flex items-center mb-4">
+                <div className="avatar placeholder">
+                  <div className="bg-neutral text-neutral-content rounded-full w-12">
+                    <span>TD</span>
                   </div>
-                  <p className="sm:text-md md:text-lg">
-                    "My beard has never looked better. The barber knew exactly
-                    how to shape it to complement my face. Will definitely be
-                    back!"
-                  </p>
+                </div>
+                <div className="ml-4">
+                  <h3 className="font-bold">Thomas D.</h3>
+                  <div className="flex text-yellow-500">
+                    {[...Array(4)].map((_, i) => (
+                      <StarIcon key={i} filled={true} />
+                    ))}
+                    <StarIcon filled={false} />
+                  </div>
                 </div>
               </div>
+              <p>
+                "My beard has never looked better. The barber knew exactly
+                how to shape it to complement my face. Will definitely be
+                back!"
+              </p>
             </div>
           </div>
-        </div>
-
-        {/* Carousel Indicators */}
-        <div className="flex justify-center w-full py-4 gap-2">
-          <a
-            href="#testimonial1"
-            className="btn btn-xs btn-glow"
-            onClick={(e) => {
-              e.preventDefault();
-              document
-                .getElementById("testimonial1")
-                ?.scrollIntoView({ behavior: "smooth" , block: "nearest" });
-            }}
-          >
-            1
-          </a>
-          <a
-            href="#testimonial2"
-            className="btn btn-xs btn-glow"
-            onClick={(e) => {
-              e.preventDefault();
-              document
-                .getElementById("testimonial2")
-                ?.scrollIntoView({ behavior: "smooth", block: "nearest" });
-            }}
-          >
-            2
-          </a>
-          <a
-            href="#testimonial3"
-            className="btn btn-xs btn-glow"
-            onClick={(e) => {
-              e.preventDefault();
-              document
-                .getElementById("testimonial3")
-                ?.scrollIntoView({ behavior: "smooth", block: "nearest" });
-            }}
-          >
-            3
-          </a>
         </div>
       </div>
 
@@ -500,7 +399,7 @@ const Preview = () => {
             style={{ animationDelay: "0.4s" }}
           >
             <div className="card bg-base-100 shadow-xl hover:shadow-2xl transition-all duration-300">
-              <div className="card-body p-2 md:w-auto sm:w-[300px]">
+              <div className="card-body">
                 <h3 className="card-title justify-center mb-4">
                   <ClockIcon size={24} className="mr-2" />
                   Opening Hours
@@ -524,9 +423,6 @@ const Preview = () => {
           </div>
         </div>
       </div>
-
-      {/* Calendar Section */}
-      
     </div>
   );
 };
