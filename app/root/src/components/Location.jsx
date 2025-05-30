@@ -47,7 +47,7 @@ const Location = () => {
   };
 
   const copyAddress = async () => {
-    const address = "123 Main Street, Varna, Bulgaria";
+    const address = "ul.Studentska, Varna, Bulgaria";
     try {
       await navigator.clipboard.writeText(address);
       // You could add a toast notification here
