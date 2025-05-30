@@ -6,7 +6,7 @@ const HomeView = () => {
 
 
   return (
-    <div className="md:flex-col justify-items-center md:items-center w-screen overflow-x-hidden md:flex md:gap-10">
+    <div className="md:flex-col justify-items-center md:items-center w-screen overflow-x-hidden md:flex md:gap-10 sm:gap-5 ">
       
 
       <Header />
