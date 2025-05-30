@@ -156,14 +156,14 @@ const Preview = () => {
               {photos.map((photo, index) => (
                 <div
                   key={index}
-                  className={`  carousel-item w-full transition-opacity duration-500  ${
+                  className={`carousel-item w-full transition-opacity duration-500  ${
                     index === currentImageIndex ? "opacity-100" : "opacity-0 absolute"
                   }`}
                   style={{ zIndex: 1 }}
                 >
                   <img
                     src={photo}
-                    className=" absolute inset-0 w-full h-full object-cover"
+                    className=" border-4 border-primary absolute inset-0 w-full h-full object-cover"
                     alt={`Salon ${index + 1}`}
                   />
                 </div>
@@ -394,33 +394,7 @@ const Preview = () => {
               </div>
             </div>
           </div>
-          <div
-            className="lg:w-1/2 animate-fade-in"
-            style={{ animationDelay: "0.4s" }}
-          >
-            <div className="card bg-base-100 shadow-xl hover:shadow-2xl transition-all duration-300">
-              <div className="card-body">
-                <h3 className="card-title justify-center mb-4">
-                  <ClockIcon size={24} className="mr-2" />
-                  Opening Hours
-                </h3>
-                <ul className="space-y-2">
-                  <li className="flex justify-between">
-                    <span>Monday - Friday:</span>
-                    <span>9:00 AM - 7:00 PM</span>
-                  </li>
-                  <li className="flex justify-between">
-                    <span>Saturday:</span>
-                    <span>10:00 AM - 6:00 PM</span>
-                  </li>
-                  <li className="flex justify-between">
-                    <span>Sunday:</span>
-                    <span>Closed</span>
-                  </li>
-                </ul>
-              </div>
-            </div>
-          </div>
+        
         </div>
       </div>
     </div>
