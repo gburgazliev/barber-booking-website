@@ -150,7 +150,7 @@ const Location = () => {
                     <LocationIcon size={20} className="text-primary mt-1 flex-shrink-0" />
                     <div>
                       <p className="font-semibold">Address</p>
-                      <p className="text-base-content/70">123 Main Street, Varna 9000, Bulgaria</p>
+                      <p className="text-base-content/70">ul.Studentska, Varna 9000, Bulgaria</p>
                       <button 
                         onClick={copyAddress}
                         className="text-xs text-primary hover:underline mt-1"
