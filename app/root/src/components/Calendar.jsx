@@ -358,7 +358,11 @@ const Calendar = () => {
 
         // Generate default base slots
         const slots = [];
+        
         let start = new Date(`1970-01-01T09:00:00`);
+        if(date.day() === 1 ) {
+          start = new Date(`1970-01-01T12:00:00`); // Monday starts at 10:00 AM
+        }
         const end = new Date(`1970-01-01T18:20:00`);
         const breakStart ='' //new Date(`1970-01-01T13:00:00`);
         const breakEnd = ''//new Date(`1970-01-01T14:00:00`);
