@@ -23,7 +23,7 @@ const Preview = () => {
   const { isLoggedIn } = useContext(AuthContext);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [photos] = useState([salon1, salon2, salon3]);
-  const [isImgLoading, setIsImgLoading] = useState(true);
+  const [isImgLoading, setIsImgLoading] = useState({1: true, 2: true, 3: true});
   const navigate = useNavigate();
   const [sectionsVisible, setSectionsVisible] = useState({});
   
@@ -164,10 +164,10 @@ const Preview = () => {
                 >
                   <img
                     src={photo}
-                    className={`border-4 border-primary absolute inset-0 w-full h-full object-cover  transition-all duration-300 ${isImgLoading ? 'blur-lg' : 'blur-0'}`}
+                    className={`border-4 border-primary absolute inset-0 w-full h-full object-cover  transition-all duration-300 ${isImgLoading[index] ? 'blur-lg' : 'blur-0'}`}
                     alt={`Salon ${index + 1}`}
-                    onLoad={() => setIsImgLoading(false)}
-                    onError={() => setIsImgLoading(false)}
+                    onLoad={() => setIsImgLoading({...isImgLoading, [index]: false})}
+                    onError={() => setIsImgLoading({...isImgLoading, [index]: false})}
                   />
                 </div>
               ))}
