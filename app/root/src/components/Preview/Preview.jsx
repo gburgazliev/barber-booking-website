@@ -23,10 +23,10 @@ const Preview = () => {
   const { isLoggedIn } = useContext(AuthContext);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [photos] = useState([salon1, salon2, salon3]);
-  const [isImgLoading, setIsImgLoading] = useState({1: true, 2: true, 3: true});
+  const [isImgLoading, setIsImgLoading] = useState([true, true, true]);
   const navigate = useNavigate();
   const [sectionsVisible, setSectionsVisible] = useState({});
-  
+
   const sectionRefs = {
     services: useRef(null),
     features: useRef(null),
@@ -158,29 +158,46 @@ const Preview = () => {
                 <div
                   key={index}
                   className={`carousel-item w-full transition-opacity duration-500  ${
-                    index === currentImageIndex ? "opacity-100" : "opacity-0 absolute"
+                    index === currentImageIndex
+                      ? "opacity-100"
+                      : "opacity-0 absolute"
                   }`}
                   style={{ zIndex: 1 }}
                 >
                   <img
                     src={photo}
-                    className={`border-4 border-primary absolute inset-0 w-full h-full object-cover  transition-all duration-300 ${isImgLoading[index] ? 'blur-lg' : 'blur-0'}`}
+                    className={`border-4 border-primary absolute inset-0 w-full h-full object-cover  transition-all duration-300 ${
+                      isImgLoading[index] ? "blur-lg" : "blur-0"
+                    }`}
                     alt={`Salon ${index + 1}`}
-                    onLoad={() => setIsImgLoading({...isImgLoading, [index]: false})}
-                    onError={() => setIsImgLoading({...isImgLoading, [index]: false})}
+                    onLoad={() => {
+                      // const updated = [...isImgLoading];
+                      // updated[index] = false;
+                      // setIsImgLoading(updated);
+                      setIsImgLoading((prev) => {
+                        prev[index] = false;
+                        return [...prev];
+                      });
+                    }}
+                    onError={() => {
+                      setIsImgLoading((prev) => {
+                        prev[index] = false;
+                        return [...prev];
+                      });
+                    }}
                   />
                 </div>
               ))}
-              
+
               {/* Navigation Arrows */}
               <div className="absolute flex justify-between transform -translate-y-1/2 left-5 right-5 top-1/2 z-10">
-                <button 
+                <button
                   onClick={goToPrevious}
                   className="btn btn-circle bg-black/50 border-none hover:bg-black/70 text-white"
                 >
                   ❮
                 </button>
-                <button 
+                <button
                   onClick={goToNext}
                   className="btn btn-circle bg-black/50 border-none hover:bg-black/70 text-white"
                 >
@@ -188,7 +205,7 @@ const Preview = () => {
                 </button>
               </div>
             </div>
-            
+
             {/* Indicators */}
             <div className="flex justify-center w-full py-2 gap-2 relative z-10 bg-semi-transparent backdrop-blur-sm rounded-lg mt-4">
               {photos.map((_, index) => (
@@ -204,7 +221,7 @@ const Preview = () => {
               ))}
             </div>
           </div>
-          
+
           {/* Hero Content */}
           <div className="lg:w-1/2 animate-fade-in">
             <h1 className="text-5xl font-bold font-mono">BARBERIA</h1>
@@ -220,8 +237,6 @@ const Preview = () => {
             </button>
           </div>
         </div>
-
-       
       </div>
 
       {/* Services Section */}
@@ -288,7 +303,7 @@ const Preview = () => {
         <h2 className="text-3xl font-bold text-center mb-12">
           What Our Customers Say
         </h2>
-        
+
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           <div className="card bg-base-100 shadow-xl animate-fade-in">
             <div className="card-body">
@@ -308,8 +323,8 @@ const Preview = () => {
                 </div>
               </div>
               <p>
-                "The best haircut I've ever had! The barber took their time
-                and listened to exactly what I wanted."
+                "The best haircut I've ever had! The barber took their time and
+                listened to exactly what I wanted."
               </p>
             </div>
           </div>
@@ -332,8 +347,8 @@ const Preview = () => {
                 </div>
               </div>
               <p>
-                "Great atmosphere, professional service, and the online
-                booking system is so convenient. Highly recommend!"
+                "Great atmosphere, professional service, and the online booking
+                system is so convenient. Highly recommend!"
               </p>
             </div>
           </div>
@@ -357,9 +372,8 @@ const Preview = () => {
                 </div>
               </div>
               <p>
-                "My beard has never looked better. The barber knew exactly
-                how to shape it to complement my face. Will definitely be
-                back!"
+                "My beard has never looked better. The barber knew exactly how
+                to shape it to complement my face. Will definitely be back!"
               </p>
             </div>
           </div>
@@ -397,7 +411,6 @@ const Preview = () => {
               </div>
             </div>
           </div>
-        
         </div>
       </div>
     </div>
