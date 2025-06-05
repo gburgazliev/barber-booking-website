@@ -6,6 +6,7 @@ import AuthContext from "./context/AuthContext";
 import Authentication from "./hoc/Authentication";
 import AuthView from "./views/AuthView";
 import AlertProvider from "./hoc/AlertProvider";
+import PricesProvider from "./hoc/PricesProvider";
 import AlertContainer from "./components/AlertContainer";
 import ResetPasswordView from "./views/ResetPasswordView";
 import NewPasswordView from "./views/NewPasswordView";
@@ -62,6 +63,7 @@ function App() {
             setIsLoading,
           }}
         >
+          <PricesProvider>
           <LocalizationProvider dateAdapter={AdapterDayjs}>
             <Routes>
               <Route
@@ -96,6 +98,7 @@ function App() {
               <Route path="*" element={<div>nonono</div>} />
             </Routes>
           </LocalizationProvider>
+          </PricesProvider>
         </AuthContext.Provider>
       </BrowserRouter>
     </AlertProvider>
