@@ -126,7 +126,7 @@
   }
   
   /* Custom scroll indicator */
-  .scroll-indicator {
+   .scroll-indicator {
     position: absolute;
     bottom: 20px;
     left: 50%;
@@ -135,8 +135,8 @@
     height: 50px;
     border: 2px solid currentColor;
     border-radius: 15px;
-  }
-  
+  } 
+
   .scroll-indicator::after {
     content: '';
     position: absolute;
@@ -149,7 +149,7 @@
     transform: translateX(-50%);
     animation: scrollIndicator 2s infinite;
   }
-  
+   
   @keyframes scrollIndicator {
     0% {
       opacity: 1;
@@ -160,3 +160,29 @@
       transform: translateX(-50%) translateY(15px);
     }
   }
+
+/* Ensure all images and SVGs are responsive */
+img, svg {
+  max-width: 100%;
+  height: auto;
+}
+
+/* Add responsive styles to prevent overflow */
+.container {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+
+.fluid-text-xl {
+  font-size: clamp(1.25rem, 4vw, 3rem); /* min 20px, scales with viewport, max 48px */
+}
+
+.fluid-text-lg {
+  font-size: clamp(1rem, 3vw, 1.5rem); /* min 16px, scales with viewport, max 24px */
+}
+
+.fluid-text-base {
+  font-size: clamp(0.875rem, 2.5vw, 1.125rem); /* min 14px, scales with viewport, max 18px */
+}
