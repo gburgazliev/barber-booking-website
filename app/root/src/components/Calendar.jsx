@@ -1,5 +1,6 @@
 import { useState, useEffect, useContext } from "react";
 import AuthContext from "../context/AuthContext";
+import PriceContext from "../context/PriceContext"; // Import PriceContext
 import AlertContext from "../context/AlertContext";
 import Appointment from "./Appointment";
 import AlERT_TYPES from "../constants/alertTypeConstants";
@@ -34,13 +35,11 @@ const Calendar = () => {
   const [shiftedSlots, setShiftedSlots] = useState([]);
   const [intermediateSlots, setIntermediateSlots] = useState([]);
   const [blockedSlots, setBlockedSlots] = useState([]);
-  const [prices, setPrices] = useState({
-    Hair: 0,
-    Beard: 0,
-    "Hair and Beard": 0,
-  });
+  
   const { addAlert } = useContext(AlertContext);
   const { isLoggedIn } = useContext(AuthContext);
+  const { prices, loading: pricesLoading } = useContext(PriceContext); // Use PriceContext
+  
   const minDate = dayjs();
 
   // Set maximum date to 14 days from today
@@ -220,7 +219,6 @@ const Calendar = () => {
       const nextSlot = calculateNextTimeSlot(currentSlot);
 
       // Remove both slots
-
       availableSlots = availableSlots.filter(
         (slot) => slot !== currentSlot && slot !== nextSlot
       );
@@ -266,6 +264,7 @@ const Calendar = () => {
         }
       });
     }
+    
     if (blockedSlots.length) {
       blockedSlots.forEach((slotOBJ) => {
         availableSlots.map((slot, index) => {
@@ -284,30 +283,6 @@ const Calendar = () => {
     return availableSlots;
   };
 
-  // Fix the generateTimeSlots function to ensure correct 40-minute intervals
-  // const generateTimeSlots = (startTime, endTime, breakStart, breakEnd) => {
-  //   const slots = [];
-  //   const breakStartDate = new Date(`1970-01-01T${breakStart}:00`);
-  //   const breakEndDate = new Date(`1970-01-01T${breakEnd}:00`);
-
-  //   // Create a new date object to avoid modifying the original
-  //   let current = new Date(`1970-01-01T${startTime}:00`);
-  //   const end = new Date(`1970-01-01T${endTime}:00`);
-
-  //   // Generate slots at exact 40-minute intervals
-  //   while (current <= end) {
-  //     // Skip slots during break time
-  //     if (current >= breakStartDate && current < breakEndDate) {
-  //       current.setMinutes(current.getMinutes() + 40);
-  //       continue;
-  //     }
-
-  //     slots.push(current.toTimeString().substring(0, 5));
-  //     current.setMinutes(current.getMinutes() + 40);
-  //   }
-
-  //   return slots;
-  // };
   // Combined function to fetch schedule and appointments
   const refreshData = async () => {
     try {
@@ -358,14 +333,10 @@ const Calendar = () => {
 
         // Generate default base slots
         const slots = [];
-        
         let start = new Date(`1970-01-01T09:00:00`);
-        if(date.day() === 1 ) {
-          start = new Date(`1970-01-01T12:20:00`); // Monday starts at 10:00 AM
-        }
         const end = new Date(`1970-01-01T18:20:00`);
-        const breakStart ='' //new Date(`1970-01-01T13:00:00`);
-        const breakEnd = ''//new Date(`1970-01-01T14:00:00`);
+        const breakStart = ''; //new Date(`1970-01-01T13:00:00`);
+        const breakEnd = ''; //new Date(`1970-01-01T14:00:00`);
 
         // Ensure we generate slots at exactly 40-minute intervals
         while (start <= end) {
@@ -389,7 +360,6 @@ const Calendar = () => {
         const appointmentsData = await appointmentsResponse.json();
        
         setAppointments(appointmentsData.appointments);
-        // setBlockedSlots(appointmentsData.blockedSlots);
 
         // Check if there are any Hair and Beard appointments
         const hairAndBeardAppointments = appointmentsData.appointments.filter(
@@ -431,38 +401,7 @@ const Calendar = () => {
     refreshData();
   }, [formattedDateString]);
 
-  useEffect(() => {
-   const fetchPrices = async () => {
-      try {
-        const response = await fetch(SERVER_URL("api/prices/"), {
-          method: "GET",
-          credentials: "include",
-          headers: {
-            "Content-Type": "application/json",
-          },
-        });
-        if (response.ok) {
-          const data = await response.json();
-        
-          const priceMap = data.reduce((acc, price) => {
-            acc[price.type] = price.price;
-            return acc;
-          }, {});
-          setPrices(priceMap);
-          
-
-          
-        } else {
-          console.error("Failed to fetch prices:", response.statusText);
-        }
-      }
-      catch (error) {
-        console.error("Error fetching prices:", error.message);
-      }
-    }
-    fetchPrices();
-  }, [])
-  
+  // Remove the individual price fetching useEffect - now using PriceContext
 
   // Filter out booked slots and slots after Hair and Beard appointments
   useEffect(() => {
@@ -501,8 +440,8 @@ const Calendar = () => {
           const slots = [];
           const start = new Date(`1970-01-01T09:00:00`);
           const end = new Date(`1970-01-01T19:00:00`);
-          const breakStart = '';//new Date(`1970-01-01T13:00:00`);
-          const breakEnd = '';//new Date(`1970-01-01T14:00:00`);
+          const breakStart = ''; //new Date(`1970-01-01T13:00:00`);
+          const breakEnd = ''; //new Date(`1970-01-01T14:00:00`);
 
           while (start <= end) {
             if (start >= breakStart && start < breakEnd) {
@@ -525,29 +464,18 @@ const Calendar = () => {
     updateAvailableSlots();
   }, [appointments, formattedDateString]);
 
-  // useEffect(() => {
-  //   if (appointments.length > 0) {
-  //     setTimeSlots((prev) =>
-  //       prev.filter((timeSlot) => {
-  //         const isBookedByOthers = appointments.some(
-  //           (appointment) => timeSlot === appointment.timeSlot
-  //         );
-
-  //         // If it's booked by someone else, filter it out
-  //         if (isBookedByOthers) {
-  //           return false;
-  //         } else {
-  //           return true;
-  //         }
-
-  //         // Otherwise keep the time slot (whether it's available or booked by current user)
-  //       })
-  //     );
-  //   }
-  // }, [appointments, isLoggedIn]);
-
+  // Show loading state if prices are still loading
+  if (pricesLoading) {
+    return (
+      <div className="flex items-center justify-center p-8">
+        <span className="loading loading-spinner loading-lg"></span>
+        <span className="ml-2">Loading prices...</span>
+      </div>
+    );
+  }
+ 
   return (
-    <div className="border bg-red-50 rounded-lg shadow-lg shadow-black flex sm:flex-col sm:p-0 sm:m-0  md:flex-row md:p-5 m-5  lg:flex-row  lg:m-5 lg:p-5  xl:flex-row xl:p-5 xl:m-5">
+    <div className="border bg-red-50 rounded-lg shadow-lg shadow-black flex sm:flex-col sm:p-0 sm:m-0 sm:scale-75 md:flex-row md:p-5 m-5 md:scale-75 lg:flex-row lg:scale-100 lg:m-5 lg:p-5  xl:flex-row xl:p-5 xl:m-5">
       <div>
         <h1 className="text-2xl font-bold mb-4">Calendar</h1>
         {isLoggedIn.user.role !== "admin" ? (
@@ -595,7 +523,7 @@ const Calendar = () => {
               slotDuration={getSlotType(timeSlot).duration}
               isRegularSlot={isRegularSlot(timeSlot)}
               isShiftedSlot={getSlotType(timeSlot).isShiftedSlot}
-              prices={prices}
+              prices={prices} // Pass prices from context
               isIntermediateSlot={getSlotType(timeSlot).isIntermediateSlot}
             />
           ))}
@@ -632,7 +560,7 @@ const Calendar = () => {
                       slotDuration={slotTypeInfo.duration}
                       isShiftedSlot={slotTypeInfo.isShiftedSlot}
                       isIntermediateSlot={slotTypeInfo.isIntermediateSlot}
-                      prices={prices}
+                      prices={prices} // Pass prices from context
                       userAppointment={true}
                     />
                   );
