@@ -182,6 +182,21 @@ const Appointment = memo(
       if (!isRegularSlot) return "Short Slot (30 minutes)";
       return "Regular Slot (40 minutes)";
     };
+    // Add this helper function inside your Appointment component, before the return statement
+    const getDisplayPrice = () => {
+      if (!selectedService || !prices[selectedService]) return 0;
+
+      if (useDiscount) {
+        return prices[selectedService] / 2;
+      }
+
+      return prices[selectedService];
+    };
+
+    const getRegularPrice = () => {
+      if (!selectedService || !prices[selectedService]) return 0;
+      return prices[selectedService];
+    };
 
     const modalContent = isCurrentUserAppointment ? (
       <div className="flex flex-col gap-2 p-2v items-center">
@@ -228,49 +243,121 @@ const Appointment = memo(
             <option disabled value="">
               Choose service
             </option>
-            <option value="Hair">Hair - 20lv</option>
+            <option value="Hair">Hair</option>
             <option value="Hair and Beard" disabled={!isHairAndBeardAvailable}>
-              Hair and Beard - 30lv{" "}
+              Hair and Beard
               {!isHairAndBeardAvailable && "(Requires consecutive slot)"}
             </option>
-            <option value="Beard">Beard - 20lv</option>
+            <option value="Beard">Beard</option>
           </select>
         )}
 
-        {selectedService === "Hair and Beard" && (
-          <p className="text-sm text-info">
-            This service requires two time slots (80 minutes)
-          </p>
-        )}
-
-        {/* Add discount checkbox if user is eligible */}
+        {/* Enhanced discount checkbox and price display */}
         {isLoggedIn.user?.discountEligible && selectedService && (
-          <div className="form-control mt-2">
-            <label className="label cursor-pointer justify-start gap-2">
+          <div className="form-control mt-3">
+            <label className="label cursor-pointer justify-start gap-3 p-3 bg-gradient-to-r from-purple-50 to-blue-50 rounded-lg border border-purple-200 hover:shadow-md transition-all duration-200">
               <input
                 type="checkbox"
-                className="checkbox checkbox-accent"
+                className="checkbox checkbox-accent checkbox-lg"
                 checked={useDiscount}
                 onChange={(e) => setUseDiscount(e.target.checked)}
               />
-              <span className="label-text">
-                Use my 50% discount (5 visits completed)
-              </span>
-            </label>
-
-            {useDiscount && (
-              <div className="badge badge-accent text-lg mt-2">
-                Price with discount: {prices[selectedService] / 2} lv
-                <span className="text-xs ml-2">
-                  (Regular: {prices[selectedService]} lv)
+              <div className="flex flex-col">
+                <span className="label-text font-semibold text-purple-700">
+                  🎉 Use my 50% discount
+                </span>
+                <span className="text-xs text-purple-500 opacity-75">
+                  Congratulations! You've completed 5 visits
                 </span>
               </div>
-            )}
+            </label>
+
+            {/* Enhanced Price Display */}
+            {useDiscount ? (
+              <div className="mt-3 p-4 bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50 border-2 border-green-200 rounded-xl shadow-lg">
+                <div className="flex items-center justify-between">
+                  {/* Discount Badge */}
+                  <div className="flex items-center gap-2">
+                    <div className="badge badge-error badge-lg px-3 py-1 text-white font-bold animate-pulse">
+                      50% OFF
+                    </div>
+                  </div>
+
+                  {/* Savings Amount */}
+                  <div className="text-right">
+                    <div className="text-xs text-green-600 font-medium">
+                      You save:{" "}
+                      {(getRegularPrice() - getDisplayPrice()).toFixed(2)} lv
+                    </div>
+                  </div>
+                </div>
+
+                {/* Price Comparison */}
+                <div className="mt-3 flex items-center justify-center gap-4">
+                  {/* Original Price */}
+                  <div className="text-center">
+                    <div className="text-xs text-gray-500 uppercase tracking-wide">
+                      Regular Price
+                    </div>
+                    <div className="relative">
+                      <span className="text-lg font-bold text-gray-400 line-through decoration-red-500 decoration-2">
+                        {getRegularPrice()} lv
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Arrow */}
+                  <div className="text-2xl text-green-500 animate-bounce">
+                    →
+                  </div>
+
+                  {/* Discounted Price */}
+                  <div className="text-center">
+                    <div className="text-xs text-green-600 uppercase tracking-wide font-medium">
+                      Your Price
+                    </div>
+                    <div className="relative">
+                      <span className="text-2xl font-bold text-green-600">
+                        {getDisplayPrice()} lv
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Additional Info */}
+                <div className="mt-3 text-center">
+                  <div className="inline-flex items-center gap-1 px-3 py-1 bg-white bg-opacity-50 rounded-full text-xs text-green-700 font-medium">
+                    ⭐ Loyalty Reward Applied
+                  </div>
+                </div>
+              </div>
+            ) : /* Regular Price Display */
+            null}
           </div>
         )}
+        <div className="mt-3 p-3 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-lg">
+          <div className="flex items-center gap-2">
+            <div className="text-sm text-blue-700 font-medium">
+              Service Price:
+            </div>
+            <div className="text-lg font-bold text-blue-800">
+              {getRegularPrice()} lv
+            </div>
+          </div>
 
-        <form method="dialog">
-          <button className="w-1/2" onClick={bookAppointment}>
+          {/* Potential Savings Hint */}
+          {!isLoggedIn.user.discountEligible && (
+            <div className="flex flex-col mt-2 text-xs text-blue-600 text-center opacity-75">
+              💡 Complete 5 visits to unlock 50% discount on future bookings
+              <span> {isLoggedIn.user?.attendance} / 5</span>
+            </div>
+          )}
+        </div>
+        <form
+          method="dialog"
+          className="flex lg:justify-start lg:items-start sm:justify-end sm:items-end flex-col gap-2 mt-4"
+        >
+          <button className="w-1/4  text-white" onClick={bookAppointment}>
             Book
           </button>
         </form>
@@ -279,7 +366,7 @@ const Appointment = memo(
 
     useEffect(() => {
       if (!timeSlots || !appointments || !calculateNextTimeSlot) return;
-    
+
       // Only check for Hair and Beard availability on regular 40-minute slots
       if (slotDuration === 40) {
         const nextTimeSlot40mins = calculateNextTimeSlot(timeSlot)[0];
