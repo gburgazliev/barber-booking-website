@@ -161,7 +161,7 @@ const Preview = () => {
   const goToImage = (index) => {
     setCurrentImageIndex(index);
   };
-
+  
   const goToPrevious = () => {
     setCurrentImageIndex((prev) => (prev === 0 ? photos.length - 1 : prev - 1));
   };
@@ -232,8 +232,8 @@ const Preview = () => {
 
           {/* Hero Content */}
           <div className="lg:w-1/2 animate-fade-in">
-          <h1 className="fluid-text-xl font-bold font-mono">BARBERIA</h1>
-            <p className="fluid-text-base align-start text-left sm:text-left md:text-center lg:text-center mb-4">
+          <h1 className="fluid-text-xl font-bold font-mono text-gray-300 ">BARBERIA</h1>
+            <p className="fluid-text-base align-start text-left sm:text-left md:text-center lg:text-center mb-4 text-white ">
               Professional haircuts and beard grooming services. Book your
               appointment today and experience the difference.
             </p>
