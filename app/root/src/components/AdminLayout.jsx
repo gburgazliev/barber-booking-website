@@ -7,6 +7,25 @@ import AlertContext from '../context/AlertContext';
 import ALERT_TYPES from '../constants/alertTypeConstants';
 import { logout } from '../service/authentication-service';
 
+// Currency/Money icon component
+const MoneyIcon = ({ size = 20, color = "currentColor", className = "" }) => (
+  <svg 
+    xmlns="http://www.w3.org/2000/svg" 
+    width={size} 
+    height={size} 
+    viewBox="0 0 24 24" 
+    fill="none" 
+    stroke={color} 
+    strokeWidth="2" 
+    strokeLinecap="round" 
+    strokeLinejoin="round"
+    className={className}
+  >
+    <line x1="12" y1="1" x2="12" y2="23"></line>
+    <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+  </svg>
+);
+
 const AdminLayout = () => {
   const { isLoggedIn, setIsLoggedIn } = useContext(AuthContext);
   const { addAlert } = useContext(AlertContext);
@@ -66,6 +85,17 @@ const AdminLayout = () => {
               >
                 <ClockIcon size={20} className="mr-3" />
                 Working Hours
+              </NavLink>
+            </li>
+            <li>
+              <NavLink 
+                to="/admin/prices" 
+                className={({isActive}) => 
+                  `flex items-center p-3 rounded-lg ${isActive ? 'bg-primary text-primary-content' : 'hover:bg-base-300'}`
+                }
+              >
+                <MoneyIcon size={20} className="mr-3" />
+                Prices
               </NavLink>
             </li>
             <li>
@@ -130,6 +160,11 @@ const AdminLayout = () => {
               <li>
                 <NavLink to="/admin/schedule">
                   Working Hours
+                </NavLink>
+              </li>
+              <li>
+                <NavLink to="/admin/prices">
+                  Prices
                 </NavLink>
               </li>
               <li>

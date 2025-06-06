@@ -22,6 +22,7 @@ import AdminAuth from "./hoc/AdminAuth";
 import AdminLayout from "./components/AdminLayout";
 import AdminDashboard from "./components/AdminDashboard";
 import AppointmentManagement from "./components/AppointmentManagement";
+import PriceManagement from "./components/PriceManagement";
 import ScheduleManagement from "./components/ScheduleManagement";
 import UserManagement from "./components/UserManagement";
 
@@ -80,6 +81,7 @@ function App() {
                   element={<AppointmentManagement />}
                 />
                 <Route path="schedule" element={<ScheduleManagement />} />
+                <Route path="prices" element={<PriceManagement />} />
                 <Route path="users" element={<UserManagement />} />
               </Route>
               <Route path="/auth" element={<AuthView />} />
