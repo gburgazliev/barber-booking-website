@@ -100,10 +100,10 @@ const Appointment = memo(
           }),
         });
 
-        if (response.status === 401) {
-          navigate("auth", { state: { auth: "login" } });
-          return;
-        }
+        // if (response.status === 401) {
+        //   navigate("auth", { state: { auth: "login" } });
+        //   return;
+        // }
 
         if (response.ok) {
           const data = await response.json();
@@ -427,7 +427,11 @@ const Appointment = memo(
       <>
         <button
           className={getSlotStyle()}
-          onClick={() => document.getElementById(modalId).showModal()}
+          onClick={() => {
+            document.getElementById(modalId).showModal();
+            !isLoggedIn.status &&
+              navigate("auth", { state: { auth: "login" } });
+          }}
         >
           {timeSlot}
         </button>
