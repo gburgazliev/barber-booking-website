@@ -38,11 +38,9 @@ const Profile = () => {
         const data = await response.json();
         setAppointments(data);
         calculateStats(data);
-      } else {
-        throw new Error("Failed to fetch appointments");
-      }
+      } 
     } catch (error) {
-    //   addAlert(`Error loading appointments: ${error.message}`, ALERT_TYPES.ERROR);
+       console.error("Error fetching appointments:", error);
     } finally {
       setLoading(false);
     }
@@ -289,8 +287,8 @@ const Profile = () => {
           ) : appointments.length === 0 ? (
             <div className="text-center py-8">
               <CalendarIcon size={64} className="mx-auto mb-4 opacity-50" />
-              <p className="text-lg opacity-70">No appointments yet</p>
-              <p className="text-sm opacity-50">Book your first appointment to get started!</p>
+              <p className="text-lg opacity-70">No appointments</p>
+              
             </div>
           ) : (
             <div className="overflow-x-auto">
