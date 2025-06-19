@@ -72,7 +72,7 @@ const HomePhotosContainer = () => {
             whileTap={{ scale: 1.5, zIndex: 10 }}
             src={photo}
             alt={`Salon ${index + 1}`}
-            className="bg-green-100 sm:w-[200px] sm:h-[200px] md:w-[300px] md:h-[300px] object-cover rounded-lg shadow-lg shadow-green-300 hover:shadow-2xl"
+            className="bg-green-100 w-full max-w-[200px] h-[200px] sm:max-w-[250px] sm:h-[250px] md:max-w-[300px] md:h-[300px]"
             variants={photoVariants}
           />
         ))}
