@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const verifyCookie = require("../middleware/verifyCookie");
+const {verifyCookie} = require("../middleware/verifyCookie");
 const User = require("../models/User");
 const Appointment = require("../models/Appointment");
 const WorkingHours = require("../models/WorkingHours");
@@ -425,7 +425,7 @@ router.patch("/users/:id/role", verifyCookie, verifyAdmin, async (req, res) => {
 
     user.role = role;
     await user.save();
-
+    clearUserCache(user._id.toString()); 
     res.status(200).json({ message: "User role updated successfully" });
   } catch (error) {
     console.error("Error updating user role:", error);

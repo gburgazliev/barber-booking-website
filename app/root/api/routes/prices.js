@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 
 const Price = require("../models/Price");
-const verifyCookie = require("../middleware/verifyCookie");
+const {verifyCookie} = require("../middleware/verifyCookie");
 const verifyAdmin = require("../middleware/verifyAdmin");
 
 

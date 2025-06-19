@@ -15,6 +15,7 @@ import { autoLogin } from "./service/authentication-service";
 import LocationView from "./views/LocationView";
 import AppointmentConfirmation from "./components/AppointmentConfirmation";
 import { LocalizationProvider } from "@mui/x-date-pickers";
+import { AuthProvider } from "./hoc/AuthProvider";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import ProfileView from "./views/ProfileView";
 
@@ -56,14 +57,9 @@ function App() {
     <AlertProvider>
       <AlertContainer />
       <BrowserRouter>
-        <AuthContext.Provider
-          value={{
-            isLoggedIn: authValue,
-            setIsLoggedIn: setAuthValue,
-            isLoading,
-            setIsLoading,
-          }}
-        >
+        <AuthProvider>
+
+        
           <PricesProvider>
           <LocalizationProvider dateAdapter={AdapterDayjs}>
             <Routes>
@@ -101,7 +97,7 @@ function App() {
             </Routes>
           </LocalizationProvider>
           </PricesProvider>
-        </AuthContext.Provider>
+          </AuthProvider>
       </BrowserRouter>
     </AlertProvider>
   );

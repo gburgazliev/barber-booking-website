@@ -3,7 +3,7 @@ const crypto = require("crypto");
 const router = express.Router();
 const User = require("../models/User");
 const bcrypt = require("bcryptjs");
-const verifyCookie = require("../middleware/verifyCookie");
+const {verifyCookie} = require("../middleware/verifyCookie");
 const signJWT = require("../helpers/signJWT");
 const nodemailer = require("nodemailer");
 const verifyAdmin = require("../middleware/verifyAdmin");
@@ -165,6 +165,7 @@ router.post("/reset-password", async (req, res) => {
   user.resetToken = resetTokenHex;
   user.resetTokenExpirationTime = resetTokenExpDate;
   await user.save();
+  clearUserCache(user._id.toString()); // Clear cache for the user
 
   const resetUrl = `${process.env.FRONTEND_URL}/reset-password/${resetTokenHex}`;
   await transporter.sendMail({
@@ -209,6 +210,7 @@ router.post("/new-password", async (req, res) => {
   user.resetToken = null;
   user.resetTokenExpirationTime = null;
   await user.save();
+  clearUserCache(user._id.toString());
   res.status(200).json({ message: "Password reset successfully" });
 });
 
@@ -225,6 +227,7 @@ router.patch("/update-attendance/:id", verifyCookie, verifyAdmin, async (req, re
     }
     user.attendance = attendance;
     user.save();
+    clearUserCache(user._id.toString()); 
     res.status(200).json({ message: "Attendance updated successfully", user });
   } catch (error) {
     console.error("Error updating attendance:", error);

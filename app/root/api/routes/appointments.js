@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const verifyCookie = require("../middleware/verifyCookie");
+const {verifyCookie} = require("../middleware/verifyCookie");
 const verifyAdmin = require("../middleware/verifyAdmin");
 const crypto = require("crypto");
 const Appointment = require("../models/Appointment");
@@ -48,21 +48,6 @@ const sanitizeDate = (dateStr) => {
   // Return null if invalid format
   return null;
 };
-
-async function getServicePrice(serviceType) {
-  // Fetch the price from the database or use a default value
-  const price = await Price.findOne({ type: serviceType });
-  switch (serviceType) {
-    case 'Hair':
-      return 20; // 20 lv
-    case 'Beard':
-      return 20; // 20 lv
-    case 'Hair and Beard':
-      return 30; // 30 lv
-    default:
-      throw new Error('Invalid service type');
-  }
-}
 
 /**
  * Sanitizes time string to prevent injection
@@ -210,32 +195,31 @@ router.post(
         });
       }
 
-         // Get user and check discount eligibility
-    const user = await User.findById(userId);
-    let applyDiscount = false;
-    
-    // Only apply discount if user wants to use it and is eligible
-    if (useDiscount && user.discountEligible) {
-      applyDiscount = true;
-      // Reset discount eligibility and attendance count
-      user.discountEligible = false;
-      user.attendance = 0;
-      await user.save();
-    }
-    
-    // Calculate price with discount
-    let priceDoc = await Price.findOne({type: sanitizedType}, 'price');
-    if (!priceDoc || typeof priceDoc.price !== 'number') {
-      return res.status(400).json({ message: "Invalid price data" });
-    }
-    
-    let price = priceDoc.price;
-    if (applyDiscount) {
-      price = price * 0.5; // 50% discount
-     
-    }
-    
-  
+      // Get user and check discount eligibility
+      const user = await User.findById(userId);
+      let applyDiscount = false;
+
+      // Only apply discount if user wants to use it and is eligible
+      if (useDiscount && user.discountEligible) {
+        applyDiscount = true;
+        // Reset discount eligibility and attendance count
+        user.discountEligible = false;
+        user.attendance = 0;
+        await user.save();
+        clearUserCache(userId.toString()); 
+      }
+
+      // Calculate price with discount
+      let priceDoc = await Price.findOne({ type: sanitizedType }, "price");
+      if (!priceDoc || typeof priceDoc.price !== "number") {
+        return res.status(400).json({ message: "Invalid price data" });
+      }
+
+      let price = priceDoc.price;
+      if (applyDiscount) {
+        price = price * 0.5; // 50% discount
+      }
+
       // Check if user already has a booking for this date
       const hasUserBooked = await Appointment.findOne({
         userId: userId,
@@ -366,7 +350,7 @@ router.post(
       // Generate confirmation token
       const confirmationToken = crypto.randomBytes(32).toString("hex");
       // Create the appointment
-       await Appointment.create({
+      await Appointment.create({
         date: sanitizedDate,
         timeSlot: sanitizedTimeSlot,
         type: sanitizedType,
@@ -378,12 +362,12 @@ router.post(
         originalSlotTime: isShiftedSlot
           ? sanitizeTime(req.body.originalSlotTime)
           : null,
-          price,
-          discountApplied: applyDiscount
+        price,
+        discountApplied: applyDiscount,
       });
 
       // Send confirmation email
-      const confirmationLink = `${process.env.FRONTEND_URL}/confirm-appointment/:${confirmationToken}`;
+      const confirmationLink = `${process.env.FRONTEND_URL_TEST}/confirm-appointment/:${confirmationToken}`;
 
       // Sanitize email content
       const safeFirstName = validator.escape(firstname);
@@ -411,7 +395,15 @@ router.post(
 
       await transporter.sendMail(mailOptions);
 
-      res.status(200).json({ message: "Confirmation link sent to email!", user: {attendance: user.attendance, discountEligible: user.discountEligible} });
+      res
+        .status(200)
+        .json({
+          message: "Confirmation link sent to email!",
+          user: {
+            attendance: user.attendance,
+            discountEligible: user.discountEligible,
+          },
+        });
     } catch (error) {
       next(error);
     }
@@ -665,7 +657,11 @@ router.get("/confirmation/:confirmHex", async (req, res) => {
     );
 
     await appointment.save();
-    res.status(200).json({ message: "Appointment confirmed successfully!" });
+    const updatedUser = await User.findById(appointment.userId)
+  .select('-password -resetToken -resetTokenExpirationTime')
+  .lean();
+
+    res.status(200).json({ message: "Appointment confirmed successfully!", user: updatedUser  });
   } catch (error) {
     console.error("Error confirming appointment:", error);
     res.status(500).json({ message: "Internal server error" });
@@ -977,7 +973,7 @@ router.patch(
         if (user.attendance >= 5) {
           // They're now eligible for a discount
           user.discountEligible = true;
-          
+
           // Send email notification about discount eligibility
           const mailOptions = {
             from: process.env.EMAIL,
@@ -1004,7 +1000,7 @@ router.patch(
         }
       }
 
-       if (user.attendance === -3) {
+      if (user.attendance === -3) {
         // send email for appointments ban
 
         const mailOptions = {
@@ -1024,8 +1020,15 @@ router.patch(
       }
 
       await user.save();
-
-      res.status(200).json({ message: "Appointment updated successfully!" });
+      clearUserCache(userId.toString()); 
+      res.status(200).json({
+        message: "Appointment updated successfully!",
+        user: {
+          attendance: user.attendance,
+          discountEligible: user.discountEligible,
+          rights: user.rights,
+        },
+      });
     } catch (error) {
       console.error("Error updating appointment:", error);
       res.status(500).json({ message: "Error updating appointment!" });
