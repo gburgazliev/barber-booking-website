@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const {verifyCookie} = require("../middleware/verifyCookie");
+const { verifyCookie } = require("../middleware/verifyCookie");
 const User = require("../models/User");
 const Appointment = require("../models/Appointment");
 const WorkingHours = require("../models/WorkingHours");
@@ -65,13 +65,16 @@ router.get("/stats", verifyCookie, verifyAdmin, async (req, res) => {
     });
 
     // Initialize counts for each day of the week
-    const dayNames = [ "Mon", "Tue", "Wed", "Thu", "Fri", "Sat","Sun"];
-    const appointmentsByDay = dayNames.map(name => ({ name, appointments: 0 }));
+    const dayNames = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+    const appointmentsByDay = dayNames.map((name) => ({
+      name,
+      appointments: 0,
+    }));
 
     // Count appointments for each day
-    weeklyAppointments.forEach(appointment => {
+    weeklyAppointments.forEach((appointment) => {
       const appointmentDate = new Date(appointment.date);
-      const dayOfWeek = appointmentDate.getDay(); 
+      const dayOfWeek = appointmentDate.getDay();
       appointmentsByDay[dayOfWeek].appointments++;
     });
 
@@ -92,9 +95,6 @@ router.get("/stats", verifyCookie, verifyAdmin, async (req, res) => {
       .sort({ date: -1, timeSlot: -1 })
       .limit(5)
       .populate("userId", "firstname lastname email");
-
-    
-
 
     res.status(200).json({
       todayCount,
@@ -165,7 +165,14 @@ router.get("/appointments", verifyCookie, verifyAdmin, async (req, res) => {
 // Add a new appointment
 router.post("/appointments", verifyCookie, verifyAdmin, async (req, res) => {
   try {
-    const { date, timeSlot, type, userEmail, status = "Confirmed", price } = req.body;
+    const {
+      date,
+      timeSlot,
+      type,
+      userEmail,
+      status = "Confirmed",
+      price,
+    } = req.body;
     let workingHours = await WorkingHours.findOne({ date });
     // Validate user email
 
@@ -382,7 +389,11 @@ router.get(
 // Get all users
 router.get("/users", verifyCookie, verifyAdmin, async (req, res) => {
   try {
-    const users = await User.find({}, "firstname lastname email role attendance rights");
+    const users = await User.find(
+      {},
+      "firstname lastname email role attendance rights createdAt"
+    );
+
     res.status(200).json(users);
   } catch (error) {
     console.error("Error fetching users:", error);
@@ -425,7 +436,7 @@ router.patch("/users/:id/role", verifyCookie, verifyAdmin, async (req, res) => {
 
     user.role = role;
     await user.save();
-    clearUserCache(user._id.toString()); 
+    clearUserCache(user._id.toString());
     res.status(200).json({ message: "User role updated successfully" });
   } catch (error) {
     console.error("Error updating user role:", error);
