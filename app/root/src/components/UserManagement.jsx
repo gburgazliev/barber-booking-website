@@ -170,32 +170,17 @@ const UserManagement = () => {
       <h1 className="text-3xl font-bold mb-8">User Management</h1>
 
       {/* Search Bar */}
-      <div className="flex gap-2 mb-6">
+      <div className="flex gap-5  ">
         <div className="form-control flex-grow">
-          <div className="input-group">
+          <div className="input-group flex justify-end ">
             <input
               type="text"
               placeholder="Search by name or email"
-              className="input input-bordered w-full"
+              className="input input-bordered w-1/2 "
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
-            <button className="btn btn-square">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-6 w-6"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                />
-              </svg>
-            </button>
+           
           </div>
         </div>
         <button className="btn btn-primary" onClick={fetchUsers}>
