@@ -73,7 +73,7 @@ const startServer = async () => {
   await connectDB();
 
   const app = express();
-
+  app.set("trust proxy", 1);
   // // Create log directory if it doesn't exist
   // const logDir = path.join(__dirname, 'logs');
   // if (!fs.existsSync(logDir)) {
