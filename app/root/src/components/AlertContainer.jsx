@@ -2,7 +2,6 @@ import { useContext, useEffect, useState } from "react";
 import AlertContext from "../context/AlertContext";
 import Swal from "sweetalert2";
 import ALERT_TYPES from "../constants/alertTypeConstants";
-import("@sweetalert2/theme-dark/dark.css");
 const AlertContainer = () => {
   const { alerts, removeAlert } = useContext(AlertContext);
   const [queue, setQueue] = useState([]);
